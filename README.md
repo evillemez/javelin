@@ -1,18 +1,18 @@
 # Javelin.js #
 
-An open source game engine for the web.  Built with [cannon.js](), [three.js](), and potentially others.
+An open source game engine for the web.  Built with [cannon.js](http://schteppe.github.com/cannon.js/), [three.js](https://github.com/mrdoob/three.js/), and potentially others.
 
 Why?  Cause I thought it would be a fun project.
 
-> Note: As this is just a perosnal experiment at the moment, don't use it for anything serious, but feel free to contribute if you are so inclined!
+> Note: As this is just a personal experiment at the moment, don't use it for anything serious, but feel free to contribute if you are so inclined!
 
 ## Overview ##
 
-Javelin is a component-based game engine that can be deployed in the browser, and on the server with [node.js]().
+Javelin is a component-based game engine that can be deployed in the browser, and on the server with [node.js](http://nodejs.org/).
 
 As it is component-based, other libraries can be substituted for the ones provide with the default implementation.  For
-example, if you wanted to make a 2D game using [Box2d](), an engine plugin could be written for that, and you could
-then use the Box2D api in your game object scripts.
+example, if you wanted to make a 2D game using [Box2d](http://code.google.com/p/box2dweb/), an engine plugin could be written 
+for that, and you could then use the Box2D api in your game object scripts.
 
 > Note: while this meant to be deployed in a browser, I am only interested in developing for Chrome and V8.  When other browsers actually implement the necessary APIs, it may change.
 
@@ -44,8 +44,27 @@ when the object is added.  Game objects can have parent-child hierarchies, so yo
 * **Game Object Components** - Components are where all the interesting things happen.  The Plugins process the object components
 to actually make things happen.  Any time you write a custom script to attach to a game object, you are writing a custom component.
 All components have some basic functionality, for example registering callback functions for when certain events occur.  In your
-components, you can directly interact with other components by requesting them from the game object.
+components, you can directly interact with other components by requesting them from the game object.  Some example components
+included with the engine are:
+    * **transform3d** - Contains 3d spatial data regarding position and rotation
+    * **renderer3d** - Requires the *transform* component, and contains objects required by the *ThreeJs* plugin to visually render a given object
+    * **rigidbody3d** - Requires the *transform* component, is proccessed by the *CannonJs* plugin to simulate physics
+    
+    > The `3d` suffix on these components reflects the fact that the *CannonJs* and *ThreeJs* plugins are tightly integrated with one another
+    > for performance reasons.  However, one could easily build a 2d game using different plugins, in which case these components would be
+    > out of place, and their equivalents should be named differently to avoid confusion.
 
-### Example manual setup ###
+### Example setup ###
 
-This is going to change all the time - look in the `demos/` section to see current experiments.
+This is going to change all the time - look in the `demos/` section to see the status of current experiments.  I imagine it will be a 
+little while before there is actually anything working.
+
+## Developing ##
+
+To do any real development on the engine directly, you'll need *node.js* installed. The project Uses [grunt.js](http://gruntjs.com/) to
+automate tasks like *linting*, *concatenation*, *minification* and *testing*.  Install by running `npm install` in the project root.  Once it's 
+installed you can simply run `grunt watch` and start editing files.  New builds will be published in `builds/` automatically, and
+you'll be notified of failing tests and bad syntax.
+
+The tests are run with mocha, using node's built-in assertion library.  They are pretty basic, and probably lacking for now.
+
