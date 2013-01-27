@@ -3,14 +3,18 @@
 'use strict';
 
 Javelin.Engine = function(config) {
-    //this value persists always
+    //this should persist
     this.config = config;
-    
+
     //everything else can be reset
     this.reset();
+    
 };
 
 Javelin.Engine.prototype.reset = function() {
+    //general state
+    this.stopped = false;
+    
     //game object
     this.gos = [];
     this.goIdMap = {};
@@ -26,7 +30,10 @@ Javelin.Engine.prototype.reset = function() {
     this.sceneDefinition = {};
     
     //plugins
+    this.plugins = [];
     
+    //run any setup based on constructor config
+    this.processConfig(this.config);
 };
 
 
@@ -84,11 +91,19 @@ Javelin.Engine.prototype.loadScene = function(definition, callback) {
     this.pluginsReset();
     this.reset();
 
+    this.environment.$onBeforeSceneLoad(definition);
+
     for (var plugin in definition.plugins) {
         this.plugins[plugin] = {};
     }
 
-    callback(this);
+    this.environment.$onAfterSceneLoad(definition);
+
+    callback();
+};
+
+Javelin.Engine.prototype.run = function() {
+    this.environment.run();
 };
 
 

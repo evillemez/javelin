@@ -16,14 +16,18 @@ Javelin.Component = {};;/*global Javelin:true */
 'use strict';
 
 Javelin.Engine = function(config) {
-    //this value persists always
+    //this should persist
     this.config = config;
-    
+
     //everything else can be reset
     this.reset();
+    
 };
 
 Javelin.Engine.prototype.reset = function() {
+    //general state
+    this.stopped = false;
+    
     //game object
     this.gos = [];
     this.goIdMap = {};
@@ -39,7 +43,10 @@ Javelin.Engine.prototype.reset = function() {
     this.sceneDefinition = {};
     
     //plugins
+    this.plugins = [];
     
+    //run any setup based on constructor config
+    this.processConfig(this.config);
 };
 
 
@@ -97,25 +104,63 @@ Javelin.Engine.prototype.loadScene = function(definition, callback) {
     this.pluginsReset();
     this.reset();
 
+    this.environment.$onBeforeSceneLoad(definition);
+
     for (var plugin in definition.plugins) {
         this.plugins[plugin] = {};
     }
 
-    callback(this);
+    this.environment.$onAfterSceneLoad(definition);
+
+    callback();
+};
+
+Javelin.Engine.prototype.run = function() {
+    this.environment.run();
 };
 
 
-/* Plugin Management */;/*global Javelin:true */
+/* Plugin Management */;"use strict";
+
+Javelin.EnginePlugin = function() {
+    
+};
+
+/* GameObject Lifecycle */
+Javelin.EnginePlugin.prototype.$onStep = function(deltaTime) {
+    // body...
+};
+
+Javelin.EnginePlugin.prototype.$onGameObjectDestroy = function(go) {
+    // body...
+};
+
+Javelin.EnginePlugin.prototype.$onGameObjectCreate = function(go) {
+    // body...
+};
+
+/* data import/export for scene configuration */
+
+Javelin.EnginePlugin.prototype.$serialize = function() {
+    // body...
+};
+
+Javelin.EnginePlugin.prototype.$unserialize = function(data) {
+    // body...
+};
+;/*global Javelin:true */
 
 'use strict';
 
 Javelin.GameObject = function () {
     this.id = -1;
+    this.name = "Untitled";
     this.engine = null;
     this.active = false;
     this.components = {};
     this.children = [];
     this.parent = null;
+    this.callbacks = {};
 };
 
 /* Lifecycle */
@@ -198,12 +243,17 @@ Javelin.GameObject.prototype.abandon = function() {
 
 /* Messaging */
 
+Javelin.GameObject.prototype.on = function(eventName, callback) {
+    //todo: allow arbitrary listeners, reimplement this.callbacks
+};
+
 Javelin.GameObject.prototype.getCallbacks = function(eventName) {
-    var cbs = [];
+    var cbs = this.callbacks[eventName] || [];
 
     for (var comp in this.components) {
         var cb = comp.$getCallback(eventName);
         if (cb) {
+            cb.$id = this.id;
             cbs.push(cb);
         }
     }

@@ -12,8 +12,13 @@ module.exports = function(grunt) {
             test: ['tests/**/*.js']
         },
         watch: {
-            files: "<%= files.lint %>",
-            tasks: ["default"]
+            all: {
+                files: "<%= files.lint %>",
+                tasks: ["default"],
+                options: {
+                    interrupt: true
+                }
+            }
         },
         jshint: {
             options: {
@@ -64,6 +69,7 @@ module.exports = function(grunt) {
             }
         },
         uglify: {
+            //not entirely sure whether or not I can use mangle... will have to experiment
             options: {
                 mangle: false
             },

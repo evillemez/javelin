@@ -4,11 +4,13 @@
 
 Javelin.GameObject = function () {
     this.id = -1;
+    this.name = "Untitled";
     this.engine = null;
     this.active = false;
     this.components = {};
     this.children = [];
     this.parent = null;
+    this.callbacks = {};
 };
 
 /* Lifecycle */
@@ -91,12 +93,17 @@ Javelin.GameObject.prototype.abandon = function() {
 
 /* Messaging */
 
+Javelin.GameObject.prototype.on = function(eventName, callback) {
+    //todo: allow arbitrary listeners, reimplement this.callbacks
+};
+
 Javelin.GameObject.prototype.getCallbacks = function(eventName) {
-    var cbs = [];
+    var cbs = this.callbacks[eventName] || [];
 
     for (var comp in this.components) {
         var cb = comp.$getCallback(eventName);
         if (cb) {
+            cb.$id = this.id;
             cbs.push(cb);
         }
     }

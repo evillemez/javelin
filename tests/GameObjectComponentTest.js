@@ -72,8 +72,8 @@ describe("GameObjectComponent Tests", function() {
         
         //an example component construction function
         var Namespace = Namespace || {};
-        Namespace.FooComponent = function(comp, testWord) {
-            
+        Namespace.BarComponent = function(comp) {};
+        Namespace.FooComponent = function(comp, testWord) {            
             var foo = testWord;
             
             //all components
@@ -84,8 +84,16 @@ describe("GameObjectComponent Tests", function() {
                 return foo;
             });
         };
+        Namespace.FooComponent.alias = "namespace.foo";
+        Namespace.FooComponent.requires = [
+            Namespace.BarComponent
+        ];
+        Namespace.FooComponent.inherits = Namespace.BarComponent;
         
         //create and "setup" components
+        assert.equal("namespace.foo", Namespace.FooComponent.alias);
+        assert.deepEqual([Namespace.BarComponent], Namespace.FooComponent.requires);
+        assert.equal(Namespace.BarComponent, Namespace.FooComponent.inherits);
         var c1 = new j.GameObjectComponent();
         var c2 = new j.GameObjectComponent();
         Namespace.FooComponent(c1, 'bar');
