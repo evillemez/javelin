@@ -1,7 +1,7 @@
 "use strict";
 
 Playground.scene = {
-    alias: "",
+    alias: "Demo Scene",
     assets: {
         
     },
@@ -12,29 +12,20 @@ Playground.scene = {
         "server": {
             maxConnections: 30
         }
-    }
+    },
     plugins: {
         "three": {
             renderer: "webgl"
-            ,renderTarget: $('#game')
+            ,renderTarget: $('#viewport')
             ,useQuaternions: true
             ,stepsPerSecond: 60
-        },
-        "cannon" {
-            stepsPerSecond: 30
-            ,foo: 'bar'
-        },
-        "network": {
-            server: "http://localhost:1337"
-            ,style: 'snapshot'
-            ,syncsPerSecond: 10
         }
     },
     objects: [
         {
             name: "Obj 1",
             components: {
-                "transform": {
+                "transform3d": {
                     position: {
                         x: 5.3,
                         y: 1.1,
@@ -45,6 +36,9 @@ Playground.scene = {
                         y: 1,
                         z: 1
                     }
+                },
+                "renderer3d": {
+                    
                 },
                 "playground.rotator": {
                     speed: 4

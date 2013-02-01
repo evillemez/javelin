@@ -1,14 +1,12 @@
 # TODO #
 
-* Engine updates objects
-    * plugins call object components callbacks
-        * components need certain methods:
-            * start
-            * enable
-            * update
-            * disable
-            * destroy
-        * components can access this.$go for communication
-        * components can access this.$engine for communication
-    * Engine passes objects to plugins
-        * plugins may process specific components
+* implement go callback cache
+    * invalidate cache when:
+        * component.$on() calls
+        * add/remove components also
+        * parent/unparent 
+    * cache includes children (optionally?)
+* implement `engine.updating` boolean
+    * don't allow the go array to be modified during a loop
+    * new gos should be added to a temp location and merged in at end of game step
+    * removed gos should be removed after updates are completed

@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert');
-var j = require('../build/javelin.min.js');
+var j = require('../build/javelin.js');
 
 describe("GameObjectComponent Tests", function() {
     it("should return false if requested callback does not exist", function() {

@@ -1,7 +1,15 @@
 "use strict";
 
 Javelin.EnginePlugin = function() {
-    
+    this.$alias = '';
+    this.$defaults = {};
+    this.$requirements = [];
+    this.$active = false;
+    this.$config = {};
+};
+
+Javelin.EnginePlugin.prototype.$reset = function() {
+    // body...
 };
 
 /* GameObject Lifecycle */
@@ -20,9 +28,10 @@ Javelin.EnginePlugin.prototype.$onGameObjectCreate = function(go) {
 /* data import/export for scene configuration */
 
 Javelin.EnginePlugin.prototype.$serialize = function() {
-    // body...
+    return this.$config;
 };
 
 Javelin.EnginePlugin.prototype.$unserialize = function(data) {
-    // body...
+    this.$config = data;
+    this.$reset();
 };

@@ -15,11 +15,14 @@ callback is determined by the part of the engine that is calling it.
 
 Javelin.GameObjectComponent = function() {
     this.$callbacks = {};
-    this.$go = null;
+    this.$go = {};
+    this.$id = 0;
+    this.$alias = '';
+    this.$inheritedAliases = [];
 };
 
-
 Javelin.GameObjectComponent.prototype.$on = function(name, callback) {
+    callback.$id = this.$id;
     this.$callbacks[name] = callback;
 };
 
@@ -29,7 +32,8 @@ Javelin.GameObjectComponent.prototype.$getCallback = function(name) {
 
 Javelin.GameObjectComponent.prototype.$serialize = function() {
     var data = {};
-
+    
+    //export non-function component properties, excluding the builtins ($)
     for (var key in this) {
         if (typeof(this[key]) !== 'function' && key.charAt(0) !== "$") {
             data[key] = this[key];

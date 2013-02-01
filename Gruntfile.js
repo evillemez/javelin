@@ -8,8 +8,12 @@ module.exports = function(grunt) {
         
         //this is for convenience, used in other configs
         files: {
-            lint: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js'],
-            test: ['tests/**/*.js']
+            lint: ['Gruntfile.js', 'src/**/*.js', '!src/vendor/**/*.js', 'tests/**/*.js'],
+            test: ['tests/**/*.js'],
+            
+            //note: src/vendor DOES need to be included in the build, but not until I can make it work
+            //and pass the tests properly
+            build: ['util/build_intro.js', "src/**/*.js", "!src/vendor/**/*.js", 'util/build_outro.js']
         },
         watch: {
             all: {
@@ -22,34 +26,39 @@ module.exports = function(grunt) {
         },
         jshint: {
             options: {
-                curly: true,
-                eqeqeq: true,
-                immed: true,
-                latedef: true,
-                newcap: true,
-                noarg: true,
-                sub: true,
-                undef: true,
-                boss: true,
-                eqnull: true,
-                node: true,
-                es5: true,
-                strict: true,
-                browser: true,
-                globals: {
-                    Javelin: true,
-                    should: true,
-                    it: true,
-                    define: true,
-                    require: true,
-                    describe: true
+                curly: true
+                ,eqeqeq: true
+                ,immed: true
+                ,latedef: true
+                ,newcap: true
+                ,noarg: true
+                ,sub: true
+                ,undef: true
+                ,boss: true
+                ,eqnull: true
+                ,node: true
+                ,es5: true
+                ,strict: true
+                ,browser: true
+                ,laxcomma: true
+                ,globals: {
+                    Javelin: true
+                    ,should: true
+                    ,it: true
+                    ,define: true
+                    ,require: true
+                    ,describe: true
+                    ,CANNON: true
+                    ,THREE: true
+                    ,self: true
+                    //,window: true
                 }
             },
             all: "<%= files.lint %>"
         },
         simplemocha: {
             options: {
-                globals: ['should', 'it', 'define','require','describe','Javelin'],
+                globals: ['should', 'it', 'define','require','describe','Javelin', 'THREE', 'window', 'self'],
                 timeout: 3000,
                 ignoreLeaks: false,
                 ui: 'bdd',
@@ -64,7 +73,7 @@ module.exports = function(grunt) {
                 separator: ";"
             },
             dist: {
-                src: ['util/build_intro.js', "src/**/*.js", 'util/build_outro.js'],
+                src: "<%= files.build %>",
                 dest: 'build/javelin.js'
             }
         },

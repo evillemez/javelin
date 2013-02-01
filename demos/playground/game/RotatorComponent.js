@@ -10,18 +10,20 @@ Playground.RotatorComponent = function(go, component) {
     component.speed = 5;
     
     //set up internal values, effectively "private"
-    var rotation = go.getComponent('transform').rotation;
+    var rotX = go.getComponent('transform').rotation.x;
     
     //register callbacks on the game object for engine plugins to process
     component.$on('update', function(deltaTime) {
-        rotation += component.speed * deltaTime;
+        rotX += component.speed * deltaTime;
     });
 };
 
-//example component meta (name is required)
-Playground.Rotator.alias = "playground.rotator";
-//Playground.Rotator.inherits = Playground.BaseComponent;
-Playground.Rotator.requires = [
+//component meta
+Playground.RotatorComponent.alias = 'playground.rotator';
+Playground.RotatorComponent.requires = [
     Javelin.Component.Transform3d
     ,Javelin.Component.Rigidbody
 ];
+
+//register
+Javelin.register(Playground.RotatorComponent);
