@@ -20,5 +20,4 @@ Javelin.Component.Renderer3d.alias = 'renderer3d';
 Javelin.Component.Renderer3d.requires = [
     Javelin.Component.Transform3d
 ];
-
-Javelin.register(Javelin.Component.Renderer3d);
+//Javelin.register(Javelin.Component.Renderer3d);

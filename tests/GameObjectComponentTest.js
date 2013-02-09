@@ -3,7 +3,7 @@
 var assert = require('assert');
 var j = require('../build/javelin.js');
 
-describe("GameObjectComponent Tests", function() {
+describe("GameObjectComponent", function() {
     it("should return false if requested callback does not exist", function() {
         var c = new j.GameObjectComponent();
         assert.strictEqual(false, c.$getCallback("update"));

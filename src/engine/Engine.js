@@ -42,17 +42,21 @@ Javelin.Engine.prototype.reset = function() {
 };
 
 Javelin.Engine.prototype.processConfig = function(config) {
+    //configure the loader
+    this.loader = new Javelin.AssetLoader(this.config.loader.assetUrl);
+
+    //add plugins
     var plugins = config.plugins || [];
     for (var i in plugins) {
         this.addPlugin(plugins[i]);
     }
     
+    //configure the plugins
     var opts = config.options || {};
     for (var j in opts) {
         this.getPlugin(j).$unserialize(opts[j]);
     }
 };
-
 
 /* Managing Game Objects */
 Javelin.Engine.prototype.addGameObject = function(go) {
@@ -110,7 +114,8 @@ Javelin.Engine.prototype.instantiate = function(def) {
     
     if (def.children) {
         for (var i in def.children) {
-            this.instantiate(def.children[i]);
+            var child = this.instantiate(def.children[i]);
+            child.setParent(go);
         }
     }
     
@@ -148,6 +153,7 @@ Javelin.Engine.prototype.step = function() {
         this.updating = false;
         
         //TODO: commit go changes (creations/deletions)
+        this.cleanupStep();
     }
 };
 
@@ -171,6 +177,11 @@ Javelin.Engine.prototype.updatePlugins = function(deltaTime) {
         }
     }
 };
+
+Javelin.Engine.prototype.cleanupStep = function() {
+    //TODO: commit go creation/deletion changes
+};
+
 
 Javelin.Engine.prototype.pluginsCreateGameObject = function(go) {
     for (var p in this.plugins) {
@@ -199,6 +210,22 @@ Javelin.Engine.prototype.loadScene = function(definition, callback) {
     }
 
     callback();
+};
+
+/* Asset management */
+
+Javelin.Engine.prototype.loadAsset = function(path) {
+    return this.loader.loadAsset(path);
+};
+
+Javelin.Engine.prototype.loadAssets = function(array) {
+    var assets = [];
+    
+    for (var i in array) {
+        assets.push(this.loader.loadAsset(array[i]));
+    }
+    
+    return assets;
 };
 
 /* Plugin Management */

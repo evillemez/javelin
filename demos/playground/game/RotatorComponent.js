@@ -10,7 +10,11 @@ Playground.RotatorComponent = function(go, component) {
     component.speed = 5;
     
     //set up internal values, effectively "private"
-    var rotX = go.getComponent('transform').rotation.x;
+    var rotX = go.getComponent('transform3d').rotation.x;
+    
+    //give self a cube renderer
+    go.getComponent('renderer3d').geometry = new THREE.CubeGeometry(1, 1, 1);
+    go.getComponent('renderer3d').material =new THREE.MeshBasicMaterial({color: 0x00ff00})
     
     //register callbacks on the game object for engine plugins to process
     component.$on('update', function(deltaTime) {
@@ -22,7 +26,7 @@ Playground.RotatorComponent = function(go, component) {
 Playground.RotatorComponent.alias = 'playground.rotator';
 Playground.RotatorComponent.requires = [
     Javelin.Component.Transform3d
-    ,Javelin.Component.Rigidbody
+    ,Javelin.Component.Renderer3d
 ];
 
 //register

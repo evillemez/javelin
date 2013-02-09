@@ -11,8 +11,9 @@ Javelin.GameObject = function () {
     this.children = [];                 //child gameobject instances
     this.parent = null;                 //parent gameobject instance
     this.containedAliases = [];         //list of compnent aliases contained in object
-    this.hasChanges = false;            //whether or not the hierarchy or components have been modified
-    this.cbCache = {};
+    this.modified = false;              //whether or not the hierarchy or components have been modified
+    this.ownCallbackCache = {};         //cached callbacks from own components
+    this.allCallbackCache = {};         //cached callbacks from all children
 };
 
 /* Lifecycle */
@@ -30,10 +31,10 @@ Javelin.GameObject.prototype.addComponent = function(componentConstructor) {
         return;
     }
     
-    this.hasChanges = true;
+    this.setModified();
 
     //add any required components first
-    var reqs = Javelin.getRequirementsFor(componentName);
+    var reqs = Javelin.getComponentRequirements(componentName);
     var l = reqs.length;
     for (var i = 0; i < l; i++) {
         this.addComponent(reqs[i]);
@@ -45,14 +46,16 @@ Javelin.GameObject.prototype.addComponent = function(componentConstructor) {
     def.$go = this;
     
     //call hierarchy in proper inheritence order
-    var handlers = Javelin.getComponentHierarchy(componentName);
+    var handlers = Javelin.getComponentChain(componentName);
     l = handlers.length;
-    for (i = 0; i < l; i++) {
+    for (i = l; i > 0; i--) {
         handlers[i](this, def);
         this.containedAliases[handlers[i].name] = true;
     }
 
     this.components[componentName] = def;
+    
+    return def;
 };
 
 Javelin.GameObject.prototype.getComponent = function(name) {
@@ -60,7 +63,7 @@ Javelin.GameObject.prototype.getComponent = function(name) {
 };
 
 Javelin.GameObject.prototype.removeComponent = function(name) {
-    this.hasChanges = true;
+    this.setModified();
     this.components[name] = null;
 };
 
@@ -96,21 +99,21 @@ Javelin.GameObject.prototype.getComponentsInChildren = function(name) {
 /* GO Hierarchy management */
 
 Javelin.GameObject.prototype.addChild = function(child) {
-    this.hasChanges = true;
-    child.hasChanges = true;
+    this.setModified();
+    child.setModified();
     child.parent = this;
     this.children.push(child);
 };
 
 Javelin.GameObject.prototype.setParent = function(parent) {
-    this.hasChanges = true;
-    parent.hasChanges = true;
+    this.setModified();
+    parent.setModified();
     parent.addChild(this);
 };
 
 Javelin.GameObject.prototype.removeChild = function(child) {
-    child.hasChanges = true;
-    this.hasChanges = true;
+    child.setModified();
+    this.setModified();
     child.parent = null;
     this.children.splice(this.children.indexOf(child), 1);
 };
@@ -125,27 +128,42 @@ Javelin.GameObject.prototype.abandon = function() {
 /* Messaging */
 
 Javelin.GameObject.prototype.getCallbacks = function(eventName, recursive) {
-    var cbs = [];
+    if (this.modified) {
+        this.rebuildCallbackCache();
+    }
+    
+    return (recursive) ? this.allCallbackCache[eventName] : this.ownCallbackCache[eventName];
+};
 
+Javelin.GameObject.prototype.rebuildCallbackCache = function() {
+    var ownCallbacks = {};
     for (var comp in this.components) {
-        var cb = comp.$getCallback(eventName);
-        if (cb) {
-            cb.$id = this.id;
-            cbs.push(cb);
+        for (var key in comp.$callbacks) {
+            ownCallbacks[key] = ownCallbacks[key] || [];
+            ownCallbacks[key].push(comp.$callbacks[key]);
         }
     }
     
-    //recursively get callbacks in children?
-    if (recursive) {
-        for (var i = 0; i < this.children.length; i++) {
-            var nestedCBs = this.children[i].getCallbacks(eventName, recursive);
-            for (var j in nestedCBs) {
-                cbs.push(nestedCBs[j]);
+    this.ownCallbackCache = ownCallbacks;
+    
+    var allCallbacks = ownCallbacks;
+    for (var i in this.children) {
+        this.children[i].rebuildCallbackCache();
+        for (var eventName in this.children[i].$allCallbackCache) {
+            for (var j in this.children[i].$allCallbackCache[eventName]) {
+                allCallbacks[eventName].push(this.children[i].$allCallbackCache[eventName][j]);
             }
         }
     }
     
-    return cbs;
+    this.allCallbackCache = allCallbacks;
+};
+
+Javelin.GameObject.prototype.setModified = function() {
+    this.modified = true;
+    if (this.parent) {
+        this.parent.setModified();
+    }
 };
 
 /* Data Serialization Helpers */
@@ -158,6 +176,8 @@ Javelin.GameObject.prototype.serialize = function() {
     for (var alias in this.components) {
         serialized[alias] = this.components[alias].$serialize();
     }
+    
+    //TODO: check for children
     
     return serialized;
 };
@@ -173,4 +193,6 @@ Javelin.GameObject.prototype.unserialize = function(data) {
             this.components[alias].$unserialize(data.components[alias]);
         }
     }
+    
+    //TODO: check for children
 };

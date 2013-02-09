@@ -30,11 +30,11 @@ Playground.scene = {
 };
 
 //on document ready
-$(function() {
+$(document).ready(function() {
     
     //configure engine
     var engineConfig = {
-        debug: true
+        debug: true,
         plugins: [
             Javelin.Plugin.ThreeJs
             //,Javelin.Plugin.CannonJs
