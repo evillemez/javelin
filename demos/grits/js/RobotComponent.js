@@ -25,7 +25,6 @@ Grits.RobotComponent = function(go, comp) {
     
     var sprite = go.getComponent('sprite');
     var currentFrame = 0;
-    console.log("Maybe a sprite: ", sprite);
     
     comp.frames = [];
     
@@ -35,6 +34,7 @@ Grits.RobotComponent = function(go, comp) {
     });
     
     comp.$on('update', function(deltaTime) {
+                
         //set the current image
         sprite.image = comp.frames[currentFrame];
         

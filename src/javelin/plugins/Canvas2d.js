@@ -40,11 +40,12 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         //loop over gos and draw any sprite components
-        var gos = this.engine.gos;
+        console.log(this.$engine.stepId);
+        var gos = this.$engine.gos;
         var l = gos.length;
         for (var i = 0; i < l; i++) {
             var s = gos[i].getComponent('sprite');
-            if (s && s.isVisible) {
+            if (s && s.visible) {
                 var pos = gos[i].getComponent('transform2d').position;
                 ctx.drawImage(s.image, pos.x, pos.y);
             }
