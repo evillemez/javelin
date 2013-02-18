@@ -17,13 +17,14 @@ Javelin.Component.SpriteAnimator = function(go, comp) {
     
     comp.interrupt = function() {};
     
+    //each frame, figure out which frame to draw
     comp.$on('update', function(deltaTime) {
-        //play the current animation by switching
-        //to the appropriate sprite
+        if (sprite.visible) {
+            //play the current animation by switching
+            //to the appropriate sprite
+        }
     });
 };
 Javelin.Component.SpriteAnimator.alias = "spriteAnimator";
-Javelin.Component.SpriteAnimator.requires = [
-    Javelin.Component.Sprite
-];
-//Javelin.register(Javelin.Component.SpriteAnimator);
+Javelin.Component.SpriteAnimator.requires = ['sprite'];
+Javelin.register(Javelin.Component.SpriteAnimator);

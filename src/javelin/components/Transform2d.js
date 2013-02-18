@@ -44,4 +44,4 @@ Javelin.Component.Transform2d = function(go, comp) {
     
 };
 Javelin.Component.Transform2d.alias = 'transform2d';
-//Javelin.register(Javelin.Component.Transform2d);
+Javelin.register(Javelin.Component.Transform2d);

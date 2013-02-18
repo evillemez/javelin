@@ -25,8 +25,12 @@ Grits.RobotComponent = function(go, comp) {
     
     var sprite = go.getComponent('sprite');
     var currentFrame = 0;
+    console.log("Maybe a sprite: ", sprite);
+    
+    comp.frames = [];
     
     comp.$on('start', function() {
+        console.log("STARTING!");
         comp.frames = go.engine.loadAssets(requiredAssets);
     });
     
@@ -39,8 +43,5 @@ Grits.RobotComponent = function(go, comp) {
     });
 };
 Grits.RobotComponent.alias = "grits.robot";
-Grits.RobotComponent.requires = [
-    Javelin.Component.Sprite
-];
-//Grits.RobotComponent.requiredAssets = [];
+Grits.RobotComponent.requires = ['sprite'];
 Javelin.register(Grits.RobotComponent);

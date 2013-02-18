@@ -17,9 +17,20 @@ Javelin.AssetLoader = function(basePath) {
         img.url = absPath;
     };
     
+    //image atlas loader
+    var imageAtlasLoader = function(relPath, absPath, register) {};
+    
+    //generic json file loader
+    var jsonLoader = function(relPath, absPath, register) {};
+    
+    //generic file loader
+    var soundLoader = function(relPath, absPath, register) {};
+    
     this.loaders = {
         'png': imageLoader,
         'jpg': imageLoader,
+        'atlas.json': imageAtlasLoader,
+        'json': function(relPath, absPath, register) { throw new Error("NOT IMPLEMENTED"); },
         'ogg': function(relPath, absPath, register) { throw new Error("NOT IMPLEMENTED"); },
         'mp3': function(relPath, absPath, register) { throw new Error("NOT IMPLEMENTED"); },
     };
@@ -42,6 +53,6 @@ Javelin.AssetLoader.prototype.getLoaderForPath = function(path) {
     return this.loaders[ext] || false;
 };
 
-Javelin.AssetLoader.prototype.register = function(path, item) {
-    this.assets[path] = item;
+Javelin.AssetLoader.prototype.register = function(relPath, obj) {
+    this.assets[relPath] = obj;
 };

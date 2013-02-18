@@ -23,20 +23,23 @@ objects.  It does this by letting engine plugins process components on game obje
 in a scene, which helps you organize the code you write to script those objects.  So, generally, here are the pieces you need
 to know about, and what they do:
 
+* **Javelin** - The global *Javelin* object acts as a registry for components and plugins.  The Engine uses this internally when instantiating
+game objects and loading scenes.
 * **Engine** - The engine manages plugins, game objects, and an environment.  The engine doesn't really know anything
-at all about the contents of the game objects - it just keeps track of them so they can (or the relevant parts of them) can
-be processed by the engine plugins.  The Engine defines the main game loop, and tells the plugins to process the game objects
-once every game step.
+at all about the contents of the game objects - it just keeps track of them so they can be processed by the engine plugins.
+The Engine defines the main game loop, and tells the plugins to process the game objects once every game step.
 * **Engine Plugins** - These do the real work.  The Plugins process the actual game objects in the game.  They do this by
 looking at the components of the game object.  On every game step, if a particular game object has a component the Plugin
 cares about, it may do something.  For example, if a game object has a *renderer* component, the *ThreeJs* plugin will visually
 update that component on every frame - otherwise the *ThreeJs* plugin will ignore that object completely.  Example plugins include:
     * *ThreeJs* - For visually rendering a scene
     * *CannonJs* - For providing physics simulation
+    * *Canvas2d* - For rendering 2d scenes
+    * *Box2d* - A physics engine for 2d scenes
     * *Input* - For capturing user device input
     * *Network* - For connecting to a server with web sockets
 * **Engine Environment** - The engine "runs" in the context of an environment.  So far there are only two: *browser* and *server*.  This
-allows the engine to reconfigure certain internal aspects, like asset loading, game loop iteration, based on the environment in 
+allows the engine to reconfigure certain internal aspects, like asset loading and plugin activation, based on the environment in 
 which it is executing.  In some environments, the engine may disable certian components - for example by default it will disable
 the *ThreeJs* and *Input* components when it is executing on the server, because there is no need for them.
 * **Game Objects** - Game objects are mostly containers for components.  Each object has a unique ID, assigned to it by the engine
@@ -46,14 +49,14 @@ to actually make things happen.  Any time you write a custom script to attach to
 All components have some basic functionality, for example registering callback functions for when certain events occur.  In your
 components, you can directly interact with other components by requesting them from the game object.  Some example components
 included with the engine are:
-    * **transform3d** - Contains 3d spatial data regarding position and rotation
-    * **renderer3d** - Requires the *transform* component, and contains objects required by the *ThreeJs* plugin to visually render a given object
-    * **rigidbody3d** - Requires the *transform* component, is proccessed by the *CannonJs* plugin to simulate physics
+    * *sprite* - A reference to an image to be drawn in a 2d context on a canvas
+    * *spriteAnimator* - A component for defining animations for a sprite comprised of multiple images
+    * *transform2d* - Contains 2d spatial data regarding position and rotation
+    * *transform3d* - Contains 3d spatial data regarding position and rotation
+    * *renderer3d* - Requires the *transform* component, and contains objects required by the *ThreeJs* plugin to visually render a given object
+    * *rigidbody2d* - Requires *transform2d*, is processed by the *Box2d* plugin for simulating 2d physics
+    * *rigidbody3d* - Requires the *transform3d* component, is proccessed by the *CannonJs* plugin to simulate 3d physics
     
-    > The `3d` suffix on these components reflects the fact that the *CannonJs* and *ThreeJs* plugins are tightly integrated with one another
-    > for performance reasons.  However, one could easily build a 2d game using different plugins, in which case these components would be
-    > out of place, and their equivalents should be named differently to avoid confusion.
-
 ### Example setup ###
 
 This is going to change all the time - look in the `demos/` section to see the status of current experiments.  I imagine it will be a 
@@ -67,4 +70,3 @@ installed you can simply run `grunt watch` and start editing files.  New builds 
 you'll be notified of failing tests and bad syntax.
 
 The tests are run with mocha, using node's built-in assertion library.  They are pretty basic, and probably lacking for now.
-

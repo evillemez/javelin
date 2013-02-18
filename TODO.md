@@ -1,5 +1,8 @@
 # TODO #
 
+* test go hierarchy stuff
+* implement Plugins and plugin registry the same way as gameobject components
+    * add `Javelin.registerPlugin`
 * implement go callback cache
     * invalidate cache when:
         * component.$on() calls

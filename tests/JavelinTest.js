@@ -7,87 +7,63 @@ var assert = require('assert');
 describe("Javelin Registry", function() {
     it("should properly assemble component chain on initialize()", function() {
         var j = require('../build/javelin.js');
+        var f = require('./fixtures/fixtures.js');
 
-        function FooComponent(go, comp) {}
-        FooComponent.alias = 'c.foo';
-        j.register(FooComponent);
-
-        function BarComponent(go, comp) {}
-        BarComponent.alias = 'c.bar';
-        BarComponent.inherits = FooComponent;
-        j.register(BarComponent);
-
-        function BazComponent(go, comp) {}
-        BazComponent.alias = 'c.baz';
-        BazComponent.inherits = BarComponent;
-        j.register(BazComponent);
+        j.register(f.FooComponent);
+        j.register(f.BarComponent);
+        j.register(f.BazComponent);
+        j.initialize();
         
         var expectedFoo = [
-            FooComponent
+            f.FooComponent
         ];
 
         var expectedBar = [
-            FooComponent,
-            BarComponent
+            f.FooComponent,
+            f.BarComponent
         ];
         
         var expectedBaz = [
-            FooComponent,
-            BarComponent,
-            BazComponent
+            f.FooComponent,
+            f.BarComponent,
+            f.BazComponent
         ];
         
-        j.initialize();
-        
-        assert.deepEqual(expectedFoo, j.getComponentChain('c.foo'));
-        assert.deepEqual(expectedBar, j.getComponentChain('c.bar'));
-        assert.deepEqual(expectedBaz, j.getComponentChain('c.baz'));
+        assert.deepEqual(expectedFoo, j.getComponentChain('f.foo'));
+        assert.deepEqual(expectedBar, j.getComponentChain('f.bar'));
+        assert.deepEqual(expectedBaz, j.getComponentChain('f.baz'));
     });
     
     it("should properly assemble component requirements on initialize()", function() {
         var j = require('../build/javelin.js');
+        var f = require('./fixtures/fixtures.js');
 
-        function FooComponent(go, comp) {}
-        FooComponent.alias = 'c.foo';
-        j.register(FooComponent);
-
-        function BarComponent(go, comp) {}
-        BarComponent.alias = 'c.bar';
-        BarComponent.requires = [FooComponent];
-        j.register(BarComponent);
-
-        function BazComponent(go, comp) {}
-        BazComponent.alias = 'c.baz';
-        BazComponent.requires = [BarComponent];
-        j.register(BazComponent);
-        
-        function QuxComponent(go, comp) {}
-        QuxComponent.alias = 'c.qux';
-        QuxComponent.requires = [FooComponent, BazComponent];
-        j.register(QuxComponent);
+        j.register(f.FooComponent);
+        j.register(f.BarComponent);
+        j.register(f.BazComponent);        
+        j.register(f.QuxComponent);
+        j.initialize();        
         
         var expectedFoo = [];
         
         var expectedBar = [
-            FooComponent
+            f.FooComponent
         ];
         
         var expectedBaz = [
-            FooComponent,
-            BarComponent
+            f.FooComponent,
+            f.BarComponent
         ];
         
         var expectedQux = [
-            FooComponent,
-            BarComponent,
-            BazComponent
+            f.FooComponent,
+            f.BarComponent,
+            f.BazComponent
         ];
         
-        j.initialize();
-        
-        assert.deepEqual(expectedFoo, j.getComponentRequirements('c.foo'));
-        assert.deepEqual(expectedBar, j.getComponentRequirements('c.bar'));
-        assert.deepEqual(expectedBaz, j.getComponentRequirements('c.baz'));
-        assert.deepEqual(expectedQux, j.getComponentRequirements('c.qux'));
+        assert.deepEqual(expectedFoo, j.getComponentRequirements('f.foo'));
+        assert.deepEqual(expectedBar, j.getComponentRequirements('f.bar'));
+        assert.deepEqual(expectedBaz, j.getComponentRequirements('f.baz'));
+        assert.deepEqual(expectedQux, j.getComponentRequirements('f.qux'));
     });
 });

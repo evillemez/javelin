@@ -17,6 +17,7 @@ Javelin.GameObject = function () {
 };
 
 /* Lifecycle */
+
 Javelin.GameObject.prototype.destroy = function() {
     if (this.engine) {
         this.engine.removeGameObject(this);
@@ -25,41 +26,67 @@ Javelin.GameObject.prototype.destroy = function() {
 
 
 /* Component management */
-Javelin.GameObject.prototype.addComponent = function(componentConstructor) {
-    var componentName = componentConstructor.name;
-    if (this.components[componentName]) {
+
+Javelin.GameObject.prototype.addComponent = function(handler) {
+    if (this.components[handler.alias]) {
         return;
     }
     
     this.setModified();
 
     //add any required components first
-    var reqs = Javelin.getComponentRequirements(componentName);
+    var reqs = Javelin.getComponentRequirements(handler.alias);
     var l = reqs.length;
     for (var i = 0; i < l; i++) {
         this.addComponent(reqs[i]);
     }
     
     //instantiate new component instance
-    var def = new Javelin.GameObjectComponent();
-    def.$id = this.id;
-    def.$go = this;
+    var comp = new Javelin.GameObjectComponent();
+    comp.$id = this.id;
+    comp.$go = this;
+    comp.$alias = handler.alias;
     
     //call hierarchy in proper inheritence order
-    var handlers = Javelin.getComponentChain(componentName);
+    var handlers = Javelin.getComponentChain(handler.alias);
     l = handlers.length;
-    for (i = l; i > 0; i--) {
-        handlers[i](this, def);
-        this.containedAliases[handlers[i].name] = true;
+    for (i = 0; i < l; i++) {
+        handlers[i](this, comp);
+        comp.$inheritedAliases.push(handlers[i].alias);
+        this.containedAliases[handlers[i].alias] = true;
     }
 
-    this.components[componentName] = def;
+    this.components[handler.alias] = comp;
     
-    return def;
+    return comp;
 };
 
 Javelin.GameObject.prototype.getComponent = function(name) {
-    return this.components[name] || false;
+    if (this.components[name]) {
+        return this.components[name];
+    }
+    
+    for (var comp in this.components) {
+        if (this.components[comp].$isA(name)) {
+            return this.components[comp];
+        }
+    }
+
+    return false;
+};
+
+Javelin.GameObject.prototype.hasComponent = function(name) {
+    if (this.components[name]) {
+        return true;
+    }
+    
+    for (var comp in this.components) {
+        if (this.components[comp].$isA(name)) {
+            return true;
+        }
+    }
+    
+    return false;
 };
 
 Javelin.GameObject.prototype.removeComponent = function(name) {
@@ -127,20 +154,28 @@ Javelin.GameObject.prototype.abandon = function() {
 
 /* Messaging */
 
+Javelin.GameObject.prototype.emit = function(name, data) {
+    //TODO: fill in
+};
+
+Javelin.GameObject.prototype.broadcast = function(name, data) {
+    //TODO: fill in
+};
+
 Javelin.GameObject.prototype.getCallbacks = function(eventName, recursive) {
     if (this.modified) {
         this.rebuildCallbackCache();
     }
     
-    return (recursive) ? this.allCallbackCache[eventName] : this.ownCallbackCache[eventName];
+    return (recursive) ? this.allCallbackCache[eventName] || []: this.ownCallbackCache[eventName] || [];
 };
 
 Javelin.GameObject.prototype.rebuildCallbackCache = function() {
     var ownCallbacks = {};
     for (var comp in this.components) {
-        for (var key in comp.$callbacks) {
+        for (var key in this.components[comp].$callbacks) {
             ownCallbacks[key] = ownCallbacks[key] || [];
-            ownCallbacks[key].push(comp.$callbacks[key]);
+            ownCallbacks[key].push(this.components[comp].$callbacks[key]);
         }
     }
     
@@ -148,7 +183,10 @@ Javelin.GameObject.prototype.rebuildCallbackCache = function() {
     
     var allCallbacks = ownCallbacks;
     for (var i in this.children) {
-        this.children[i].rebuildCallbackCache();
+        if (this.children[i].modified) {
+            this.children[i].rebuildCallbackCache();
+        }
+        
         for (var eventName in this.children[i].$allCallbackCache) {
             for (var j in this.children[i].$allCallbackCache[eventName]) {
                 allCallbacks[eventName].push(this.children[i].$allCallbackCache[eventName][j]);

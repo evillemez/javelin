@@ -15,7 +15,6 @@ Javelin.Engine = function(environment, config) {
 
     //everything else can be reset
     this.reset();
-    
 };
 
 Javelin.Engine.prototype.reset = function() {
@@ -26,9 +25,11 @@ Javelin.Engine.prototype.reset = function() {
     //game object
     this.gos = [];
     this.lastGoId = 0;
+    this.newGos = [];
+    this.gosToDelete = [];
 
     //timing
-    this.step = 0;
+    this.stepId = 0;
     this.time = 0.0;
     this.prevTime = 0.0;
     this.deltaTime = 0.0;
@@ -43,7 +44,9 @@ Javelin.Engine.prototype.reset = function() {
 
 Javelin.Engine.prototype.processConfig = function(config) {
     //configure the loader
-    this.loader = new Javelin.AssetLoader(this.config.loader.assetUrl);
+    if(config.loader) {
+        this.loader = new Javelin.AssetLoader(config.loader.assetUrl || '');
+    }
 
     //add plugins
     var plugins = config.plugins || [];
@@ -60,26 +63,32 @@ Javelin.Engine.prototype.processConfig = function(config) {
 
 /* Managing Game Objects */
 Javelin.Engine.prototype.addGameObject = function(go) {
-    if (!go.id) {
+    if (-1 === go.id) {
         //register for engine
         go.id = ++this.lastGoId;
         go.engine = this;
         go.active = true;
+        
+        //TODO: check for whether or not we're updating
         this.gos.push(go);
         
         //notify plugins
-        this.pluginsAddGameObject(go);
+        this.pluginsCreateGameObject(go);
         
-        //notify object
-        var cbs = go.getCallbacks('create');
+        //notify object: todo: do this before or after notifying plugins?
+        var cbs = go.getCallbacks('create') || [];
         for (var j = 0; j < cbs.length; j++) {
             cbs[j]();
         }
+        
+        return go;
     }
+    
+    return false;
 };
 
 Javelin.Engine.prototype.removeGameObject = function(go) {
-    if (go.id) {
+    if (-1 !== go.id) {
         //notify object
         var cbs = go.getCallbacks('destroy');
         for (var j = 0; j < cbs.length; j++) {
@@ -90,9 +99,14 @@ Javelin.Engine.prototype.removeGameObject = function(go) {
         this.pluginsDestroyGameObject(go);
         
         //clean up self
-        go.id = 0;
+        go.id = -1;
+        go.active = false;
+        go.engine = null;
+
         var index = this.gos.indexOf(go);
         this.gos.splice(index, 1);
+        
+        return go;
     }
 };
 
@@ -129,7 +143,6 @@ Javelin.Engine.prototype.initialize = function() {
     Javelin.initialize();
 };
 
-
 Javelin.Engine.prototype.run = function() {
     this.running = true;
     this.environment.run();
@@ -141,45 +154,50 @@ Javelin.Engine.prototype.stop = function() {
 };
 
 Javelin.Engine.prototype.step = function() {
-    if (this.running) {
-        this.updating = true;
-        this.step++;
-        this.prevStepTime = this.time;
-        this.time = new Date().getTime();
-        this.deltaTime = this.time - this.prevStepTime;
+    this.updating = true;
+    this.stepId++;
+    this.prevStepTime = this.time;
+    this.time = new Date().getTime();
+    this.deltaTime = this.time - this.prevStepTime;
     
-        this.updateGameObjects(this.deltaTime);
-        this.updatePlugins(this.deltaTime);
-        this.updating = false;
+    this.updateGameObjects(this.deltaTime);
+
+    //clean now, so plugins can update with proper go array
+    this.cleanupStep();
+
+    this.updatePlugins(this.deltaTime);
+    this.updating = false;
         
-        //TODO: commit go changes (creations/deletions)
-        this.cleanupStep();
-    }
 };
 
 Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
-    for (var i = 0; i < this.gos.length; i++) {
+    var l = this.gos.length;
+    for (var i = 0; i < l; i++) {
         //TODO: only process root level objects,
         //the callbacks can be retrieved recursively
         //for nested hierarchies, which will allow
         //for efficient caching
-        var cbs = this.gos[i].getCallbacks('update');
-        for (var j = 0; j < cbs.length; j++) {
-            cbs[j](deltaTime);
+        if (this.gos[i].active) {
+            var cbs = this.gos[i].getCallbacks('update', false);
+            for (var j = 0; j < cbs.length; j++) {
+                cbs[j](deltaTime);
+            }
         }
     }
 };
 
 Javelin.Engine.prototype.updatePlugins = function(deltaTime) {
-    for (var plugin in this.plugins) {
-        if (plugin.$active) {
-            plugin.$step(deltaTime);
+    var plugins = this.plugins;
+    var l = plugins.length;
+    for (var i = 0; i < l; i++) {
+        if (plugins[i].$active) {
+            plugins[i].$onStep(deltaTime);
         }
     }
 };
 
 Javelin.Engine.prototype.cleanupStep = function() {
-    //TODO: commit go creation/deletion changes
+    //TODO: commit go changes (creations/deletions)
 };
 
 
@@ -229,15 +247,29 @@ Javelin.Engine.prototype.loadAssets = function(array) {
 };
 
 /* Plugin Management */
-Javelin.Engine.prototype.addPlugin = function(pluginBuilder) {
+Javelin.Engine.prototype.addPlugin = function(handler) {
+    if (this.plugins[handler.alias]) {
+        return;
+    }
+    
     var plugin = new Javelin.EnginePlugin();
-    plugin.$alias = pluginBuilder.alias;
-    plugin.$defaults = pluginBuilder.defaults || {};
+    plugin.$alias = handler.alias;
+    plugin.$defaults = handler.defaults || {};
+    plugin.$engine = this;
     
     //TODO: validate plugin requirements
     
-    pluginBuilder(this, plugin, pluginBuilder.$defaults);
+    handler(plugin, handler.$defaults);
+    plugin.$active = true;
     this.plugins.push(plugin);
+};
+
+Javelin.Engine.prototype.removePlugin = function(name) {
+    var p = this.getPlugin(name);
+    if(p) {
+        var index = this.plugins.indexOf(p);
+        this.plugins.splice(index, 1);
+    }
 };
 
 Javelin.Engine.prototype.resetPlugins = function() {

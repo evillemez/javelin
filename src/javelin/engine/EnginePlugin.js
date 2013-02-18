@@ -5,7 +5,7 @@ Javelin.EnginePlugin = function() {
     this.$defaults = {};
     this.$requirements = [];
     this.$active = false;
-    this.$config = {};
+    this.$engine = {};
 };
 
 Javelin.EnginePlugin.prototype.$reset = function() {
