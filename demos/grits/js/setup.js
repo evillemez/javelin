@@ -2,15 +2,22 @@
 
 //setup game namespace
 var Grits = Grits || {};
-Grits.Prefab = {};
+Grits.Prefab = {
+    Robot: {
+        name: "Robot",
+        components: {
+            "grits.robot": {},
+        }
+    }
+};
 
 Grits.scene = {
     name: "Test Scene",
     objects: [
         {
-            name: "Main Robot",
+            name: "Robot Manager",
             components: {
-                "grits.robot": {}
+                "grits.robot_manager": {}
             }
         },
     ]

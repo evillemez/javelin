@@ -30,7 +30,7 @@ Javelin.Engine.prototype.reset = function() {
 
     //timing
     this.stepId = 0;
-    this.time = 0.0;
+    this.time = new Date().getTime();
     this.prevTime = 0.0;
     this.deltaTime = 0.0;
 
@@ -115,6 +115,8 @@ Javelin.Engine.prototype.getGameObjectById = function(id) {
 };
 
 Javelin.Engine.prototype.instantiate = function(def) {
+    //TODO: move most functionality from GO.addComponent
+    //into here
     var go = new Javelin.GameObject();
 
     go.name = def.name || "Anonymous";

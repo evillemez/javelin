@@ -49,6 +49,8 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
             var s = gos[i].getComponent('sprite');
             if (s && s.visible && s.image) {
                 var pos = gos[i].getComponent('transform2d').position;
+                
+                //TODO: check for atlas images
                 ctx.drawImage(s.image, pos.x, pos.y);
             }
         }

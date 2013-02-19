@@ -43,4 +43,8 @@ describe("GameObject", function() {
     
     it("should serialize and unserialize properly");
     
+    it("should broadcast events to children");
+    
+    it("should emit events to parents");
+    
 });
