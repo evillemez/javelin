@@ -27,7 +27,7 @@ Javelin.GameObjectComponent.prototype.$on = function(name, callback) {
 //    this.$go.setModified();
 };
 
-Javelin.GameObjectComponent.prototype.$isA = function(alias) {
+Javelin.GameObjectComponent.prototype.$instanceOf = function(alias) {
     return (-1 !== this.$inheritedAliases.indexOf(alias));
 };
 

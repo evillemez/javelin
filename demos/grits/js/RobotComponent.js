@@ -24,22 +24,30 @@ Grits.RobotComponent = function(go, comp) {
     ];
     
     var sprite = go.getComponent('sprite');
+    var transform = go.getComponent('transform2d');
     var currentFrame = 0;
     
     comp.frames = [];
-    
-    comp.$on('start', function() {
-        console.log("STARTING!");
-        comp.frames = go.engine.loadAssets(requiredAssets);
+        
+    comp.$on('create', function() {
+        go.active = false;
+        
+        //load assets on start
+        go.engine.loadAssets(requiredAssets, function(images) {
+            comp.frames = images;
+            go.active = true;
+        });
     });
     
     comp.$on('update', function(deltaTime) {
-                
         //set the current image
         sprite.image = comp.frames[currentFrame];
         
+        //just to prove a point, that it can move
+        transform.position.x = currentFrame;
+        
         //modify the index for the next frame
-        currentFrame = (currentFrame + 1) % requiredAssets.length;
+        currentFrame = (currentFrame + 1) % comp.frames.length;
     });
 };
 Grits.RobotComponent.alias = "grits.robot";

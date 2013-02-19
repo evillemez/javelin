@@ -1,17 +1,20 @@
 'use strict';
 
 var assert = require('assert');
-
-//test component setup
+var j = require('../build/javelin.js');
+var f = require('./fixtures/fixtures.js');
 
 describe("Javelin Registry", function() {
-    it("should properly assemble component chain on initialize()", function() {
-        var j = require('../build/javelin.js');
-        var f = require('./fixtures/fixtures.js');
 
+    beforeEach(function() {
+        j.reset();
+    });
+    
+    it("should properly assemble component chain on initialize()", function() {
         j.register(f.FooComponent);
         j.register(f.BarComponent);
         j.register(f.BazComponent);
+        j.register(f.QuxComponent);
         j.initialize();
         
         var expectedFoo = [
@@ -29,20 +32,22 @@ describe("Javelin Registry", function() {
             f.BazComponent
         ];
         
+        var expectedQux = [
+            f.QuxComponent,
+        ];
+        
         assert.deepEqual(expectedFoo, j.getComponentChain('f.foo'));
         assert.deepEqual(expectedBar, j.getComponentChain('f.bar'));
         assert.deepEqual(expectedBaz, j.getComponentChain('f.baz'));
+        assert.deepEqual(expectedQux, j.getComponentChain('f.qux'));
     });
     
     it("should properly assemble component requirements on initialize()", function() {
-        var j = require('../build/javelin.js');
-        var f = require('./fixtures/fixtures.js');
-
         j.register(f.FooComponent);
         j.register(f.BarComponent);
         j.register(f.BazComponent);        
         j.register(f.QuxComponent);
-        j.initialize();        
+        j.initialize();
         
         var expectedFoo = [];
         

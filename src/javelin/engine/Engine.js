@@ -232,18 +232,12 @@ Javelin.Engine.prototype.loadScene = function(definition, callback) {
 
 /* Asset management */
 
-Javelin.Engine.prototype.loadAsset = function(path) {
-    return this.loader.loadAsset(path);
+Javelin.Engine.prototype.loadAsset = function(path, callback) {
+    return this.loader.loadAsset(path, callback);
 };
 
-Javelin.Engine.prototype.loadAssets = function(array) {
-    var assets = [];
-    
-    for (var i in array) {
-        assets.push(this.loader.loadAsset(array[i]));
-    }
-    
-    return assets;
+Javelin.Engine.prototype.loadAssets = function(arr, callback) {
+    return this.loader.loadAssets(arr, callback);
 };
 
 /* Plugin Management */

@@ -12,7 +12,7 @@ Grits.scene = {
             components: {
                 "grits.robot": {}
             }
-        }
+        },
     ]
 };
 

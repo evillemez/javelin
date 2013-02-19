@@ -9,8 +9,19 @@ var Fixtures = Fixtures || {};
 Fixtures.FooComponent = function(go, comp) {
     comp.test = function() { return "foo"; };
     comp.numUpdates = 0;
+    comp.started = false;
+    comp.destroyed = false;
+    
+    comp.$on('create', function() {
+        comp.started = true;
+    });
+    
     comp.$on('update', function(deltaTime) {
         comp.numUpdates++;
+    });
+    
+    comp.$on('destroy', function() {
+        comp.destroyed = true;
     });
 };
 Fixtures.FooComponent.alias = 'f.foo';
@@ -38,10 +49,10 @@ Fixtures.QuxComponent.requires = ['f.foo','f.baz'];
 /* Engine Plugins */
 
 Fixtures.TestPlugin = function(plugin, config) {
-
+    plugin.$config.foo = 'foo';
     plugin.stepCount = 0;
     plugin.goCount = 0;
-
+    
     plugin.$onStep = function(deltaTime) {
         plugin.stepCount++;
     };
@@ -60,6 +71,21 @@ Fixtures.TestPlugin.alias = 'f.test_plugin';
 
 Fixtures.TestEnvironment = function() {};
 Fixtures.TestEnvironment.prototype = new Javelin.Environment();
+
+/* Test scene */
+
+Fixtures.Scene = {
+    plugins: [
+        
+    ],
+    options: {
+        
+    },
+    objects: [
+        {},
+        {}
+    ]
+};
 
 //export
 module.exports = Fixtures;

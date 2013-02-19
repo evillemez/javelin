@@ -29,7 +29,7 @@ Javelin.GameObject.prototype.destroy = function() {
 
 Javelin.GameObject.prototype.addComponent = function(handler) {
     if (this.components[handler.alias]) {
-        return;
+        return this.components[handler.alias];
     }
     
     this.setModified();
@@ -67,7 +67,7 @@ Javelin.GameObject.prototype.getComponent = function(name) {
     }
     
     for (var comp in this.components) {
-        if (this.components[comp].$isA(name)) {
+        if (this.components[comp].$instanceOf(name)) {
             return this.components[comp];
         }
     }
@@ -81,7 +81,7 @@ Javelin.GameObject.prototype.hasComponent = function(name) {
     }
     
     for (var comp in this.components) {
-        if (this.components[comp].$isA(name)) {
+        if (this.components[comp].$instanceOf(name)) {
             return true;
         }
     }
@@ -215,7 +215,12 @@ Javelin.GameObject.prototype.serialize = function() {
         serialized[alias] = this.components[alias].$serialize();
     }
     
-    //TODO: check for children
+    if (this.children.length > 0) {
+        serialized.children = [];
+        for (var index in this.children) {
+            serialized.children.push(this.children[index].serialize());
+        }
+    }
     
     return serialized;
 };
@@ -225,12 +230,15 @@ Javelin.GameObject.prototype.unserialize = function(data) {
         this.name = data.name;
     }
     
-    if(data.components) {
+    if (data.components) {
         for (var alias in data.components) {
-            this.addComponent(Javelin.getComponentHandler(alias));
             this.components[alias].$unserialize(data.components[alias]);
         }
     }
     
-    //TODO: check for children
+    if (data.children) {
+        for (var index in data.children) {
+            this.children[index].unserialize(data.children[index]);
+        }
+    }
 };

@@ -35,6 +35,14 @@ Javelin.registerPlugin = function(handler) {
     this.__pluginHandlers[handler.alias] = handler;
 };
 
+Javelin.reset = function() {
+    Javelin.__componentHandlers = {};
+    Javelin.__componentChain = {};
+    Javelin.__componentRequirements = {};
+    Javelin.__pluginHandlers = {};
+};
+
+
 Javelin.getComponentHandler = function(alias) {
     return Javelin.__componentHandlers[alias] || false;
 };
@@ -55,14 +63,15 @@ Javelin.buildComponentChain = function(handler) {
         if (!func) {
             throw new Error("Missing component for requirement ["+alias+"]!");
         }
+
         if (func.inherits) {
             getParent(func.inherits);
         }
+
         chain.push(func);
     };
     
     getParent(handler.alias);
-    chain.push(handler);
     
     this.__componentChain[handler.alias] = chain;
 };
@@ -72,7 +81,7 @@ Javelin.buildComponentRequirements = function(handler) {
     
     var getRequirements = function(alias) {
         var handler = Javelin.getComponentHandler(alias);
-        if (!alias) {
+        if (!handler) {
             throw new Error("Missing component for requirement ["+alias+"]!");
         }
         if (handler.requires) {
@@ -91,7 +100,7 @@ Javelin.buildComponentRequirements = function(handler) {
         }
     };
     
-    getRequirements(handler);
+    getRequirements(handler.alias);
     
     this.__componentRequirements[handler.alias] = reqs;
 };

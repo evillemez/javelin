@@ -13,8 +13,6 @@ Javelin.Component.Transform2d = function(go, comp) {
         y: 0.0
     };
     
-    comp.scale = 1.0;
-    
     /* Absolute world coordinates */
     
     //if there's a parent, cache it's transform
@@ -24,6 +22,7 @@ Javelin.Component.Transform2d = function(go, comp) {
     comp.getWorldX = function() {
         return (parentTransform) ? parentTransform.position.x + comp.position.x : comp.position.x;
     };
+    
     comp.getWorldY = function() {
         return (parentTransform) ? parentTransform.position.y + comp.position.y : comp.position.y;
     };

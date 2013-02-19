@@ -45,6 +45,10 @@ module.exports = function(grunt) {
                     Javelin: true
                     ,should: true
                     ,it: true
+                    ,before: true
+                    ,after: true
+                    ,beforeEach: true
+                    ,afterEach: true
                     ,define: true
                     ,require: true
                     ,describe: true
@@ -58,7 +62,7 @@ module.exports = function(grunt) {
         },
         simplemocha: {
             options: {
-                globals: ['should', 'it', 'define','require','describe','Javelin', 'THREE', 'window', 'self'],
+                globals: ['should', 'it', 'define','require','describe','Javelin', 'THREE', 'window', 'self', 'before','after','beforeEach','afterEach'],
                 timeout: 3000,
                 ignoreLeaks: false,
                 ui: 'bdd',

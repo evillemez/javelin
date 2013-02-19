@@ -2,7 +2,8 @@
 
 Javelin.Component.Sprite = function(go, comp) {
     
-    comp.visible = false;     //set by plugin (probably)
+    //set by plugin (probably)    
+    comp.visible = false;
 
     //can be Image or Javelin.Asset.AtlasImage
     comp.image = null;

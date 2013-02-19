@@ -67,4 +67,41 @@ describe("Javelin Engine", function() {
         e.step();
         assert.equal(1, go.getComponent('f.foo').numUpdates);
     });
+    
+    it("should call game object on create and destroy", function() {
+        j.register(f.FooComponent);
+        j.initialize();
+        var e = new j.Engine(new f.TestEnvironment(), {});
+        var go = new j.GameObject();
+        var comp = go.addComponent(f.FooComponent);
+        assert.equal(false, comp.started);
+        assert.equal(false, comp.destroyed);
+        
+        e.addGameObject(go);
+        assert.equal(true, comp.started);
+        e.removeGameObject(go);
+        assert.equal(true, comp.destroyed);
+    });
+    
+    it("should properly call callback upon loading a scene", function() {
+        j.register(f.FooComponent);
+        j.register(f.BarComponent);
+        j.register(f.BazComponent);
+        j.register(f.QuxComponent);
+        j.initialize();
+        
+        var called = false;
+        var cb = function() {
+            called = true;
+        };
+        
+        assert.equal(false, called);
+        var e = new j.Engine(new f.TestEnvironment(), {});
+        e.loadScene(f.Scene, cb);
+        assert.equal(true, called);
+    });
+    
+    it("should configure plugins upon loading a scene");
+    
+    it("should add game objects upon loading a scene");
 });

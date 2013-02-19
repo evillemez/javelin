@@ -3,6 +3,7 @@
 Javelin.EnginePlugin = function() {
     this.$alias = '';
     this.$defaults = {};
+    this.$config = {};
     this.$requirements = [];
     this.$active = false;
     this.$engine = {};

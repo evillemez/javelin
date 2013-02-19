@@ -28,7 +28,10 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
     };
     
     plugin.$onGameObjectCreate = function(go) {
-        
+        var sprite = go.getComponent('sprite');
+        if (sprite) {
+            sprite.visible = true;
+        }
     };
     
     plugin.$onStep = function(deltaTime) {
@@ -40,12 +43,11 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         //loop over gos and draw any sprite components
-        console.log(this.$engine.stepId);
         var gos = this.$engine.gos;
         var l = gos.length;
         for (var i = 0; i < l; i++) {
             var s = gos[i].getComponent('sprite');
-            if (s && s.visible) {
+            if (s && s.visible && s.image) {
                 var pos = gos[i].getComponent('transform2d').position;
                 ctx.drawImage(s.image, pos.x, pos.y);
             }
