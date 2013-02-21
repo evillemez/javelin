@@ -28,6 +28,8 @@ Javelin.GameObject.prototype.destroy = function() {
 /* Component management */
 
 Javelin.GameObject.prototype.addComponent = function(handler) {
+    var go = this;
+    
     if (this.components[handler.alias]) {
         return this.components[handler.alias];
     }
@@ -43,20 +45,20 @@ Javelin.GameObject.prototype.addComponent = function(handler) {
     
     //instantiate new component instance
     var comp = new Javelin.GameObjectComponent();
-    comp.$id = this.id;
-    comp.$go = this;
+    comp.$id = go.id;
+    comp.$go = go;
     comp.$alias = handler.alias;
     
     //call hierarchy in proper inheritence order
     var handlers = Javelin.getComponentChain(handler.alias);
     l = handlers.length;
     for (i = 0; i < l; i++) {
-        handlers[i](this, comp);
+        handlers[i](go, comp);
         comp.$inheritedAliases.push(handlers[i].alias);
-        this.containedAliases[handlers[i].alias] = true;
+        go.containedAliases[handlers[i].alias] = true;
     }
 
-    this.components[handler.alias] = comp;
+    go.components[handler.alias] = comp;
     
     return comp;
 };
