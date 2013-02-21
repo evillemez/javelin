@@ -72,6 +72,15 @@ Fixtures.TestPlugin.alias = 'f.test_plugin';
 Fixtures.TestEnvironment = function() {};
 Fixtures.TestEnvironment.prototype = new Javelin.Environment();
 
+/* Object definition "prefab" */
+
+Fixtures.Prefab1 = {
+    name: "Test Object",
+    components: {
+        "sprite": {}
+    }
+};
+
 /* Test scene */
 
 Fixtures.Scene = {

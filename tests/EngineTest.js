@@ -101,6 +101,18 @@ describe("Javelin Engine", function() {
         assert.equal(true, called);
     });
     
+    it("should properly instantiate game objects from definitions", function() {
+        var e = new j.Engine(new f.TestEnvironment(), {});
+        j.initialize();
+        
+        var go = e.instantiate(f.Prefab1);
+        assert.equal(true, go instanceof j.GameObject);
+        assert.equal(true, go.getComponent('transform2d') instanceof j.GameObjectComponent);
+        assert.equal(true, go.getComponent('sprite') instanceof j.GameObjectComponent);
+    });
+    
+    it("should properly instantiate and destroy gameobjects during update step");
+    
     it("should configure plugins upon loading a scene");
     
     it("should add game objects upon loading a scene");
