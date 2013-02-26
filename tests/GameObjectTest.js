@@ -4,19 +4,23 @@ var assert = require('assert');
 var j = require('../build/javelin.js');
 var f = require('./fixtures/fixtures.js');
 
-j.register(f.FooComponent);
-j.register(f.BarComponent);
-j.register(f.BazComponent);
-j.register(f.QuxComponent);
-j.initialize();
-
 describe("GameObject", function() {
+    beforeEach(function() {
+        j.reset();
+    });
+    
     it("should instantiate properly", function() {
         var go = new j.GameObject();
         assert.equal(true, go instanceof j.GameObject);
     });
     
     it("should add components properly", function() {
+        j.register(f.FooComponent);
+        j.register(f.BarComponent);
+        j.register(f.BazComponent);
+        j.register(f.QuxComponent);
+        j.initialize();
+
         var go = new j.GameObject();
         assert.equal(false, go.hasComponent('f.foo'));
         assert.equal(false, go.getComponent('f.foo'));

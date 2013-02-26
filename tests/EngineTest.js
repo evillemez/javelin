@@ -5,6 +5,11 @@ var j = require('../build/javelin.js');
 var f = require('./fixtures/fixtures.js');
 
 describe("Javelin Engine", function() {
+    
+    beforeEach(function() {
+        j.reset();
+    });
+    
     it("should step with no components and or objects", function() {
         var e = new j.Engine(new f.TestEnvironment(), {});
         assert.equal(0, e.stepId);
@@ -36,10 +41,10 @@ describe("Javelin Engine", function() {
         var go = new j.GameObject();
         assert.equal(-1, go.id);
         assert.equal(0, e.gos.length);
-        e.addGameObject(go);
+        e.__addGameObject(go);
         assert.equal(1, go.id);
         assert.equal(1, e.gos.length);
-        e.removeGameObject(go);
+        e.__destroyGameObject(go);
         assert.equal(-1, go.id);
         assert.equal(0, e.gos.length);
     });
@@ -49,10 +54,10 @@ describe("Javelin Engine", function() {
         e.addPlugin(f.TestPlugin);
         var p = e.getPlugin('f.test_plugin');
         assert.equal(0, p.goCount);
-        var go = new j.GameObject();
-        e.addGameObject(go);
+        var go = new j.GameObject(); 
+        e.__addGameObject(go);
         assert.equal(1, p.goCount);
-        e.removeGameObject(go);
+        e.__destroyGameObject(go);
         assert.equal(0, p.goCount);
     });
     
@@ -61,7 +66,7 @@ describe("Javelin Engine", function() {
         j.initialize();
         
         var e = new j.Engine(new f.TestEnvironment(), {});
-        var go = e.addGameObject(new j.GameObject());
+        var go = e.__addGameObject(new j.GameObject());
         go.addComponent(f.FooComponent);
         assert.equal(0, go.getComponent('f.foo').numUpdates);
         e.step();
@@ -77,9 +82,9 @@ describe("Javelin Engine", function() {
         assert.equal(false, comp.started);
         assert.equal(false, comp.destroyed);
         
-        e.addGameObject(go);
+        e.__addGameObject(go);
         assert.equal(true, comp.started);
-        e.removeGameObject(go);
+        e.__destroyGameObject(go);
         assert.equal(true, comp.destroyed);
     });
     
@@ -103,6 +108,8 @@ describe("Javelin Engine", function() {
     
     it("should properly instantiate game objects from definitions", function() {
         var e = new j.Engine(new f.TestEnvironment(), {});
+        j.register(j.Component.Transform2d);
+        j.register(j.Component.Sprite);
         j.initialize();
         
         var go = e.instantiate(f.Prefab1);
@@ -111,7 +118,28 @@ describe("Javelin Engine", function() {
         assert.equal(true, go.getComponent('sprite') instanceof j.GameObjectComponent);
     });
     
-    it("should properly instantiate and destroy gameobjects during update step");
+    it("should properly instantiate and destroy game objects during update step", function() {
+        var e = new j.Engine(new f.TestEnvironment(), {});
+        j.register(f.FooComponent);
+        j.register(f.BarComponent);
+        j.register(f.BazComponent);
+        j.register(f.QuxComponent);
+        j.register(f.ManagerComponent);
+        j.initialize();
+        assert.equal(0, e.gos.length);
+        e.instantiate(f.Prefab2);
+        assert.equal(5, e.gos.length);
+        e.step();
+        assert.equal(4, e.gos.length);
+        e.step();
+        assert.equal(3, e.gos.length);
+        e.step();
+        assert.equal(2, e.gos.length);
+        e.step();
+        assert.equal(1, e.gos.length);
+        e.step();
+        assert.equal(0, e.gos.length);
+    });
     
     it("should configure plugins upon loading a scene");
     

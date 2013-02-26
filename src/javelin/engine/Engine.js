@@ -25,8 +25,8 @@ Javelin.Engine.prototype.reset = function() {
     //game object
     this.gos = [];
     this.lastGoId = 0;
-    this.newGos = [];
-    this.gosToDelete = [];
+    this.createdGos = [];
+    this.destroyedGos = [];
 
     //timing
     this.stepId = 0;
@@ -62,7 +62,7 @@ Javelin.Engine.prototype.processConfig = function(config) {
 };
 
 /* Managing Game Objects */
-Javelin.Engine.prototype.addGameObject = function(go) {
+Javelin.Engine.prototype.__addGameObject = function(go) {
     if (-1 === go.id) {
         //register for engine
         go.id = ++this.lastGoId;
@@ -70,7 +70,11 @@ Javelin.Engine.prototype.addGameObject = function(go) {
         go.active = true;
         
         //TODO: check for whether or not we're updating
-        this.gos.push(go);
+        if (this.updating) {
+            this.createdGos.push(go);
+        } else {
+            this.gos.push(go);
+        }
         
         //notify plugins
         this.pluginsCreateGameObject(go);
@@ -87,10 +91,10 @@ Javelin.Engine.prototype.addGameObject = function(go) {
     return false;
 };
 
-Javelin.Engine.prototype.removeGameObject = function(go) {
+Javelin.Engine.prototype.__destroyGameObject = function(go) {
     if (-1 !== go.id) {
-        //notify object
-        var cbs = go.getCallbacks('destroy');
+        //notify all contained destroy callbacks
+        var cbs = go.getCallbacks('destroy', true);
         for (var j = 0; j < cbs.length; j++) {
             cbs[j]();
         }
@@ -98,23 +102,44 @@ Javelin.Engine.prototype.removeGameObject = function(go) {
         //notify plugins
         this.pluginsDestroyGameObject(go);
         
-        //clean up self
+        //destroy children first
+        if(go.children) {
+            for (var i in go.children) {
+                this.__destroyGameObject(go.children[i]);
+            }
+        }
+        
+        //make sure this object is detached from any parents
+        if (go.parent) {
+            go.parent.removeChild(go);
+        }
+
+        //remove references
         go.id = -1;
         go.active = false;
         go.engine = null;
-
+        
+        //remove from engine
         var index = this.gos.indexOf(go);
         this.gos.splice(index, 1);
-        
-        return go;
     }
 };
 
 Javelin.Engine.prototype.getGameObjectById = function(id) {
-    return this.gos[this.goIdMap[id]] || false;
+    var l = this.gos.length;
+    for (var i = 0; i < l; i++) {
+        if (this.gos[i].id === id) {
+            return this.gos[i];
+        }
+    }
+    return false;
 };
 
+//TODO: move most creation logic into instantiate, which COULD BE A STRING REFERENCE TO A PREFAB
 Javelin.Engine.prototype.instantiate = function(def) {
+    //TODO: allow instantiation based on string for registered prefab: engine.instantiate('mygame.somePrefab');
+    //this would assume Javelin.registerPrefab(PrefabObjectDefinition) had been called, with a proper name
+    
     //TODO: move most functionality from GO.addComponent
     //into here
     var go = new Javelin.GameObject();
@@ -135,13 +160,49 @@ Javelin.Engine.prototype.instantiate = function(def) {
         }
     }
     
-    this.addGameObject(go);
+    this.__addGameObject(go);
     
     return go;
 };
 
+//destroy an object (if the engine is updating, it will be destroyed after the update is done)
+Javelin.Engine.prototype.destroy = function(go) {
+    if (this.updating) {
+        this.destroyedGos.push(go);
+    } else {
+        this.__destroyGameObject(go);        
+    }
+};
+
+
 /* Game Loop & State */
+
+//TODOC
 Javelin.Engine.prototype.initialize = function() {
+    var func;
+    var obj;
+    
+    if (this.config.autoregisterComponents) {
+        for (func in this.config.autoregisterComponents) {
+            Javelin.register(this.config.autoregisterComponents[func]);
+        }
+    }
+    
+    if (this.config.autoregisterPrefabs) {
+        for (obj in this.config.autoregisterPrefabs) {
+            Javelin.registerPrefab(this.config.autoregisterPrefabs[func]);
+        }
+    }
+    
+    if (this.config.autoregisterScenes) {
+        if (this.config.autoregisterScenes) {
+            for (obj in this.config.autoregisterScenes) {
+                Javelin.registerScene(this.config.autoregisterScenes[func]);
+            }
+        }
+    }
+
+    //build up maps of component dependencies and whatever else
     Javelin.initialize();
 };
 
@@ -199,7 +260,23 @@ Javelin.Engine.prototype.updatePlugins = function(deltaTime) {
 };
 
 Javelin.Engine.prototype.cleanupStep = function() {
-    //TODO: commit go changes (creations/deletions)
+    var lc = this.createdGos.length;
+    var ld = this.destroyedGos.length;
+    var i;
+    if (lc) {
+        for (i = 0; i < lc; i++) {
+            this.gos.push(this.createdGos[i]);
+        }
+    }
+    
+    if (ld) {
+        for (i = 0; i < ld; i++) {
+            this.__destroyGameObject(this.destroyedGos[i]);
+        }
+    }
+    
+    this.createdGos = [];
+    this.destroyedGos = [];
 };
 
 

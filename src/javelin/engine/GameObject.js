@@ -11,7 +11,7 @@ Javelin.GameObject = function () {
     this.children = [];                 //child gameobject instances
     this.parent = null;                 //parent gameobject instance
     this.containedAliases = [];         //list of compnent aliases contained in object
-    this.modified = false;              //whether or not the hierarchy or components have been modified
+    this.modified = true;               //whether or not the hierarchy or components have been modified
     this.ownCallbackCache = {};         //cached callbacks from own components
     this.allCallbackCache = {};         //cached callbacks from all children
 };
@@ -20,13 +20,14 @@ Javelin.GameObject = function () {
 
 Javelin.GameObject.prototype.destroy = function() {
     if (this.engine) {
-        this.engine.removeGameObject(this);
+        this.engine.destroy(this);
     }
 };
 
-
 /* Component management */
 
+//TODO: most of this functionality should move into engine, which should act as the
+//factory for components
 Javelin.GameObject.prototype.addComponent = function(handler) {
     var go = this;
     
@@ -167,6 +168,7 @@ Javelin.GameObject.prototype.broadcast = function(name, data) {
 Javelin.GameObject.prototype.getCallbacks = function(eventName, recursive) {
     if (this.modified) {
         this.rebuildCallbackCache();
+        this.modified = false;
     }
     
     return (recursive) ? this.allCallbackCache[eventName] || []: this.ownCallbackCache[eventName] || [];

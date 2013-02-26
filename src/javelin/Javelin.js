@@ -9,11 +9,13 @@ Javelin.Environment = {};
 Javelin.Asset = {};
 Javelin.Editor = {};
 
-//component registry
+//registry for stuff used in the engine
 Javelin.__componentHandlers = {};
 Javelin.__componentChain = {};
 Javelin.__componentRequirements = {};
 Javelin.__pluginHandlers = {};
+Javelin.__prefabs = {};
+Javelin.__scenes = {};
 
 Javelin.register = function(handler) {
     if (!handler.alias) {
@@ -31,17 +33,41 @@ Javelin.register = function(handler) {
     Javelin.__componentHandlers[handler.alias] = handler;
 };
 
+Javelin.registerPrefab = function(obj) {
+    if (!obj.name) {
+        throw new Error("Prefabs must have a name!");
+    }
+
+    //TODO: serious validation
+    
+    Javelin.__prefabs[obj.name] = obj;
+};
+
+Javelin.registerScene = function(obj) {
+    if (!obj.name) {
+        throw new Error("Scenes must have a name!");
+    }
+    
+    //TODO: serious validation
+    
+    Javelin.__scenes[obj.name] = obj;
+};
+
 Javelin.registerPlugin = function(handler) {
     this.__pluginHandlers[handler.alias] = handler;
 };
 
+// for testing, generally you should never call this because
+// you'll have to manually re-register all the components/plugins/whatever
+// included in the framework
 Javelin.reset = function() {
     Javelin.__componentHandlers = {};
     Javelin.__componentChain = {};
     Javelin.__componentRequirements = {};
     Javelin.__pluginHandlers = {};
+    Javelin.__prefabs = {};
+    Javelin.__scenes = {};
 };
-
 
 Javelin.getComponentHandler = function(alias) {
     return Javelin.__componentHandlers[alias] || false;

@@ -46,6 +46,30 @@ Fixtures.QuxComponent = function(go, comp) {
 Fixtures.QuxComponent.alias = 'f.qux';
 Fixtures.QuxComponent.requires = ['f.foo','f.baz'];
 
+Fixtures.ManagerComponent = function(go, comp) {
+    var max = 4;
+    var gos = [];
+    
+    comp.$on('create', function() {
+        for (var i=0; i < max; i++) {
+            gos.push(go.engine.instantiate({components: {'f.qux': {}}}));
+        }
+    });
+    
+    comp.$on('update', function(deltaTime) {
+        if (gos.length) {
+            var go = gos[0];
+            gos.splice(0, 1);
+            go.destroy();
+        } else {
+            //destroy self
+            comp.$go.destroy();
+        }
+    });
+}; 
+Fixtures.ManagerComponent.alias = 'f.manager';
+
+
 /* Engine Plugins */
 
 Fixtures.TestPlugin = function(plugin, config) {
@@ -78,6 +102,13 @@ Fixtures.Prefab1 = {
     name: "Test Object",
     components: {
         "sprite": {}
+    }
+};
+
+Fixtures.Prefab2 = {
+    name: "Manager",
+    components: {
+        "f.manager": {}
     }
 };
 
