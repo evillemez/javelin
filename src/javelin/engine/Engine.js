@@ -190,14 +190,14 @@ Javelin.Engine.prototype.initialize = function() {
     
     if (this.config.autoregisterPrefabs) {
         for (obj in this.config.autoregisterPrefabs) {
-            Javelin.registerPrefab(this.config.autoregisterPrefabs[func]);
+            Javelin.registerPrefab(this.config.autoregisterPrefabs[obj]);
         }
     }
     
     if (this.config.autoregisterScenes) {
         if (this.config.autoregisterScenes) {
             for (obj in this.config.autoregisterScenes) {
-                Javelin.registerScene(this.config.autoregisterScenes[func]);
+                Javelin.registerScene(this.config.autoregisterScenes[obj]);
             }
         }
     }

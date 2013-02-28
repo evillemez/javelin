@@ -115,14 +115,11 @@ Javelin.AssetLoader.prototype.getLoaderForPath = function(path) {
     //counts the last extension: it would be nice to be able to use
     //special loaders for compound extensions like `images.atlas.json`
     for (var key in this.loaders) {
-        if (path.endsWith(key)) {
+        if (path.substring(path.length - key.length) === key) {
             return this.loaders[key];
         }
     }
 
-//    var ext = path.split('.').pop();
-
-//    return this.loaders[ext] || false;
     throw new Error("No applicable loader for path [" + path + "] found!");
 };
 
