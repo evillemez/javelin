@@ -59,8 +59,7 @@ included with the engine are:
     
 ### Example setup ###
 
-This is going to change all the time - look in the `demos/` section to see the status of current experiments.  I imagine it will be a 
-little while before there is actually anything working.
+This will be described at a later date, perhaps with a skeleton project.
 
 ## Developing ##
 

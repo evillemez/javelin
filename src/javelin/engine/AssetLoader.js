@@ -22,6 +22,8 @@ Javelin.AssetLoader = function(basePath) {
     
     //image atlas loader
     var imageAtlasLoader = function(relPath, absPath, assets, callback) {
+        //load json file first, try loading corresponding image file
+
         throw new Error("NOT IMPLEMENTED");
     };
     
@@ -35,7 +37,10 @@ Javelin.AssetLoader = function(basePath) {
         throw new Error("NOT IMPLEMENTED");
     };
     
-    //map loader functions to types
+    //map loader functions to types, note more specific extensions
+    //should be declared before more general, otherwise
+    //they will never be matched because they are checked
+    //in the order defined
     this.loaders = {
         'png': imageLoader,
         'jpg': imageLoader,
@@ -49,6 +54,7 @@ Javelin.AssetLoader = function(basePath) {
 /**
  * Load an individual asset by path.  Your call back will be called with the loaded
  * object once completed.
+ * 
  * @param {string} path Relative path to asset
  * @param {function} callback Callback function to call with the requested asset object
  */
@@ -64,6 +70,7 @@ Javelin.AssetLoader.prototype.loadAsset = function(path, callback) {
 /**
  * Load an array of assets by path.  The given callback will be called with the array
  * of loaded assets in the same order as the requested paths.
+ * 
  * @param {array} arr Array of string paths (relative)
  * @param {function} callback Callback function to call with the array of loaded assets
  */
@@ -103,6 +110,7 @@ Javelin.AssetLoader.prototype.loadAssets = function(arr, callback) {
 /**
  * Explicitly register an object to an asset path.  Any requests for an asset at that path
  * will return the registered object.
+ * 
  * @param {string} path The path to register
  * @param {Object} obj The object to register
  */
@@ -110,6 +118,13 @@ Javelin.AssetLoader.prototype.register = function(relPath, obj) {
     this.assets[relPath] = obj;
 };
 
+/**
+ * Will return the function used for loading an asset of the given type, based on file extension.
+ * 
+ * @param {String} path Path to asset file
+ * @returns The function that should be called to load the file of the given type
+ * @type Function
+ */
 Javelin.AssetLoader.prototype.getLoaderForPath = function(path) {
     //TODO: this doesn't really work the way it should, it only
     //counts the last extension: it would be nice to be able to use
@@ -122,4 +137,3 @@ Javelin.AssetLoader.prototype.getLoaderForPath = function(path) {
 
     throw new Error("No applicable loader for path [" + path + "] found!");
 };
-

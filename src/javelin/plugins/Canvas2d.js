@@ -39,6 +39,7 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
 
         var ctx = plugin.context;
         var canvas = plugin.$config.canvas;
+
         //clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
@@ -49,9 +50,12 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
             var s = gos[i].getComponent('sprite');
             if (s && s.visible && s.image) {
                 var pos = gos[i].getComponent('transform2d').position;
-                
-                //TODO: check for atlas images
-                ctx.drawImage(s.image, pos.x, pos.y);
+
+                if (s.image instanceof Javelin.Asset.AtlasImage) {
+                    //TODO: check for atlas images
+                } else {
+                    ctx.drawImage(s.image, pos.x, pos.y);
+                }                
             }
         }
     };

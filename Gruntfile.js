@@ -41,6 +41,7 @@ module.exports = function(grunt) {
                 ,strict: true
                 ,browser: true
                 ,laxcomma: true
+                ,loopfunc: true
                 ,globals: {
                     Javelin: true
                     ,should: true

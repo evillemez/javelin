@@ -1,25 +1,64 @@
 'use strict';
 
+/**
+ * This component is used to define sprite animations.  You can define many animations and reference them by
+ * by name.  Every frame, the animator will pick the set the appropriate image to be rendered on the sprite
+ * component.
+ *
+ * @author Evan Villemez
+ */
 Javelin.Component.SpriteAnimator = function(go, comp) {
+    //private
     var sprite = go.getComponent('sprite');
     var animations = {};
+    var defaultAnimation = null;
+    var currentFrame = 0;
+    var currentAnimation = null;
     
-    comp.currentAnimation = null;
-    comp.define = function(name, assetArray) {
-        animations[name] = go.engine.loadAssets(assetArray);
+    //public api
+    
+    comp.define = function(name, images) {
+        animations[name] = images;
+
         //also, allow a time in ms to be set per animation
         //then update can figure out when to switch frames
     };
     
+    comp.getCurrentAnimation = function() {
+        return currentAnimation;
+    };
+
+    //start, if not already playing
     comp.play = function(name) {
-        comp.currentAnimation = name;
+        currentAnimation = name;
     };
     
+    comp.playOnce = function(name) {
+        
+    };
+    
+    //start from beginning
+    comp.start = function(name) {
+        
+    };
+    
+    //once
+    comp.startOnce = function(name) {
+        
+    };
+    
+    //stop playing
     comp.interrupt = function() {};
+    
+    //set default
+    comp.setDefaultAnimation = function(name) {
+        
+    };
     
     //each frame, figure out which frame to draw
     comp.$on('update', function(deltaTime) {
         if (sprite.visible) {
+            var cur = comp.currentAnimation || 'default';
             //play the current animation by switching
             //to the appropriate sprite
         }
