@@ -9,31 +9,58 @@ Javelin.AssetLoader = function(basePath) {
     this.baseAssetPath = basePath;
     
     //generic image loader
-    var imageLoader = function(relPath, absPath, assets, callback) {
+    var imageLoader = function(loader, relPath, absPath, callback) {
         var img = new Image();
         img.onabort =
         img.onerror =
         img.onload = function() {
-            assets[relPath] = img;
+            loader.register(relPath, img);
             callback(img);
         };
         img.src = absPath;
     };
     
     //image atlas loader
-    var imageAtlasLoader = function(relPath, absPath, assets, callback) {
-        //load json file first, try loading corresponding image file
+    var imageAtlasLoader = function(loader, relPath, absPath, callback) {
+        var json, img, imgPath;
+        var rp = relPath;
+        imgPath = rp.substring(0, rp.lastIndexOf("/"));
 
-        throw new Error("NOT IMPLEMENTED");
+        var createAtlas = function() {
+            var atlas = new Javelin.Asset.TexturePackerAtlas(json, img);
+            loader.register(relPath, atlas);
+            callback(atlas);
+        };
+
+        var loadJsonCallback = function(item) {
+            json = item;            
+            var imagePath = imgPath + "/" + json.meta.image;
+            loader.loadAsset(imagePath, loadImageCallback);
+        };
+                
+        var loadImageCallback = function(item) {
+            img = item;
+            createAtlas();
+        };
+        
+        //start by loading the json, will trigger series of callbacks
+        loader.loaders['json'](loader, relPath, absPath, loadJsonCallback);
     };
     
     //generic json file loader
-    var jsonLoader = function(relPath, absPath, assets, callback) {
-        throw new Error("NOT IMPLEMENTED");
+    var jsonLoader = function(loader, relPath, absPath, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", absPath, true);
+        xhr.onload = function() {
+            var json = JSON.parse(this.responseText);
+            loader.register(relPath, json);
+            callback(json);
+        };
+        xhr.send();
     };
     
     //generic file loader
-    var soundLoader = function(relPath, absPath, assets, callback) {
+    var soundLoader = function(loader, relPath, absPath, callback) {
         throw new Error("NOT IMPLEMENTED");
     };
     
@@ -64,7 +91,7 @@ Javelin.AssetLoader.prototype.loadAsset = function(path, callback) {
         callback(cached);
     }
     
-    this.getLoaderForPath(path)(path, this.baseAssetPath + path, this.assets, callback);
+    this.getLoaderForPath(path)(this, path, this.baseAssetPath + path, callback);
 };
 
 /**
@@ -119,6 +146,16 @@ Javelin.AssetLoader.prototype.register = function(relPath, obj) {
 };
 
 /**
+ * Unload an asset from memory, any subsequent request will have to reload it.
+ * 
+ * @param {String} relPath Path of the asset to unload
+ */
+Javelin.AssetLoader.prototype.unload = function(relPath) {
+    this.assets[relPath] = null;
+};
+
+
+/**
  * Will return the function used for loading an asset of the given type, based on file extension.
  * 
  * @param {String} path Path to asset file
@@ -126,9 +163,6 @@ Javelin.AssetLoader.prototype.register = function(relPath, obj) {
  * @type Function
  */
 Javelin.AssetLoader.prototype.getLoaderForPath = function(path) {
-    //TODO: this doesn't really work the way it should, it only
-    //counts the last extension: it would be nice to be able to use
-    //special loaders for compound extensions like `images.atlas.json`
     for (var key in this.loaders) {
         if (path.substring(path.length - key.length) === key) {
             return this.loaders[key];

@@ -6,7 +6,7 @@ Javelin.GameObject = function () {
     this.id = -1;                       //UID assigned by engine
     this.name = "Untitled";             //human-readable name (for eventual editor)
     this.engine = null;                 //reference to engine
-    this.active = false;                //active flag
+    this.enabled = false;                //active flag
     this.components = {};               //component instances
     this.children = [];                 //child gameobject instances
     this.parent = null;                 //parent gameobject instance
@@ -21,6 +21,43 @@ Javelin.GameObject = function () {
 Javelin.GameObject.prototype.destroy = function() {
     if (this.engine) {
         this.engine.destroy(this);
+    }
+};
+
+Javelin.GameObject.prototype.setId = function(id) {
+    this.id = id;
+    
+    for (var comp in this.components) {
+        //NOTE: consider comp.$setId();
+        comp.$id = id;
+    }
+};
+
+Javelin.GameObject.prototype.enable = function() {
+    this.enabled = true;
+
+    if (this.children) {
+        for (var index in this.children) {
+            this.children[index].enable();
+        }
+    } else {
+        //set modified bubbles up, so we only need to call it
+        //if we don't have children
+        this.setModified();
+    }
+};
+
+Javelin.GameObject.prototype.disable = function() {
+    this.enabled = false;
+    
+    if (this.children) {
+        for (var index in this.children) {
+            this.children[index].disable();
+        }
+    } else {
+        //set modified bubbles up, so we only need to call it
+        //if we don't have children
+        this.setModified();
     }
 };
 
@@ -148,7 +185,13 @@ Javelin.GameObject.prototype.removeChild = function(child) {
     this.children.splice(this.children.indexOf(child), 1);
 };
 
-Javelin.GameObject.prototype.abandon = function() {
+Javelin.GameObject.prototype.leaveParent = function() {
+    if (this.parent) {
+        this.parent.removeChild(this);
+    }
+};
+
+Javelin.GameObject.prototype.abandonChildren = function() {
     for (var i = 0; i < this.children.length; i++) {
         this.removeChild(this.children[i]);
     }
@@ -209,6 +252,8 @@ Javelin.GameObject.prototype.setModified = function() {
 };
 
 /* Data Serialization Helpers */
+
+//TODO: consider moving serialization out of GO and into Engine
 
 Javelin.GameObject.prototype.serialize = function() {
     var serialized = {

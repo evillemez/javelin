@@ -19,6 +19,10 @@ Javelin.Component.SpriteAnimator = function(go, comp) {
     
     comp.define = function(name, images) {
         animations[name] = images;
+        
+        if (!defaultAnimation) {
+            defaultAnimation = name;
+        }
 
         //also, allow a time in ms to be set per animation
         //then update can figure out when to switch frames
@@ -58,7 +62,16 @@ Javelin.Component.SpriteAnimator = function(go, comp) {
     //each frame, figure out which frame to draw
     comp.$on('update', function(deltaTime) {
         if (sprite.visible) {
-            var cur = comp.currentAnimation || 'default';
+            var current = comp.currentAnimation || defaultAnimation;
+            var anim = animations[current];
+            
+            //TODO: write proper logic
+            
+            //set the current image to draw
+            sprite.image = anim[currentFrame];
+            
+            currentFrame = (currentFrame + 1) % anim.length;
+            
             //play the current animation by switching
             //to the appropriate sprite
         }

@@ -1,15 +1,17 @@
 'use strict';
 
+Javelin.Asset.AtlasImage = function(data, image) {
+    this.image = image;
+    this.x = data.frame.x;
+    this.y = data.frame.y;
+    this.height = data.frame.h;
+    this.width = data.frame.w;
 
-Javelin.Asset.AtlasImage = function(data, source) {
-    this.x = data.x;
-    this.y = data.y;
-    this.h = data.h;
-    this.w = data.w;
-    
     if (data.trimmed) {
-        
+        this.cx = data.spriteSourceSize.x - data.sourceSize.w * 0.5;
+        this.cy = data.spriteSourceSize.y - data.sourceSize.h * 0.5;
+    } else {
+        this.cx = -this.w * 0.5;
+        this.cy = -this.h * 0.5;
     }
-    
-    //TODO: figure out trimmed stuff
 };

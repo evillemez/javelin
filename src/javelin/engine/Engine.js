@@ -65,9 +65,9 @@ Javelin.Engine.prototype.processConfig = function(config) {
 Javelin.Engine.prototype.__addGameObject = function(go) {
     if (-1 === go.id) {
         //register for engine
-        go.id = ++this.lastGoId;
+        go.setId(++this.lastGoId);
         go.engine = this;
-        go.active = true;
+        go.enable();
         
         //TODO: check for whether or not we're updating
         if (this.updating) {
@@ -115,8 +115,8 @@ Javelin.Engine.prototype.__destroyGameObject = function(go) {
         }
 
         //remove references
-        go.id = -1;
-        go.active = false;
+        go.setId(-1);
+        go.disable();
         go.engine = null;
         
         //remove from engine
@@ -240,7 +240,7 @@ Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
         //the callbacks can be retrieved recursively
         //for nested hierarchies, which will allow
         //for efficient caching
-        if (this.gos[i].active) {
+        if (this.gos[i].enabled) {
             var cbs = this.gos[i].getCallbacks('update', false);
             for (var j = 0; j < cbs.length; j++) {
                 cbs[j](deltaTime);

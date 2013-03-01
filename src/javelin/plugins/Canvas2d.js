@@ -16,6 +16,8 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
         plugin.context = plugin.$config.canvas.getContext('2d');
         plugin.$config.canvas.height = plugin.$config.height;
         plugin.$config.canvas.width = plugin.$config.width;
+        
+        //TODO: implement layers, create canvas(es) internally
     };
     
     plugin.$loadScene = function(sceneDef) {
@@ -50,12 +52,16 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
             var s = gos[i].getComponent('sprite');
             if (s && s.visible && s.image) {
                 var pos = gos[i].getComponent('transform2d').position;
+                var rot = gos[i].getComponent('transform2d').rotation;
+
+                //TODO: implement rotation (http://stackoverflow.com/questions/3793397/html5-canvas-drawimage-with-at-an-angle)
 
                 if (s.image instanceof Javelin.Asset.AtlasImage) {
-                    //TODO: check for atlas images
+                    var spr = s.image;
+                    ctx.drawImage(spr.image, pos.x, pos.y, spr.width, spr.height, pos.x + spr.cx, pos.y + spr.cy, spr.width, spr.height);
                 } else {
                     ctx.drawImage(s.image, pos.x, pos.y);
-                }                
+                }
             }
         }
     };

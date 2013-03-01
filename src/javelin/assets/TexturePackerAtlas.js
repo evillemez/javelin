@@ -7,8 +7,7 @@ Javelin.Asset.TexturePackerAtlas = function(json, image) {
     
     var c = 0;
     for (var name in json.frames) {
-        var img = new Javelin.Asset.AtlasImage(json.frames[name], this.imageMeta);
-        img.image = this.image;
+        var img = new Javelin.Asset.AtlasImage(json.frames[name], this.image);
         this.images[name] = img;
         c++;
     }
