@@ -103,18 +103,12 @@ Javelin.AssetLoader.prototype.loadAsset = function(path, callback) {
  * @param {Function} callback Callback to call once loading is complete
  */
 Javelin.AssetLoader.prototype.loadAssetAsType = function(path, type, callback) {
-    var cached = this.assets[path] || false;
-    if (cached) {
-        callback(cached);
-    }
-    
     if(!this.loaders[type]) {
         throw new Error("Unknown asset loader type.");
     }
     
     this.loaders[type](this, path, this.baseAssetPath + path, callback);
 };
-
 
 /**
  * Load an array of assets by path.  The given callback will be called with the array
