@@ -135,9 +135,17 @@ Javelin.Engine.prototype.getGameObjectById = function(id) {
     return false;
 };
 
+//takes a string
+Javelin.Engine.prototype.instantiate = function(name) {
+    if (!Javelin.__prefabs[name]) {
+        throw new Error("Tried instantiating unknown prefab: "+name);
+    }
+    
+    return this.instantiateObject(Javelin.__prefabs[name]);
+};
+
 //TODO: move most creation logic into instantiate, which COULD BE A STRING REFERENCE TO A PREFAB
-Javelin.Engine.prototype.instantiate = function(def) {
-    //TODO: allow instantiation based on string for registered prefab: engine.instantiate('mygame.somePrefab');
+Javelin.Engine.prototype.instantiateObject = function(def) {
     //this would assume Javelin.registerPrefab(PrefabObjectDefinition) had been called, with a proper name
     
     //TODO: move most functionality from GO.addComponent
@@ -155,7 +163,7 @@ Javelin.Engine.prototype.instantiate = function(def) {
     
     if (def.children) {
         for (var i in def.children) {
-            var child = this.instantiate(def.children[i]);
+            var child = this.instantiateObject(def.children[i]);
             child.setParent(go);
         }
     }
@@ -164,6 +172,7 @@ Javelin.Engine.prototype.instantiate = function(def) {
     
     return go;
 };
+
 
 //destroy an object (if the engine is updating, it will be destroyed after the update is done)
 Javelin.Engine.prototype.destroy = function(go) {
@@ -303,7 +312,7 @@ Javelin.Engine.prototype.loadScene = function(definition, callback) {
     }
 
     for (var i = 0; i < definition.objects.length; i++) {
-        this.instantiate(definition.objects[i]);
+        this.instantiateObject(definition.objects[i]);
     }
 
     callback();

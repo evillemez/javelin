@@ -44,7 +44,7 @@ Javelin.AssetLoader = function(basePath) {
         };
         
         //start by loading the json, will trigger series of callbacks
-        loader.loaders['json'](loader, relPath, absPath, loadJsonCallback);
+        loader.loadAssetAsType(relPath, 'json', loadJsonCallback);
     };
     
     //generic json file loader
@@ -93,6 +93,28 @@ Javelin.AssetLoader.prototype.loadAsset = function(path, callback) {
     
     this.getLoaderForPath(path)(this, path, this.baseAssetPath + path, callback);
 };
+
+/**
+ * Load an asset as if it were an explicitly defined type.  This means it won't
+ * dynamically choose how to load the asset based on the filename.
+ *
+ * @param {String} path Relative path to asset
+ * @param {String} type Type to use for loader, generally a file extension
+ * @param {Function} callback Callback to call once loading is complete
+ */
+Javelin.AssetLoader.prototype.loadAssetAsType = function(path, type, callback) {
+    var cached = this.assets[path] || false;
+    if (cached) {
+        callback(cached);
+    }
+    
+    if(!this.loaders[type]) {
+        throw new Error("Unknown asset loader type.");
+    }
+    
+    this.loaders[type](this, path, this.baseAssetPath + path, callback);
+};
+
 
 /**
  * Load an array of assets by path.  The given callback will be called with the array
@@ -153,7 +175,6 @@ Javelin.AssetLoader.prototype.register = function(relPath, obj) {
 Javelin.AssetLoader.prototype.unload = function(relPath) {
     this.assets[relPath] = null;
 };
-
 
 /**
  * Will return the function used for loading an asset of the given type, based on file extension.

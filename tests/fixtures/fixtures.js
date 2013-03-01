@@ -52,7 +52,7 @@ Fixtures.ManagerComponent = function(go, comp) {
     
     comp.$on('create', function() {
         for (var i=0; i < max; i++) {
-            gos.push(go.engine.instantiate({components: {'f.qux': {}}}));
+            gos.push(go.engine.instantiateObject({components: {'f.qux': {}}}));
         }
     });
     

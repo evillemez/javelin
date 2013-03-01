@@ -59,7 +59,7 @@ Javelin.Component.SpriteAnimator = function(go, comp) {
         
     };
     
-    //each frame, figure out which frame to draw
+    //each frame, figure out which image to draw
     comp.$on('update', function(deltaTime) {
         if (sprite.visible) {
             var current = comp.currentAnimation || defaultAnimation;

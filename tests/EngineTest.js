@@ -112,7 +112,7 @@ describe("Javelin Engine", function() {
         j.register(j.Component.Sprite);
         j.initialize();
         
-        var go = e.instantiate(f.Prefab1);
+        var go = e.instantiateObject(f.Prefab1);
         assert.equal(true, go instanceof j.GameObject);
         assert.equal(true, go.getComponent('transform2d') instanceof j.GameObjectComponent);
         assert.equal(true, go.getComponent('sprite') instanceof j.GameObjectComponent);
@@ -127,7 +127,7 @@ describe("Javelin Engine", function() {
         j.register(f.ManagerComponent);
         j.initialize();
         assert.equal(0, e.gos.length);
-        e.instantiate(f.Prefab2);
+        e.instantiateObject(f.Prefab2);
         assert.equal(5, e.gos.length);
         e.step();
         assert.equal(4, e.gos.length);
