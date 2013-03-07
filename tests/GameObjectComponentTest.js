@@ -1,12 +1,14 @@
 'use strict';
 
-var assert = require('assert');
+var chai = require('chai');
+chai.Assertion.includeStack = true;
+var assert = chai.assert;
 var j = require('../build/javelin.js');
 
 describe("GameObjectComponent", function() {
     it("should return false if requested callback does not exist", function() {
         var c = new j.GameObjectComponent();
-        assert.strictEqual(false, c.$getCallback("update"));
+        assert.isFalse(c.$getCallback("update"));
     });
     
     it("should return registered callback function if exists", function() {
@@ -57,22 +59,21 @@ describe("GameObjectComponent", function() {
             bar: 23
         };
         
-        assert.equal(true, typeof(c.foo) === 'undefined');
-        assert.equal(true, typeof(c.bar) === 'undefined');
+        assert.isUndefined(c.foo);
+        assert.isUndefined(c.bar);
         
         c.$unserialize(data);
 
-        assert.equal("bar", c.foo);
-        assert.equal(23, c.bar);
+        assert.strictEqual("bar", c.foo);
+        assert.strictEqual(23, c.bar);
         
         assert.deepEqual(data, c.$serialize());
     });
     
-    it("should be scriptable and not cause conflicts", function() {
+    it("should be scriptable from handler function and not conflict with multiple instances", function() {
         
         //an example component construction function
         var Namespace = Namespace || {};
-        Namespace.BarComponent = function(comp) {};
         Namespace.FooComponent = function(comp, testWord) {            
             var foo = testWord;
             
@@ -85,15 +86,9 @@ describe("GameObjectComponent", function() {
             });
         };
         Namespace.FooComponent.alias = "namespace.foo";
-        Namespace.FooComponent.requires = [
-            Namespace.BarComponent
-        ];
-        Namespace.FooComponent.inherits = Namespace.BarComponent;
         
         //create and "setup" components
         assert.equal("namespace.foo", Namespace.FooComponent.alias);
-        assert.deepEqual([Namespace.BarComponent], Namespace.FooComponent.requires);
-        assert.equal(Namespace.BarComponent, Namespace.FooComponent.inherits);
         var c1 = new j.GameObjectComponent();
         var c2 = new j.GameObjectComponent();
         Namespace.FooComponent(c1, 'bar');
@@ -103,12 +98,24 @@ describe("GameObjectComponent", function() {
         
         //generally the two instances should be equal, but their
         //callbacks should return different values
-        assert.equal(5.0, c1.x);
-        assert.equal(5.0, c2.x);
-        assert.equal(true, typeof(c1.foo) === 'undefined');
-        assert.equal(true, typeof(c2.foo) === 'undefined');
-        assert.equal('bar', cb1());
-        assert.equal('baz', cb2());
+        assert.strictEqual(5.0, c1.x);
+        assert.strictEqual(5.0, c2.x);
+        assert.isUndefined(c1.foo);
+        assert.isUndefined(c2.foo);
+        assert.strictEqual('bar', cb1());
+        assert.strictEqual('baz', cb2());
+    });
+    
+    it("should properly report if it is an instance of a given alias", function() {
+        var c = new j.GameObjectComponent();
+        assert.isFalse(c.$instanceOf('foo'));
+        assert.isFalse(c.$instanceOf('bar'));
+        c.$inheritedAliases.push('foo');
+        assert.isTrue(c.$instanceOf('foo'));
+        assert.isFalse(c.$instanceOf('bar'));
+        c.$inheritedAliases.push('bar');
+        assert.isTrue(c.$instanceOf('foo'));
+        assert.isTrue(c.$instanceOf('bar'));
     });
     
 });

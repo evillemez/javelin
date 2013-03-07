@@ -16,6 +16,9 @@ Javelin.Component.SpriteAnimator = function(go, comp) {
     var currentAnimation = null;
     
     //public api
+    comp.getCurrentAnimation = function() {
+        return currentAnimation;
+    };
     
     comp.define = function(name, images) {
         animations[name] = images;
@@ -79,4 +82,3 @@ Javelin.Component.SpriteAnimator = function(go, comp) {
 };
 Javelin.Component.SpriteAnimator.alias = "spriteAnimator";
 Javelin.Component.SpriteAnimator.requires = ['sprite'];
-Javelin.register(Javelin.Component.SpriteAnimator);

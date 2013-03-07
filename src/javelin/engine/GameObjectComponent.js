@@ -3,8 +3,10 @@
 /*
 A GameObjectComponent is a glorified map of callbacks + a public API for other components to use.
 Components are processed by user-defined
-scripts that compose the objects internally.  Each user script receives a new blank component
-instance.  Callbacks can be regisered on the component to be processed by the Engine plugins.
+functions that compose the objects internally.  Each user function receives a new blank component
+instance.  Callbacks can be regisered on the component to be processed by the Engine plugins.  Properties and
+methods can be added to the component instance in the function as well.  The properties and methods added
+to the instance constitute the public "api" of that component.
 
 Callbacks are called directly by whoever processes them - so the exact signature of a given
 callback is determined by the part of the engine that is calling it.

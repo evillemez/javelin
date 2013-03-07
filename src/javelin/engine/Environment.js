@@ -12,7 +12,6 @@ Javelin.Environment = function() {
     
 };
 
-
 Javelin.Environment.prototype.initialize = function() {};
 
 Javelin.Environment.prototype.validatePlugin = function(plugin) {};

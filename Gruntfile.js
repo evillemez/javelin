@@ -13,7 +13,7 @@ module.exports = function(grunt) {
             
             //note: src/vendor DOES need to be included in the build, but not until I can make it work
             //and pass the tests properly
-            build: ['util/build_intro.js', "src/**/*.js", "!src/vendor/**/*.js", 'util/build_outro.js']
+            build: ['util/build_intro.js', "src/javelin/**/*.js", 'util/build_outro.js']
         },
         watch: {
             all: {
@@ -44,6 +44,7 @@ module.exports = function(grunt) {
                 ,loopfunc: true
                 ,globals: {
                     Javelin: true
+                    ,_: true
                     ,should: true
                     ,it: true
                     ,before: true
@@ -63,7 +64,7 @@ module.exports = function(grunt) {
         },
         simplemocha: {
             options: {
-                globals: ['should', 'it', 'define','require','describe','Javelin', 'THREE', 'window', 'self', 'before','after','beforeEach','afterEach'],
+                globals: ['_', 'should', 'it', 'define','require','describe','Javelin', 'THREE', 'window', 'self', 'before','after','beforeEach','afterEach'],
                 timeout: 3000,
                 ignoreLeaks: false,
                 ui: 'bdd',
@@ -104,4 +105,5 @@ module.exports = function(grunt) {
     
     // Default task
     grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'simplemocha']);
+    grunt.registerTask('build', ['jshint', 'concat', 'uglify']);
 };

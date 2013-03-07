@@ -1,72 +1,322 @@
 'use strict';
 
-var assert = require('assert');
+var chai = require('chai');
+chai.Assertion.includeStack = true;
+var assert = chai.assert;
 var j = require('../build/javelin.js');
 var f = require('./fixtures/fixtures.js');
 
-//GOs depend on the Engine for some functionality...
 describe("GameObject", function() {
-    var engine;
-    
-    beforeEach(function() {
-        j.reset();
-        j.register(f.FooComponent);
-        j.register(f.BarComponent);
-        j.register(f.BazComponent);
-        j.register(f.QuxComponent);
-        j.register(f.ManagerComponent);
-        engine = new j.Engine(new f.TestEnvironment(), {});
-    });
     
     it("should instantiate properly", function() {
         var go = new j.GameObject();
-        assert.equal(true, go instanceof j.GameObject);
+        assert.isTrue(go instanceof j.GameObject);
     });
     
-    //TODO: move test
-    it("should add components properly", function() {
-        j.register(f.FooComponent);
-        j.register(f.BarComponent);
-        j.register(f.BazComponent);
-        j.register(f.QuxComponent);
-        j.initialize();
-
+    it("should allow setting component instances", function() {
         var go = new j.GameObject();
-        assert.equal(false, go.hasComponent('f.foo'));
-        assert.equal(false, go.getComponent('f.foo'));
-        go.addComponent(f.FooComponent);
-        assert.equal(true, go.hasComponent('f.foo'));
-        var comp = go.getComponent('f.foo');
-        assert.equal(true, comp instanceof j.GameObjectComponent);
-        assert.equal(true, comp.$instanceOf('f.foo'));
+        var c = new j.GameObjectComponent();
+        c.$inheritedAliases.push('foo');
+        c.$inheritedAliases.push('bar');
+        assert.isFalse(go.hasComponent('foo'));
+        assert.isFalse(go.hasComponent('bar'));
+        assert.isFalse(go.getComponent('foo'));
+        assert.isFalse(go.getComponent('bar'));
         
-        assert.equal(false, go.hasComponent('f.qux'));
-        assert.equal(false, go.hasComponent('f.bar'));
-        assert.equal(false, go.hasComponent('f.baz'));
-        assert.equal(false, go.instanceOf('f.baz'));
-        go.addComponent(f.QuxComponent);
-        assert.equal(true, go.hasComponent('f.qux'));
-        assert.equal(true, go.hasComponent('f.bar'));
-        assert.equal(true, go.hasComponent('f.baz'));
-        assert.equal(true, go.instanceOf('f.baz'));
-        comp = go.getComponent('f.baz');
-        assert.equal(true, comp.$instanceOf('f.foo'));
+        go.setComponent('foo', c);
+        assert.isTrue(go.hasComponent('foo'));
+        assert.isTrue(go.hasComponent('bar'));
+        assert.isObject(go.getComponent('foo'));
+        assert.isObject(go.getComponent('bar'));
+        assert.equal(go.getComponent('foo'), go.getComponent('bar'));
+        
+        go = new j.GameObject();
+        var c1 = new j.GameObjectComponent();
+        c1.$alias = 'foo';
+        c1.$inheritedAliases.push('foo');
+        var c2 = new j.GameObjectComponent();
+        c2.$alias = 'bar';
+        c2.$inheritedAliases.push('bar');
+        assert.isFalse(go.hasComponent('foo'));
+        assert.isFalse(go.hasComponent('bar'));
+        go.setComponents([c1, c2]);
+        assert.isTrue(go.hasComponent('foo'));
+        assert.isTrue(go.hasComponent('bar'));
+        assert.isTrue(go.modified);
     });
+    
+    it("should be modified if a component is added", function() {
+        var go = new j.GameObject();
+        assert.isFalse(go.modified);
+        go.setComponent('foo', new j.GameObjectComponent());
+        assert.isTrue(go.modified);
+    });
+    
+    it("should accept and remove child game objects", function() {
+        var parent = new j.GameObject();
+        var child = new j.GameObject();
+        assert.isFalse(parent.hasChildren());
+        assert.isFalse(parent.hasParent());
+        assert.isFalse(child.hasChildren());
+        assert.isFalse(child.hasParent());
         
-    it("should serialize and unserialize properly");
-    
-    it("should accept child game objects");
+        parent.addChild(child);
+        assert.isTrue(parent.hasChildren());
+        assert.isFalse(parent.hasParent());
+        assert.isFalse(child.hasChildren());
+        assert.isTrue(child.hasParent());
+        
+        parent.removeChild(child);
+        assert.isFalse(parent.hasChildren());
+        assert.isFalse(parent.hasParent());
+        assert.isFalse(child.hasChildren());
+        assert.isFalse(child.hasParent());
+        
+        child.setParent(parent);
+        assert.isTrue(parent.hasChildren());
+        assert.isFalse(parent.hasParent());
+        assert.isFalse(child.hasChildren());
+        assert.isTrue(child.hasParent());
+        
+        child.leaveParent();
+        assert.isFalse(parent.hasChildren());
+        assert.isFalse(parent.hasParent());
+        assert.isFalse(child.hasChildren());
+        assert.isFalse(child.hasParent());
+        
+        parent.addChild(child);
+        assert.isTrue(parent.hasChildren());
+        assert.isFalse(parent.hasParent());
+        assert.isFalse(child.hasChildren());
+        assert.isTrue(child.hasParent());
+        
+        parent.abandonChildren();
+        assert.isFalse(parent.hasChildren());
+        assert.isFalse(parent.hasParent());
+        assert.isFalse(child.hasChildren());
+        assert.isFalse(child.hasParent());
+    });
 
-    it("should broadcast events to children");
+    it("should set and cascade gameObject id to components", function() {
+        var go, c1, c2;
+        
+        go = new j.GameObject();
+        c1 = new j.GameObjectComponent();
+        c2 = new j.GameObjectComponent();
+        go.setComponent('foo', c1);
+        go.setComponent('bar', c2);
+        
+        assert.strictEqual(-1, go.id);
+        assert.strictEqual(-1, c1.$id);
+        assert.strictEqual(-1, c2.$id);
+        
+        //set id and cascade down to already existing components
+        go.setId(3);
+        assert.strictEqual(3, go.id);
+        assert.strictEqual(3, c1.$id);
+        assert.strictEqual(3, c2.$id);
+        
+        //set id before adding new components
+        go = new j.GameObject();
+        c1 = new j.GameObjectComponent();
+        c2 = new j.GameObjectComponent();
+        assert.strictEqual(-1, go.id);
+        assert.strictEqual(-1, c1.$id);
+        assert.strictEqual(-1, c2.$id);
+        go.setId(3);
+        go.setComponent('foo', c1);
+        go.setComponent('bar', c2);
+        assert.strictEqual(3, go.id);
+        assert.strictEqual(3, c1.$id);
+        assert.strictEqual(3, c2.$id);
+    });
     
-    it("should emit events to parents");
+    it("should set and filter up modified", function() {
+        var parent = new j.GameObject();
+        var child = new j.GameObject();
+        assert.isFalse(parent.modified);
+        assert.isFalse(child.modified);
+        
+        parent.addChild(child);
+        assert.isTrue(parent.modified);
+        assert.isTrue(child.modified);
+        parent.modified = false;
+        child.modified = false;
+        assert.isFalse(parent.modified);
+        assert.isFalse(child.modified);
+        
+        //test bubble up
+        child.setModified();
+        assert.isTrue(parent.modified);
+        assert.isTrue(child.modified);
+        parent.modified = false;
+        child.modified = false;
+        
+        //adding a new child should modify the parent, but not existing children
+        var child2 = new j.GameObject();
+        parent.addChild(child2);
+        assert.isTrue(parent.modified);
+        assert.isTrue(child2.modified);
+        assert.isFalse(child.modified);
+    });
     
-    it("should assemble callback cache properly");
+    it("should set and cascade enabled", function() {
+        var parent = new j.GameObject();
+        var child1 = new j.GameObject();
+        var child2 = new j.GameObject();
+        
+        assert.isFalse(parent.enabled);
+        assert.isFalse(child1.enabled);
+        assert.isFalse(child2.enabled);
+        parent.enable();
+        assert.isTrue(parent.enabled);
+        parent.disable();
+        assert.isFalse(parent.enabled);
+        
+        parent.addChild(child1);
+        parent.addChild(child2);
+        parent.enable();
+        assert.isTrue(parent.enabled);
+        assert.isTrue(child1.enabled);
+        assert.isTrue(child2.enabled);
+        parent.disable();
+        assert.isFalse(parent.enabled);
+        assert.isFalse(child1.enabled);
+        assert.isFalse(child2.enabled);
+    });
     
-    it("should set and cascade id");
+    it("should assemble callback cache properly", function() {
+        var c1 = new j.GameObjectComponent();
+        c1.$on('update', function() {});
+        var c2 = new j.GameObjectComponent();
+        c2.$on('update', function() {});
+        
+        var parent = new j.GameObject();
+        var child1 = new j.GameObject();
+        var child2 = new j.GameObject();
+        
+        parent.setComponent('foo', c1);
+        parent.setComponent('bar', c2);
+        
+        //test parent alone
+        assert.isTrue(parent.modified);
+        assert.strictEqual(2, parent.getCallbacks('update').length);
+        assert.strictEqual(2, parent.getCallbacks('update', true).length);
+        assert.isFalse(parent.modified);
+        
+        //now setup children and do the same assertions
+        child1.setComponent('foo', c1);
+        child1.setComponent('bar', c2);
+        child2.setComponent('foo', c1);
+        child2.setComponent('bar', c2);
+        assert.strictEqual(2, child1.getCallbacks('update').length);
+        assert.strictEqual(2, child2.getCallbacks('update').length);
+        parent.addChild(child1);
+        parent.addChild(child2);
+        assert.isTrue(parent.modified);
+        assert.isTrue(child1.modified);
+        assert.isTrue(child2.modified);
+        
+        //did the callbacks come back from the children as well?
+        assert.strictEqual(2, parent.getCallbacks('update').length);
+        assert.strictEqual(6, parent.getCallbacks('update', true).length);
+        assert.isFalse(parent.modified);
+        assert.isFalse(child1.modified);
+        assert.isFalse(child2.modified);
+    });
+
+    it("should export prefab structure of self", function () {
+        var parent = new j.GameObject();
+        var child1 = new j.GameObject();
+        var child2 = new j.GameObject();
+        parent.name = 'parent';
+        child1.name = 'child1';
+        child2.name = 'child2';
+        
+        var c1 = new j.GameObjectComponent();
+        c1.foo = 'bar';
+        var c2 = new j.GameObjectComponent();
+        c2.foo = 'baz';
+        
+        child1.setComponent('bar', c1);
+        child2.setComponent('baz', c2);
+        
+        parent.addChild(child1);
+        parent.addChild(child2);
+        
+        var expected = {
+            name: 'parent',
+            components: {},
+            children: [
+                {
+                    name: 'child1',
+                    components: {
+                        'bar': {
+                            foo: 'bar'
+                        }
+                    }
+                },
+                {
+                    name: 'child2',
+                    components: {
+                        'baz': {
+                            foo: 'baz'
+                        }
+                    }
+                }
+            ]
+        };
+        
+        //finally serialize
+        assert.deepEqual(expected, parent.export());
+    });
+
+    it.skip("should broadcast events to children", function(done) {
+        var parent = new j.GameObject();
+        var child = new j.GameObject();
+        parent.addChild(child);
+        
+        var parentCalled = false;
+        var childCalled = false;
+        
+        child.onMessage('foo', function(data) {
+            childCalled = true;
+            assert.isTrue(parentCalled);
+            assert.strictEqual(5, data.foo);
+            done();
+        });
+        
+        parent.onMessage('foo', function(data) {
+            assert.isFalse(childCalled);
+            assert.strictEqual(5, data.foo);
+            parentCalled = true;
+        });
+        
+        parent.broadcastMessage('foo', {foo: 5});
+    });
     
-    it("should set and filter up modified");
-    
-    it("should set and cascade enabled");
-    
+    it.skip("should emit events to parents", function(done) {
+        var parent = new j.GameObject();
+        var child = new j.GameObject();
+        parent.addChild(child);
+        
+        var parentCalled = false;
+        var childCalled = false;
+        
+        child.onMessage('foo', function(data) {
+            childCalled = true;
+            assert.isFalse(parentCalled);
+            assert.strictEqual(5, data.foo);
+        });
+        
+        parent.onMessage('foo', function(data) {
+            assert.strictEqual(5, data.foo);
+            assert.isTrue(childCalled);
+            parentCalled = true;
+            done();
+        });
+        
+        child.emitMessage('foo', {foo: 5});
+    });
+
 });

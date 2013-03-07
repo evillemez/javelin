@@ -10,8 +10,8 @@ Javelin.GameObject = function () {
     this.components = {};               //component instances
     this.children = [];                 //child gameobject instances
     this.parent = null;                 //parent gameobject instance
-    this.containedAliases = [];         //list of compnent aliases contained in object
-    this.modified = true;               //whether or not the hierarchy or components have been modified
+    this.root = false;
+    this.modified = false;              //whether or not the hierarchy or components have been modified
     this.ownCallbackCache = {};         //cached callbacks from own components
     this.allCallbackCache = {};         //cached callbacks from all children
 };
@@ -27,9 +27,8 @@ Javelin.GameObject.prototype.destroy = function() {
 Javelin.GameObject.prototype.setId = function(id) {
     this.id = id;
     
-    for (var comp in this.components) {
-        //NOTE: consider comp.$setId();
-        comp.$id = id;
+    for (var alias in this.components) {
+        this.components[alias].$id = id;
     }
 };
 
@@ -63,42 +62,30 @@ Javelin.GameObject.prototype.disable = function() {
 
 /* Component management */
 
-//TODO: most of this functionality should move into engine, which should act as the
-//factory for components
-Javelin.GameObject.prototype.addComponent = function(handler) {
-    var go = this;
-    
-    if (this.components[handler.alias]) {
-        return this.components[handler.alias];
+//add a component by name (internally requires the engine to create the component)
+Javelin.GameObject.prototype.addComponent = function(alias) {
+    if(this.engine) {
+        this.engine.addComponentToGameObject(this, alias);
     }
-    
+};
+
+//explicitly set a component instance
+Javelin.GameObject.prototype.setComponent = function(alias, component) {
+    this.components[alias] = component;
+    component.$alias = alias;
+    component.$id = this.id;
     this.setModified();
+};
 
-    //add any required components first
-    var reqs = Javelin.getComponentRequirements(handler.alias);
-    var l = reqs.length;
-    for (var i = 0; i < l; i++) {
-        this.addComponent(reqs[i]);
-    }
-    
-    //instantiate new component instance
-    var comp = new Javelin.GameObjectComponent();
-    comp.$id = go.id;
-    comp.$go = go;
-    comp.$alias = handler.alias;
-    
-    //call hierarchy in proper inheritence order
-    var handlers = Javelin.getComponentChain(handler.alias);
-    l = handlers.length;
-    for (i = 0; i < l; i++) {
-        handlers[i](go, comp);
-        comp.$inheritedAliases.push(handlers[i].alias);
-        go.containedAliases[handlers[i].alias] = true;
+//micro optimization to set multiple components without having to call setModified() every time
+Javelin.GameObject.prototype.setComponents = function(arr) {
+    for (var i in arr) {
+        var comp = arr[i];
+        comp.$id = this.id;
+        this.components[comp.$alias] = comp;
     }
 
-    go.components[handler.alias] = comp;
-    
-    return comp;
+    this.setModified();
 };
 
 Javelin.GameObject.prototype.getComponent = function(name) {
@@ -120,8 +107,8 @@ Javelin.GameObject.prototype.hasComponent = function(name) {
         return true;
     }
     
-    for (var comp in this.components) {
-        if (this.components[comp].$instanceOf(name)) {
+    for (var alias in this.components) {
+        if (this.components[alias].$instanceOf(name)) {
             return true;
         }
     }
@@ -132,10 +119,6 @@ Javelin.GameObject.prototype.hasComponent = function(name) {
 Javelin.GameObject.prototype.removeComponent = function(name) {
     this.setModified();
     this.components[name] = null;
-};
-
-Javelin.GameObject.prototype.instanceOf = function(alias) {
-    return this.containedAliases[alias] || false;
 };
 
 Javelin.GameObject.prototype.getComponentsInChildren = function(name) {
@@ -197,6 +180,14 @@ Javelin.GameObject.prototype.abandonChildren = function() {
     }
 };
 
+Javelin.GameObject.prototype.hasChildren = function() {
+    return (this.children.length > 0);
+};
+
+Javelin.GameObject.prototype.hasParent = function() {
+    return this.parent ? true : false;
+};
+
 
 /* Messaging */
 
@@ -214,13 +205,13 @@ Javelin.GameObject.prototype.getCallbacks = function(eventName, recursive) {
         this.modified = false;
     }
     
-    return (recursive) ? this.allCallbackCache[eventName] || []: this.ownCallbackCache[eventName] || [];
+    return (recursive) ? this.allCallbackCache[eventName] : this.ownCallbackCache[eventName];
 };
 
 Javelin.GameObject.prototype.rebuildCallbackCache = function() {
-    var ownCallbacks = {};
+    var key, cb, ownCallbacks = {};
     for (var comp in this.components) {
-        for (var key in this.components[comp].$callbacks) {
+        for (key in this.components[comp].$callbacks) {
             ownCallbacks[key] = ownCallbacks[key] || [];
             ownCallbacks[key].push(this.components[comp].$callbacks[key]);
         }
@@ -228,15 +219,29 @@ Javelin.GameObject.prototype.rebuildCallbackCache = function() {
     
     this.ownCallbackCache = ownCallbacks;
     
-    var allCallbacks = ownCallbacks;
+    //clone own callbacks into new object
+    var allCallbacks = {};
+    for (key in ownCallbacks) {
+        allCallbacks[key] = allCallbacks[key] || [];
+        for (cb in ownCallbacks[key]) {
+            allCallbacks[key].push(cb);
+        }
+    }
+    
+    //now add all callbacks from children
     for (var i in this.children) {
-        if (this.children[i].modified) {
-            this.children[i].rebuildCallbackCache();
+        var child = this.children[i];
+        
+        if (child.modified) {
+            child.rebuildCallbackCache();
+            child.modified = false;
         }
         
-        for (var eventName in this.children[i].$allCallbackCache) {
-            for (var j in this.children[i].$allCallbackCache[eventName]) {
-                allCallbacks[eventName].push(this.children[i].$allCallbackCache[eventName][j]);
+        for (var eventName in child.allCallbackCache) {
+            allCallbacks[eventName] = allCallbacks[eventName] || [];
+            
+            for (cb in child.allCallbackCache[eventName]) {
+                allCallbacks[eventName].push(cb);
             }
         }
     }
@@ -253,41 +258,22 @@ Javelin.GameObject.prototype.setModified = function() {
 
 /* Data Serialization Helpers */
 
-//TODO: consider moving serialization out of GO and into Engine
-
-Javelin.GameObject.prototype.serialize = function() {
+Javelin.GameObject.prototype.export = function() {
     var serialized = {
-        name: this.name
+        name: this.name,
+        components: {}
     };
     
     for (var alias in this.components) {
-        serialized[alias] = this.components[alias].$serialize();
+        serialized.components[alias] = this.components[alias].$serialize();
     }
     
     if (this.children.length > 0) {
         serialized.children = [];
         for (var index in this.children) {
-            serialized.children.push(this.children[index].serialize());
+            serialized.children.push(this.children[index].export());
         }
     }
     
     return serialized;
-};
-
-Javelin.GameObject.prototype.unserialize = function(data) {
-    if (data.name) {
-        this.name = data.name;
-    }
-    
-    if (data.components) {
-        for (var alias in data.components) {
-            this.components[alias].$unserialize(data.components[alias]);
-        }
-    }
-    
-    if (data.children) {
-        for (var index in data.children) {
-            this.children[index].unserialize(data.children[index]);
-        }
-    }
 };

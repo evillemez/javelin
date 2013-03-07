@@ -7,14 +7,14 @@ manner.
 
 'use strict';
 
-Javelin.Environment.Browser = function(config) {
+Javelin.Env.Browser = function(config) {
     this.config = config;
     this.engine = {};
 };
 
-Javelin.Environment.Browser.prototype = new Javelin.Environment();
+Javelin.Env.Browser.prototype = new Javelin.Environment();
 
-Javelin.Environment.Browser.prototype.run = function() {
+Javelin.Env.Browser.prototype.run = function() {
     var engine = this.engine;
     setInterval(function() {
         try {

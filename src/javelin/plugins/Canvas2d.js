@@ -13,9 +13,13 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
     };
     
     plugin.$reset = function() {
-        plugin.context = plugin.$config.canvas.getContext('2d');
-        plugin.$config.canvas.height = plugin.$config.height;
-        plugin.$config.canvas.width = plugin.$config.width;
+        var target = document.getElementById(plugin.$config.renderTarget);
+        var canvas = document.createElement('canvas');
+        plugin.canvas = canvas;
+        plugin.context = canvas.getContext('2d');
+        plugin.canvas.height = plugin.$config.height;
+        plugin.canvas.width = plugin.$config.width;
+        target.appendChild(canvas);
         
         //TODO: implement layers, create canvas(es) internally
     };

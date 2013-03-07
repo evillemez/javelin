@@ -2,11 +2,17 @@
 
 var Javelin = require('../../build/javelin.js');
 
+//setup fixtures namespaces
 var Fixtures = Fixtures || {};
+Fixtures.Component = {};
+Fixtures.Prefab = {};
+Fixtures.Scene = {};
+Fixtures.Plugin = {};
+Fixtures.Env = {};
 
 /* GO Components */
 
-Fixtures.FooComponent = function(go, comp) {
+Fixtures.Component.FooComponent = function(go, comp) {
     comp.test = function() { return "foo"; };
     comp.numUpdates = 0;
     comp.started = false;
@@ -24,29 +30,29 @@ Fixtures.FooComponent = function(go, comp) {
         comp.destroyed = true;
     });
 };
-Fixtures.FooComponent.alias = 'f.foo';
+Fixtures.Component.FooComponent.alias = 'f.foo';
 
-Fixtures.BarComponent = function(go, comp) {
+Fixtures.Component.BarComponent = function(go, comp) {
     comp.test = function() { return "bar"; };
 };
-Fixtures.BarComponent.alias = 'f.bar';
-Fixtures.BarComponent.inherits = 'f.foo';
-Fixtures.BarComponent.requires = ['f.foo'];
+Fixtures.Component.BarComponent.alias = 'f.bar';
+Fixtures.Component.BarComponent.inherits = 'f.foo';
+Fixtures.Component.BarComponent.requires = ['f.foo'];
 
-Fixtures.BazComponent = function(go, comp) {
+Fixtures.Component.BazComponent = function(go, comp) {
     comp.test = function() { return "baz"; };
 };
-Fixtures.BazComponent.alias = 'f.baz';
-Fixtures.BazComponent.inherits = 'f.bar';
-Fixtures.BazComponent.requires = ['f.bar'];
+Fixtures.Component.BazComponent.alias = 'f.baz';
+Fixtures.Component.BazComponent.inherits = 'f.bar';
+Fixtures.Component.BazComponent.requires = ['f.bar'];
         
-Fixtures.QuxComponent = function(go, comp) {
+Fixtures.Component.QuxComponent = function(go, comp) {
     comp.test = function() { return "qux"; };
 };
-Fixtures.QuxComponent.alias = 'f.qux';
-Fixtures.QuxComponent.requires = ['f.foo','f.baz'];
+Fixtures.Component.QuxComponent.alias = 'f.qux';
+Fixtures.Component.QuxComponent.requires = ['f.foo','f.baz'];
 
-Fixtures.ManagerComponent = function(go, comp) {
+Fixtures.Component.ManagerComponent = function(go, comp) {
     var max = 4;
     var gos = [];
     
@@ -67,15 +73,20 @@ Fixtures.ManagerComponent = function(go, comp) {
         }
     });
 }; 
-Fixtures.ManagerComponent.alias = 'f.manager';
+Fixtures.Component.ManagerComponent.alias = 'f.manager';
 
 
 /* Engine Plugins */
 
-Fixtures.TestPlugin = function(plugin, config) {
-    plugin.$config.foo = 'foo';
+Fixtures.Plugin.TestPlugin = function(plugin, config) {
+    plugin.config = config;
     plugin.stepCount = 0;
+    plugin.initialized = false;
     plugin.goCount = 0;
+    
+    plugin.$initialize = function() {
+        plugin.initialized = true;
+    };
     
     plugin.$onStep = function(deltaTime) {
         plugin.stepCount++;
@@ -89,42 +100,95 @@ Fixtures.TestPlugin = function(plugin, config) {
         plugin.goCount--;
     };
 };
-Fixtures.TestPlugin.alias = 'f.test_plugin';
+Fixtures.Plugin.TestPlugin.alias = 'f.test_plugin';
+Fixtures.Plugin.TestPlugin.defaults = {
+    foo: 'foo',
+    bar: 'bar'
+};
 
 /* Engine Test Environment */
 
-Fixtures.TestEnvironment = function() {};
-Fixtures.TestEnvironment.prototype = new Javelin.Environment();
+Fixtures.Env.TestEnvironment = function() {};
+Fixtures.Env.TestEnvironment.prototype = new Javelin.Environment();
 
 /* Object definition "prefab" */
 
-Fixtures.Prefab1 = {
-    name: "Test Object",
+Fixtures.Prefab.Prefab1 = {
+    name: "f.testPrefab",
     components: {
         "sprite": {}
     }
 };
 
-Fixtures.Prefab2 = {
-    name: "Manager",
+Fixtures.Prefab.Prefab2 = {
+    name: "f.managerPrefab",
     components: {
         "f.manager": {}
     }
 };
 
+Fixtures.Prefab.Prefab3 = {
+    name: 'f.nestedPrefab',
+    components: {
+        'f.foo': {}
+    },
+    children: [
+        'f.managerPrefab',
+        {
+            name: 'nested',
+            components: {
+                'f.bar': {}
+            }
+        }
+    ]
+};
+
 /* Test scene */
 
-Fixtures.Scene = {
-    plugins: [
-        
-    ],
-    options: {
-        
+Fixtures.Scene.Scene1 = {
+    name: 'f.scene1',
+    plugins: {
+        'f.test_plugin': {
+            foo: 'baz'
+        }
     },
     objects: [
-        {},
-        {}
+        'f.testPrefab',
+        'f.testPrefab',
+        {
+            name: 'example',
+            components: {
+                'f.foo': {}
+            }
+        }
     ]
+};
+
+Fixtures.Scene.Scene2 = {
+    name: 'f.scene2',
+    plugins: {
+        'f.test_plugin': {
+            foo: 'qux'
+        }
+    },
+    objects: [
+        'f.testPrefab',
+        'f.managerPrefab'
+    ]
+};
+
+/* Main game configuration */
+Fixtures.GameConfig = {
+    name: "Test game",
+    autoregisterPlugins: Fixtures.Plugin,
+    autoregisterScenes: Fixtures.Scene,
+    autoregisterPrefabs: Fixtures.Prefab,
+    autoregisterComponents: Fixtures.Component,
+    plugins: {
+        'f.test_plugin': {
+            foo: ''
+        }
+    }
 };
 
 //export

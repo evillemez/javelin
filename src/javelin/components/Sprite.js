@@ -20,4 +20,3 @@ Javelin.Component.Sprite = function(go, comp) {
 };
 Javelin.Component.Sprite.alias = "sprite";
 Javelin.Component.Sprite.requires = ['transform2d'];
-Javelin.register(Javelin.Component.Sprite);

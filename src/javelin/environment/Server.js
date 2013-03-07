@@ -7,12 +7,12 @@ manner.
 
 'use strict';
 
-Javelin.Environment.Server = function() {
+Javelin.Env.Server = function() {
     this.engine = {};
 };
 
-Javelin.Environment.Server.prototype = new Javelin.Environment();
+Javelin.Env.Server.prototype = new Javelin.Environment();
 
-Javelin.Environment.Server.prototype.run = function() {
+Javelin.Env.Server.prototype.run = function() {
     //TODO:
 };

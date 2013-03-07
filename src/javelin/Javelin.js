@@ -2,14 +2,21 @@
 
 var Javelin = Javelin || {};
 
-//setup sub namespaces
+//setup sub namespaces for categories of objects
+//included with Javelin
 Javelin.Plugin = {};
 Javelin.Component = {};
-Javelin.Environment = {};
+Javelin.Prefab = {};
+Javelin.Scene = {};
+Javelin.Env = {};
 Javelin.Asset = {};
-Javelin.Editor = {};
 
-//registry for stuff used in the engine
+//during initialize, whether to automatically register all objects included
+//with this build of Javelin (probably should leave as true unless you really
+//have a good reason not to)
+Javelin.AUTO_REGISTER_SELF = true;
+
+//registry for stuff used in the engine, don't manipulate these
 Javelin.__componentHandlers = {};
 Javelin.__componentChain = {};
 Javelin.__componentRequirements = {};
@@ -17,7 +24,32 @@ Javelin.__pluginHandlers = {};
 Javelin.__prefabs = {};
 Javelin.__scenes = {};
 
-Javelin.register = function(handler) {
+//mostly for testing and internal use; generally, don't call this from your own code
+Javelin.reset = function() {
+    Javelin.__componentHandlers = {};
+    Javelin.__componentChain = {};
+    Javelin.__componentRequirements = {};
+    Javelin.__pluginHandlers = {};
+    Javelin.__prefabs = {};
+    Javelin.__scenes = {};
+};
+
+/* utility methods */
+
+Javelin.isString = function(value) {
+    return typeof value === 'string';
+};
+
+Javelin.isEmpty = function(item) {
+    for (var key in item) {
+        return false;
+    }
+    
+    return true;
+};
+
+//register a GameObject Component handler function
+Javelin.registerComponent = function(handler) {
     if (!handler.alias) {
         throw new Error("Components must specify their alias.");
     }
@@ -43,6 +75,10 @@ Javelin.registerPrefab = function(obj) {
     Javelin.__prefabs[obj.name] = obj;
 };
 
+Javelin.getPrefab = function(name) {
+    return Javelin.__prefabs[name] || false;
+};
+
 Javelin.registerScene = function(obj) {
     if (!obj.name) {
         throw new Error("Scenes must have a name!");
@@ -53,24 +89,21 @@ Javelin.registerScene = function(obj) {
     Javelin.__scenes[obj.name] = obj;
 };
 
-Javelin.registerPlugin = function(handler) {
-    this.__pluginHandlers[handler.alias] = handler;
+Javelin.getScene = function(name) {
+    return Javelin.__scenes[name] || false;
 };
 
-// for testing, generally you should never call this because
-// you'll have to manually re-register all the components/plugins/whatever
-// included in the framework
-Javelin.reset = function() {
-    Javelin.__componentHandlers = {};
-    Javelin.__componentChain = {};
-    Javelin.__componentRequirements = {};
-    Javelin.__pluginHandlers = {};
-    Javelin.__prefabs = {};
-    Javelin.__scenes = {};
+Javelin.registerPlugin = function(handler) {
+    //TODO: validation
+    this.__pluginHandlers[handler.alias] = handler;
 };
 
 Javelin.getComponentHandler = function(alias) {
     return Javelin.__componentHandlers[alias] || false;
+};
+
+Javelin.getPluginHandler = function(alias) {
+    return Javelin.__pluginHandlers[alias] || false;
 };
 
 Javelin.getComponentChain = function(alias) {
@@ -131,14 +164,64 @@ Javelin.buildComponentRequirements = function(handler) {
     this.__componentRequirements[handler.alias] = reqs;
 };
 
-//figure out all component inheritence and requirements
-Javelin.initialize = function() {    
-    for (var alias in Javelin.__componentHandlers) {
+//converts string references inside prefab definitions to
+//in-memory objects, so no extra logic is required during
+//actual instantiation
+Javelin.unpackPrefabDefinitions = function() {
+    var unpackPrefab = function(prefab) {
+        if (prefab.children) {
+            var unpackedChildren = [];
+            for (var i in prefab.children) {
+                var child = prefab.children[i];
 
+                if (Javelin.isString(child)) {
+                    unpackPrefab(Javelin.getPrefab(child));
+                    unpackedChildren.push(Javelin.getPrefab(child));
+                } else {
+                    unpackPrefab(child);
+                    unpackedChildren.push(child);
+                }
+
+            }
+
+            prefab.children = unpackedChildren;
+            Javelin.registerPrefab(prefab);
+        }
+    };
+    
+    for (var alias in Javelin.__prefabs) {
+        unpackPrefab(Javelin.getPrefab(alias));
+    }
+};
+
+//figure out all component inheritence and requirements
+Javelin.initialize = function() {
+    if (Javelin.AUTO_REGISTER_SELF) {
+        var key;
+        for (key in Javelin.Component) {
+            Javelin.registerComponent(Javelin.Component[key]);
+        }
+        for (key in Javelin.Plugin) {
+            Javelin.registerPlugin(Javelin.Plugin[key]);
+        }
+        for (key in Javelin.Prefab) {
+            Javelin.registerPrefab(Javelin.Prefab[key]);
+        }
+        for (key in Javelin.Scene) {
+            Javelin.registerScene(Javelin.Scene[key]);
+        }
+    }
+    
+    //resolve component hierarchies/dependencies
+    for (var alias in Javelin.__componentHandlers) {
+        
         //build inheritance chain
         Javelin.buildComponentChain(Javelin.__componentHandlers[alias]);
         
         //build requirements
         Javelin.buildComponentRequirements(Javelin.__componentHandlers[alias]);
     }
+    
+    //expand all prefab definitions for quick instantiation
+    Javelin.unpackPrefabDefinitions();
 };

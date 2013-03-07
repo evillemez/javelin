@@ -2,14 +2,15 @@
 
 Javelin.EnginePlugin = function() {
     this.$alias = '';
-    this.$defaults = {};
-    this.$config = {};
-    this.$requirements = [];
     this.$active = false;
-    this.$engine = {};
+    this.$engine = null;
 };
 
-Javelin.EnginePlugin.prototype.$reset = function() {
+Javelin.EnginePlugin.prototype.$onLoad = function() {
+    // body...
+};
+
+Javelin.EnginePlugin.prototype.$onUnload = function() {
     // body...
 };
 
@@ -24,15 +25,4 @@ Javelin.EnginePlugin.prototype.$onGameObjectDestroy = function(go) {
 
 Javelin.EnginePlugin.prototype.$onGameObjectCreate = function(go) {
     // body...
-};
-
-/* data import/export for scene configuration */
-
-Javelin.EnginePlugin.prototype.$serialize = function() {
-    return this.$config;
-};
-
-Javelin.EnginePlugin.prototype.$unserialize = function(data) {
-    this.$config = data;
-    this.$reset();
 };

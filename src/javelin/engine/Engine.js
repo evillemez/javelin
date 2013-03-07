@@ -36,29 +36,18 @@ Javelin.Engine.prototype.reset = function() {
 
     //scene
     this.sceneDefinition = {};
-    this.plugins = [];
+    this.plugins = {};
         
-    //run any setup based on constructor config
-    this.processConfig(this.config);
+    //configure the loader
+    //TODO: think of better way to do this, possibly require it
+    //via the environment
+    if (this.config.loader) {
+        this.loader = new Javelin.AssetLoader(this.config.loader.assetUrl || '');
+    }
 };
 
 Javelin.Engine.prototype.processConfig = function(config) {
-    //configure the loader
-    if(config.loader) {
-        this.loader = new Javelin.AssetLoader(config.loader.assetUrl || '');
-    }
 
-    //add plugins
-    var plugins = config.plugins || [];
-    for (var i in plugins) {
-        this.addPlugin(plugins[i]);
-    }
-    
-    //configure the plugins
-    var opts = config.options || {};
-    for (var j in opts) {
-        this.getPlugin(j).$unserialize(opts[j]);
-    }
 };
 
 /* Managing Game Objects */
@@ -135,10 +124,18 @@ Javelin.Engine.prototype.getGameObjectById = function(id) {
     return false;
 };
 
+Javelin.Engine.prototype.instantiate = function(mixed) {
+    if (Javelin.isString(mixed)) {
+        return this.instantiatePrefab(mixed);
+    }
+    
+    return this.instantiateObject(mixed);
+};
+
 //takes a string
-Javelin.Engine.prototype.instantiate = function(name) {
+Javelin.Engine.prototype.instantiatePrefab = function(name) {
     if (!Javelin.__prefabs[name]) {
-        throw new Error("Tried instantiating unknown prefab: "+name);
+        throw new Error("Tried instantiating unknown prefab: " + name);
     }
     
     return this.instantiateObject(Javelin.__prefabs[name]);
@@ -146,7 +143,6 @@ Javelin.Engine.prototype.instantiate = function(name) {
 
 //TODO: move most creation logic into instantiate, which COULD BE A STRING REFERENCE TO A PREFAB
 Javelin.Engine.prototype.instantiateObject = function(def) {
-    //this would assume Javelin.registerPrefab(PrefabObjectDefinition) had been called, with a proper name
     
     //TODO: move most functionality from GO.addComponent
     //into here
@@ -155,22 +151,63 @@ Javelin.Engine.prototype.instantiateObject = function(def) {
     go.name = def.name || "Anonymous";
 
     if (def.components) {
+        var components = [];
         for (var key in def.components) {
-            var c = go.addComponent(Javelin.getComponentHandler(key));
+            var c = this.createGameObjectComponent(go, key);
             c.$unserialize(def.components[key]);
+            components.push(c);
         }
+        
+        go.addComponents(components);
     }
+    
+    this.__addGameObject(go);
     
     if (def.children) {
         for (var i in def.children) {
             var child = this.instantiateObject(def.children[i]);
             child.setParent(go);
         }
-    }
-    
-    this.__addGameObject(go);
+    }    
     
     return go;
+};
+
+Javelin.Engine.prototype.createGameObjectComponent = function(go, alias) {
+    if (go.hasComponent(alias)) {
+        return go.getComponent(alias);
+    }
+    
+    go.setModified();
+    
+    //add any required components first
+    var reqs = Javelin.getComponentRequirements(alias);
+    var l = reqs.length;
+    for (var i = 0; i < l; i++) {
+        this.createGameObjectComponent(go, reqs[i].alias);
+    }
+    
+    var handler = Javelin.getComponentHandler(alias);
+    if (!handler) {
+        throw new Error("Unknown component [" + alias + "] requested");
+    };
+
+    //instantiate new component instance
+    var comp = new Javelin.GameObjectComponent();
+    comp.$id = go.id;
+    comp.$go = go;
+    comp.$alias = handler.alias;
+    
+    //call hierarchy in proper inheritence order
+    var handlers = Javelin.getComponentChain(handler.alias);
+    l = handlers.length;
+    for (i = 0; i < l; i++) {
+        handlers[i](go, comp);
+        comp.$inheritedAliases.push(handlers[i].alias);
+        go.containedAliases[handlers[i].alias] = true;
+    }
+    
+    return comp;
 };
 
 
@@ -179,21 +216,27 @@ Javelin.Engine.prototype.destroy = function(go) {
     if (this.updating) {
         this.destroyedGos.push(go);
     } else {
-        this.__destroyGameObject(go);        
+        this.__destroyGameObject(go);
     }
 };
 
 
 /* Game Loop & State */
 
-//TODOC
+//This must be called before loading and running scenes
 Javelin.Engine.prototype.initialize = function() {
     var func;
     var obj;
     
+    if (this.config.autoregisterPlugins) {
+        for (func in this.config.autoregisterPlugins) {
+            Javelin.registerPlugin(this.config.autoregisterPlugins[func]);
+        }
+    }
+    
     if (this.config.autoregisterComponents) {
         for (func in this.config.autoregisterComponents) {
-            Javelin.register(this.config.autoregisterComponents[func]);
+            Javelin.registerComponent(this.config.autoregisterComponents[func]);
         }
     }
     
@@ -204,15 +247,15 @@ Javelin.Engine.prototype.initialize = function() {
     }
     
     if (this.config.autoregisterScenes) {
-        if (this.config.autoregisterScenes) {
-            for (obj in this.config.autoregisterScenes) {
-                Javelin.registerScene(this.config.autoregisterScenes[obj]);
-            }
+        for (obj in this.config.autoregisterScenes) {
+            Javelin.registerScene(this.config.autoregisterScenes[obj]);
         }
     }
 
     //build up maps of component dependencies and whatever else
     Javelin.initialize();
+    
+    //TODO: load required assets
 };
 
 Javelin.Engine.prototype.run = function() {
@@ -259,11 +302,9 @@ Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
 };
 
 Javelin.Engine.prototype.updatePlugins = function(deltaTime) {
-    var plugins = this.plugins;
-    var l = plugins.length;
-    for (var i = 0; i < l; i++) {
-        if (plugins[i].$active) {
-            plugins[i].$onStep(deltaTime);
+    for (var i in this.plugins) {
+        if (this.plugins[i].$active) {
+            this.plugins[i].$onStep(deltaTime);
         }
     }
 };
@@ -287,7 +328,6 @@ Javelin.Engine.prototype.cleanupStep = function() {
     this.createdGos = [];
     this.destroyedGos = [];
 };
-
 
 Javelin.Engine.prototype.pluginsCreateGameObject = function(go) {
     for (var p in this.plugins) {
@@ -329,43 +369,45 @@ Javelin.Engine.prototype.loadAssets = function(arr, callback) {
 };
 
 /* Plugin Management */
-Javelin.Engine.prototype.addPlugin = function(handler) {
-    if (this.plugins[handler.alias]) {
+Javelin.Engine.prototype.loadPlugin = function(alias, config) {
+    if (this.plugins[alias]) {
         return;
+    }
+    
+    var handler = Javelin.getPluginHandler(alias);
+    if (!handler) {
+        throw new Error("Required plugin [" + alias + "] not registered.");
+    }
+    
+    if (Javelin.isEmpty(config) && handler.defaults) {
+        config = handler.defaults;
     }
     
     var plugin = new Javelin.EnginePlugin();
     plugin.$alias = handler.alias;
-    plugin.$defaults = handler.defaults || {};
     plugin.$engine = this;
     
-    //TODO: validate plugin requirements
-    
-    handler(plugin, handler.$defaults);
+    handler(plugin, config);
+    plugin.$onLoad();
     plugin.$active = true;
-    this.plugins.push(plugin);
+    this.plugins[plugin.$alias] = plugin;
 };
 
-Javelin.Engine.prototype.removePlugin = function(name) {
+Javelin.Engine.prototype.unloadPlugin = function(name) {
     var p = this.getPlugin(name);
+    p.$active = false;
     if(p) {
-        var index = this.plugins.indexOf(p);
-        this.plugins.splice(index, 1);
+        p.$onUnload();
+        this.plugins[name] = null;
     }
 };
 
-Javelin.Engine.prototype.resetPlugins = function() {
-    for (var i in this.plugins) {
-        this.plugins[i].$reset();
+Javelin.Engine.prototype.unloadPlugins = function() {
+    for (var alias in this.plugins) {
+        this.unloadPlugin(alias);
     }
 };
 
 Javelin.Engine.prototype.getPlugin = function(name) {
-    for (var i = 0; i < this.plugins.length; i++) {
-        if (name === this.plugins[i].$alias) {
-            return this.plugins[i];
-        }
-    }
-    
-    return false;
+    return this.plugins[name] || false;
 };
