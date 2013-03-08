@@ -205,7 +205,7 @@ Javelin.GameObject.prototype.getCallbacks = function(eventName, recursive) {
         this.modified = false;
     }
     
-    return (recursive) ? this.allCallbackCache[eventName] : this.ownCallbackCache[eventName];
+    return (recursive) ? this.allCallbackCache[eventName] || [] : this.ownCallbackCache[eventName] || [];
 };
 
 Javelin.GameObject.prototype.rebuildCallbackCache = function() {

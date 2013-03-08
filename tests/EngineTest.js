@@ -76,11 +76,53 @@ describe("Javelin Engine", function() {
         assert.equal(1, p.stepCount);
     });
     
+    it("should properly add game object components to game objects", function() {
+        var go = new j.GameObject();
+        var e = getEngine();
+        
+        //inheritence
+        assert.isFalse(go.hasComponent('f.foo'));
+        assert.isFalse(go.hasComponent('f.bar'));
+        assert.isFalse(go.hasComponent('f.baz'));
+        e.addComponentToGameObject(go, 'f.baz');
+        assert.isTrue(go.hasComponent('f.foo'));
+        assert.isTrue(go.hasComponent('f.bar'));
+        assert.isTrue(go.hasComponent('f.baz'));
+        
+        //requirements
+        go = new j.GameObject();
+        assert.isFalse(go.hasComponent('transform2d'));
+        assert.isFalse(go.hasComponent('sprite'));
+        e.addComponentToGameObject(go, 'sprite');
+        assert.isTrue(go.hasComponent('transform2d'));
+        assert.isTrue(go.hasComponent('sprite'));
+    });
+    
     it("should instantiate and destroy game objects", function() {
-        //regular instantiate
+        var obj = {
+            name: "example",
+            components: {
+                'f.foo': {}
+            }
+        };
+        
+        //regular instantiate, using both prefab reference
+        //and object
         var e = getEngine();
         assert.equal(0, e.gos.length);
         var go = e.instantiate('f.testPrefab');
+        assert.equal(1, e.gos.length);
+        assert.equal(1, go.id);
+        assert.isTrue(go.hasComponent('sprite'));
+        assert.isTrue(go.hasComponent('transform2d'));
+        e.destroy(go);
+        assert.equal(-1, go.id);
+        
+        //start here, more thorough, include nested prefab
+        assert.isTrue(false);
+        /*
+        assert.equal(0, e.gos.length);
+        go = e.instantiate(obj);
         assert.equal(1, e.gos.length);
         assert.equal(1, go.id);
         e.destroy(go);
@@ -88,6 +130,14 @@ describe("Javelin Engine", function() {
         assert.equal(0, e.gos.length);
         
         //prefab
+        assert.equal(0, e.gos.length);
+        go = e.instantiatePrefab('f.testPrefab');
+        assert.equal(1, e.gos.length);
+        assert.equal(1, go.id);
+        e.destroy(go);
+        assert.equal(-1, go.id);
+        assert.equal(0, e.gos.length);
+        */
         
         //object
     });

@@ -141,11 +141,8 @@ Javelin.Engine.prototype.instantiatePrefab = function(name) {
     return this.instantiateObject(Javelin.__prefabs[name]);
 };
 
-//TODO: move most creation logic into instantiate, which COULD BE A STRING REFERENCE TO A PREFAB
 Javelin.Engine.prototype.instantiateObject = function(def) {
     
-    //TODO: move most functionality from GO.addComponent
-    //into here
     var go = new Javelin.GameObject();
 
     go.name = def.name || "Anonymous";
@@ -153,12 +150,9 @@ Javelin.Engine.prototype.instantiateObject = function(def) {
     if (def.components) {
         var components = [];
         for (var key in def.components) {
-            var c = this.createGameObjectComponent(go, key);
+            var c = this.addComponentToGameObject(go, key);
             c.$unserialize(def.components[key]);
-            components.push(c);
         }
-        
-        go.addComponents(components);
     }
     
     this.__addGameObject(go);
@@ -173,24 +167,22 @@ Javelin.Engine.prototype.instantiateObject = function(def) {
     return go;
 };
 
-Javelin.Engine.prototype.createGameObjectComponent = function(go, alias) {
+Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
     if (go.hasComponent(alias)) {
         return go.getComponent(alias);
     }
-    
-    go.setModified();
-    
+        
     //add any required components first
     var reqs = Javelin.getComponentRequirements(alias);
     var l = reqs.length;
     for (var i = 0; i < l; i++) {
-        this.createGameObjectComponent(go, reqs[i].alias);
+        this.addComponentToGameObject(go, reqs[i].alias);
     }
     
     var handler = Javelin.getComponentHandler(alias);
     if (!handler) {
         throw new Error("Unknown component [" + alias + "] requested");
-    };
+    }
 
     //instantiate new component instance
     var comp = new Javelin.GameObjectComponent();
@@ -199,13 +191,14 @@ Javelin.Engine.prototype.createGameObjectComponent = function(go, alias) {
     comp.$alias = handler.alias;
     
     //call hierarchy in proper inheritence order
-    var handlers = Javelin.getComponentChain(handler.alias);
+    var handlers = Javelin.getComponentChain(alias);
     l = handlers.length;
     for (i = 0; i < l; i++) {
         handlers[i](go, comp);
         comp.$inheritedAliases.push(handlers[i].alias);
-        go.containedAliases[handlers[i].alias] = true;
     }
+    
+    go.setComponent(alias, comp);
     
     return comp;
 };
