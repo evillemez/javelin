@@ -1,9 +1,5 @@
 /*global Javelin:true */
 
-/*
-    TODO - take into account go hierarchy
-*/
-
 'use strict';
 
 Javelin.Engine = function(environment, config) {
@@ -37,6 +33,7 @@ Javelin.Engine.prototype.reset = function() {
     //scene
     this.sceneDefinition = {};
     this.plugins = {};
+    this.currentScene = false;
         
     //configure the loader
     //TODO: think of better way to do this, possibly require it
@@ -51,68 +48,6 @@ Javelin.Engine.prototype.processConfig = function(config) {
 };
 
 /* Managing Game Objects */
-Javelin.Engine.prototype.__addGameObject = function(go) {
-    if (-1 === go.id) {
-        //register for engine
-        go.setId(++this.lastGoId);
-        go.engine = this;
-        go.enable();
-        
-        //TODO: check for whether or not we're updating
-        if (this.updating) {
-            this.createdGos.push(go);
-        } else {
-            this.gos.push(go);
-        }
-        
-        //notify plugins
-        this.pluginsCreateGameObject(go);
-        
-        //notify object: todo: do this before or after notifying plugins?
-        var cbs = go.getCallbacks('create') || [];
-        for (var j = 0; j < cbs.length; j++) {
-            cbs[j]();
-        }
-        
-        return go;
-    }
-    
-    return false;
-};
-
-Javelin.Engine.prototype.__destroyGameObject = function(go) {
-    if (-1 !== go.id) {
-        //notify all contained destroy callbacks
-        var cbs = go.getCallbacks('destroy', true);
-        for (var j = 0; j < cbs.length; j++) {
-            cbs[j]();
-        }
-
-        //notify plugins
-        this.pluginsDestroyGameObject(go);
-        
-        //destroy children first
-        if(go.children) {
-            for (var i in go.children) {
-                this.__destroyGameObject(go.children[i]);
-            }
-        }
-        
-        //make sure this object is detached from any parents
-        if (go.parent) {
-            go.parent.removeChild(go);
-        }
-
-        //remove references
-        go.setId(-1);
-        go.disable();
-        go.engine = null;
-        
-        //remove from engine
-        var index = this.gos.indexOf(go);
-        this.gos.splice(index, 1);
-    }
-};
 
 Javelin.Engine.prototype.getGameObjectById = function(id) {
     var l = this.gos.length;
@@ -121,6 +56,7 @@ Javelin.Engine.prototype.getGameObjectById = function(id) {
             return this.gos[i];
         }
     }
+
     return false;
 };
 
@@ -142,13 +78,11 @@ Javelin.Engine.prototype.instantiatePrefab = function(name) {
 };
 
 Javelin.Engine.prototype.instantiateObject = function(def) {
-    
     var go = new Javelin.GameObject();
 
     go.name = def.name || "Anonymous";
 
     if (def.components) {
-        var components = [];
         for (var key in def.components) {
             var c = this.addComponentToGameObject(go, key);
             c.$unserialize(def.components[key]);
@@ -162,7 +96,7 @@ Javelin.Engine.prototype.instantiateObject = function(def) {
             var child = this.instantiateObject(def.children[i]);
             child.setParent(go);
         }
-    }    
+    }
     
     return go;
 };
@@ -194,15 +128,52 @@ Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
     var handlers = Javelin.getComponentChain(alias);
     l = handlers.length;
     for (i = 0; i < l; i++) {
+
+        //NOTE: if the format of components changes, this
+        //will need to be modified... easy change for the engine
+        //but sucks for users, need to figure out the best way
+        //of writing components ASAP
         handlers[i](go, comp);
+        
         comp.$inheritedAliases.push(handlers[i].alias);
     }
+    
     
     go.setComponent(alias, comp);
     
     return comp;
 };
 
+Javelin.Engine.prototype.__addGameObject = function(go) {
+    if (-1 === go.id) {
+        //register for engine
+        go.setId(++this.lastGoId);
+        go.engine = this;
+        go.enable();
+        
+        if (this.updating) {
+            this.createdGos.push(go);
+        } else {
+            this.gos.push(go);
+        }
+        
+        //TODO: move notification of plugins and create callbacks to only happen
+        //if !engine.updating
+        
+        //notify object
+        var cbs = go.getCallbacks('create') || [];
+        for (var j = 0; j < cbs.length; j++) {
+            cbs[j]();
+        }
+
+        //notify plugins
+        this.pluginsCreateGameObject(go);
+        
+        return go;
+    }
+    
+    return false;
+};
 
 //destroy an object (if the engine is updating, it will be destroyed after the update is done)
 Javelin.Engine.prototype.destroy = function(go) {
@@ -213,6 +184,50 @@ Javelin.Engine.prototype.destroy = function(go) {
     }
 };
 
+Javelin.Engine.prototype.__destroyGameObject = function(go) {
+    if (-1 !== go.id) {
+        var i;
+        //destroy children first
+        if(go.children) {
+            //copy into separate array so we can abandon now
+            var children = [];
+            for (i in go.children) {
+                children.push(go.children[i]);
+            }
+            go.abandonChildren();
+
+            //destroy children
+            for (i in children) {
+                this.__destroyGameObject(children[i]);
+            }
+        }
+        
+        //notify destroy callbacks
+        var cbs = go.getCallbacks('destroy');
+        for (i = 0; i < cbs.length; i++) {
+            cbs[i]();
+        }
+
+        //notify plugins
+        this.pluginsDestroyGameObject(go);
+        
+        //make sure this object is detached from any parents, 
+        //because we abandoned and deleted children already,
+        //this should only be the case if this go is a child of
+        //another object that is NOT being deleted
+        if (go.parent) {
+            go.parent.removeChild(go);
+        }
+
+        //remove references
+        go.setId(-1);
+        go.engine = null;
+        
+        //remove from engine
+        var index = this.gos.indexOf(go);
+        this.gos.splice(index, 1);
+    }
+};
 
 /* Game Loop & State */
 
@@ -281,6 +296,7 @@ Javelin.Engine.prototype.step = function() {
 Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
     var l = this.gos.length;
     for (var i = 0; i < l; i++) {
+
         //TODO: only process root level objects,
         //the callbacks can be retrieved recursively
         //for nested hierarchies, which will allow
@@ -336,19 +352,38 @@ Javelin.Engine.prototype.pluginsDestroyGameObject = function(go) {
 
 /* Scene management */
 
-Javelin.Engine.prototype.loadScene = function(definition, callback) {
-    this.resetPlugins();
+Javelin.Engine.prototype.getCurrentScene = function() {
+    return this.currentScene;
+};
+
+Javelin.Engine.prototype.loadScene = function(name, callback) {
     this.reset();
-
-    for (var name in definition.plugins) {
-        this.getPlugin(name).$unserialize(definition.plugins[name]);
+    var scene = Javelin.getScene(name);
+    
+    if(!scene) {
+        throw new Error("Tried loading unregistered scene: " + name);
     }
 
-    for (var i = 0; i < definition.objects.length; i++) {
-        this.instantiateObject(definition.objects[i]);
+    this.sceneDefinition = scene;
+    this.currentScene = name;
+    
+    for (var alias in scene.plugins) {
+        var config = !Javelin.isEmpty(scene.plugins[alias]) ? scene.plugins[alias] : {};
+        this.loadPlugin(alias, config);
     }
 
-    callback();
+    for (var i = 0; i < scene.objects.length; i++) {
+        this.instantiate(scene.objects[i]);
+    }
+    
+    if (callback) {
+        callback();
+    }
+};
+
+Javelin.Engine.prototype.unloadScene = function() {
+    this.unloadPlugins();
+    this.reset();
 };
 
 /* Asset management */
@@ -373,7 +408,7 @@ Javelin.Engine.prototype.loadPlugin = function(alias, config) {
     }
     
     if (Javelin.isEmpty(config) && handler.defaults) {
-        config = handler.defaults;
+        config = this.config.plugins[alias] || handler.defaults;
     }
     
     var plugin = new Javelin.EnginePlugin();

@@ -148,6 +148,6 @@ describe("Javelin Registry", function() {
         
         var prefab = j.getPrefab('f.nestedPrefab');
         assert.isObject(prefab);
-        assert.isString(prefab.children[0].name);
+        assert.strictEqual('f.testPrefab', prefab.children[0].name);
     });
 });

@@ -10,10 +10,14 @@ Javelin.GameObject = function () {
     this.components = {};               //component instances
     this.children = [];                 //child gameobject instances
     this.parent = null;                 //parent gameobject instance
-    this.root = false;
+
+//TODO: implement, if in a hierarchy, true if this is the root node
+    this.root = false;                  
     this.modified = false;              //whether or not the hierarchy or components have been modified
     this.ownCallbackCache = {};         //cached callbacks from own components
     this.allCallbackCache = {};         //cached callbacks from all children
+    this.tags = [];                     //TODO: implement
+    this.layer = 'default';             //TODO: implement
 };
 
 /* Lifecycle */
@@ -116,6 +120,8 @@ Javelin.GameObject.prototype.hasComponent = function(name) {
     return false;
 };
 
+//TODO: this may be very bad..., may need to disallow removal
+//of components
 Javelin.GameObject.prototype.removeComponent = function(name) {
     this.setModified();
     this.components[name] = null;
@@ -209,7 +215,7 @@ Javelin.GameObject.prototype.getCallbacks = function(eventName, recursive) {
 };
 
 Javelin.GameObject.prototype.rebuildCallbackCache = function() {
-    var key, cb, ownCallbacks = {};
+    var key, cb, i, ownCallbacks = {};
     for (var comp in this.components) {
         for (key in this.components[comp].$callbacks) {
             ownCallbacks[key] = ownCallbacks[key] || [];
@@ -223,13 +229,13 @@ Javelin.GameObject.prototype.rebuildCallbackCache = function() {
     var allCallbacks = {};
     for (key in ownCallbacks) {
         allCallbacks[key] = allCallbacks[key] || [];
-        for (cb in ownCallbacks[key]) {
-            allCallbacks[key].push(cb);
+        for (i in ownCallbacks[key]) {
+            allCallbacks[key].push(ownCallbacks[key][i]);
         }
     }
     
     //now add all callbacks from children
-    for (var i in this.children) {
+    for (i in this.children) {
         var child = this.children[i];
         
         if (child.modified) {
@@ -240,8 +246,8 @@ Javelin.GameObject.prototype.rebuildCallbackCache = function() {
         for (var eventName in child.allCallbackCache) {
             allCallbacks[eventName] = allCallbacks[eventName] || [];
             
-            for (cb in child.allCallbackCache[eventName]) {
-                allCallbacks[eventName].push(cb);
+            for (i in child.allCallbackCache[eventName]) {
+                allCallbacks[eventName].push(child.allCallbackCache[eventName][i]);
             }
         }
     }

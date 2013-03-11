@@ -13,10 +13,10 @@ Fixtures.Env = {};
 /* GO Components */
 
 Fixtures.Component.FooComponent = function(go, comp) {
-    comp.test = function() { return "foo"; };
     comp.numUpdates = 0;
     comp.started = false;
     comp.destroyed = false;
+    comp.test = function() { return "foo"; };
     
     comp.$on('create', function() {
         comp.started = true;
@@ -52,6 +52,12 @@ Fixtures.Component.QuxComponent = function(go, comp) {
 Fixtures.Component.QuxComponent.alias = 'f.qux';
 Fixtures.Component.QuxComponent.requires = ['f.foo','f.baz'];
 
+Fixtures.Component.BlahComponent = function(go, comp) {
+    comp.test = function() { return "blah"; };
+};
+Fixtures.Component.BlahComponent.alias = 'f.blah';
+Fixtures.Component.BlahComponent.inherits = 'f.foo';
+
 Fixtures.Component.ManagerComponent = function(go, comp) {
     var max = 4;
     var gos = [];
@@ -84,8 +90,12 @@ Fixtures.Plugin.TestPlugin = function(plugin, config) {
     plugin.initialized = false;
     plugin.goCount = 0;
     
-    plugin.$initialize = function() {
+    plugin.$onLoad = function() {
         plugin.initialized = true;
+    };
+    
+    plugin.$onUnload = function() {
+        plugin.initialized = false;
     };
     
     plugin.$onStep = function(deltaTime) {
@@ -133,7 +143,7 @@ Fixtures.Prefab.Prefab3 = {
         'f.foo': {}
     },
     children: [
-        'f.managerPrefab',
+        'f.testPrefab',
         {
             name: 'nested',
             components: {
@@ -141,6 +151,13 @@ Fixtures.Prefab.Prefab3 = {
             }
         }
     ]
+};
+
+Fixtures.Prefab.Prefab4 = {
+    name: 'f.prefab4',
+    components: {
+        'f.blah': {}
+    }
 };
 
 /* Test scene */
@@ -186,7 +203,7 @@ Fixtures.GameConfig = {
     autoregisterComponents: Fixtures.Component,
     plugins: {
         'f.test_plugin': {
-            foo: ''
+            foo: 'override'
         }
     }
 };

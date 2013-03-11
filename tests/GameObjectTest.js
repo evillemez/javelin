@@ -223,6 +223,23 @@ describe("GameObject", function() {
         assert.isFalse(parent.modified);
         assert.isFalse(child1.modified);
         assert.isFalse(child2.modified);
+        
+        //test actual getCallback method
+        var cbs;
+        cbs = parent.getCallbacks('update');
+        assert.strictEqual(2, cbs.length);
+        for (var i in cbs) {
+            assert.isFunction(cbs[i]);
+        }
+        cbs = parent.getCallbacks('update', true);
+        assert.strictEqual(6, cbs.length);
+        for (i in cbs) {
+            assert.isFunction(cbs[i]);
+        }
+        cbs = parent.getCallbacks('fooooooo');
+        assert.strictEqual(0, cbs.length);
+        cbs = parent.getCallbacks('fooooooo', true);
+        assert.strictEqual(0, cbs.length);
     });
 
     it("should export prefab structure of self", function () {
@@ -269,6 +286,14 @@ describe("GameObject", function() {
         
         //finally serialize
         assert.deepEqual(expected, parent.export());
+    });
+
+    it.skip("should properly mark the root object in a parent/child hierarchy", function() {
+        //test parent.getRoot() and child.getRoot(), and general obj.root
+    });
+
+    it.skip("should manage tags, and allow retrieving children by tag", function() {
+        //go.hasTag(), go.addTag(), go.removeTag(), go.getChildrenByTag(tag, recursive)
     });
 
     it.skip("should broadcast events to children", function(done) {

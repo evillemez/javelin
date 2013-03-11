@@ -49,7 +49,7 @@ describe("Javelin Engine", function() {
     });
     
     it("should properly load and unload plugins", function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
+        var e = getEngine();
         assert.isFalse(e.getPlugin('f.test_plugin'));
         
         e = getEngine();
@@ -59,12 +59,22 @@ describe("Javelin Engine", function() {
         assert.isTrue(p.$engine instanceof j.Engine);
         e.unloadPlugin('f.test_plugin');
         assert.isFalse(e.getPlugin('f.test_plugin'));
-        
+                
+        //config inherited from game config
         e.loadPlugin('f.test_plugin');
         p = e.getPlugin('f.test_plugin');
         assert.isTrue(p instanceof j.EnginePlugin);
+        assert.strictEqual('override', p.config.foo);
         e.unloadPlugins();
         assert.isFalse(e.getPlugin('f.test_plugin'));
+        
+        //load w/ config
+        e.loadPlugin('f.test_plugin', {
+            foo: 'I have a milkshake.'
+        });
+        p = e.getPlugin('f.test_plugin');
+        assert.strictEqual('I have a milkshake.', p.config.foo);
+        e.unloadPlugin();
     });
     
     it("should properly call plugins on step", function() {
@@ -82,12 +92,17 @@ describe("Javelin Engine", function() {
         
         //inheritence
         assert.isFalse(go.hasComponent('f.foo'));
-        assert.isFalse(go.hasComponent('f.bar'));
-        assert.isFalse(go.hasComponent('f.baz'));
-        e.addComponentToGameObject(go, 'f.baz');
+        assert.isFalse(go.hasComponent('f.blah'));
+        e.addComponentToGameObject(go, 'f.blah');
         assert.isTrue(go.hasComponent('f.foo'));
-        assert.isTrue(go.hasComponent('f.bar'));
-        assert.isTrue(go.hasComponent('f.baz'));
+        assert.isTrue(go.hasComponent('f.blah'));
+        var c1 = go.getComponent('f.foo');
+        var c2 = go.getComponent('f.blah');
+        assert.strictEqual(c1.$alias, c2.$alias);
+        
+        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.blah'));
+        assert.strictEqual(go.getComponent('f.foo').test(), 'blah');
+        assert.strictEqual(go.getComponent('f.blah').test(), 'blah');
         
         //requirements
         go = new j.GameObject();
@@ -99,128 +114,184 @@ describe("Javelin Engine", function() {
     });
     
     it("should instantiate and destroy game objects", function() {
+        var go;
         var obj = {
             name: "example",
             components: {
                 'f.foo': {}
             }
-        };
+        };        
+
+        var e = getEngine();
         
+        //instantiate prefab
+        assert.equal(0, e.gos.length);
+        go = e.instantiatePrefab('f.testPrefab');
+        assert.equal(1, e.gos.length);
+        assert.isTrue(go.hasComponent('sprite'));
+        assert.isTrue(go.hasComponent('transform2d'));
+        assert.equal(1, go.id);
+        e.destroy(go);
+        assert.equal(-1, go.id);
+        assert.equal(0, e.gos.length);
+
+        //instantiate object
+        go = e.instantiate(obj);
+        assert.equal(1, e.gos.length);
+        assert.equal(2, go.id);
+        assert.isTrue(go.hasComponent('f.foo'));
+        e.destroy(go);
+        assert.equal(-1, go.id);
+        assert.equal(0, e.gos.length);
+
         //regular instantiate, using both prefab reference
         //and object
-        var e = getEngine();
         assert.equal(0, e.gos.length);
-        var go = e.instantiate('f.testPrefab');
+        go = e.instantiate('f.testPrefab');
         assert.equal(1, e.gos.length);
-        assert.equal(1, go.id);
+        assert.equal(3, go.id);
         assert.isTrue(go.hasComponent('sprite'));
         assert.isTrue(go.hasComponent('transform2d'));
         e.destroy(go);
         assert.equal(-1, go.id);
-        
-        //start here, more thorough, include nested prefab
-        assert.isTrue(false);
-        /*
         assert.equal(0, e.gos.length);
+        
         go = e.instantiate(obj);
         assert.equal(1, e.gos.length);
-        assert.equal(1, go.id);
+        assert.equal(4, go.id);
+        assert.isTrue(go.hasComponent('f.foo'));
         e.destroy(go);
         assert.equal(-1, go.id);
         assert.equal(0, e.gos.length);
+    });
+    
+    it("should instantiate and destroy nested objects", function() {
+        var e = getEngine();
+        assert.strictEqual(e.gos.length, 0);
+        var go = e.instantiatePrefab('f.nestedPrefab');
+        assert.strictEqual(e.gos.length, 3);
+        assert.strictEqual(e.lastGoId, 3);
         
-        //prefab
-        assert.equal(0, e.gos.length);
-        go = e.instantiatePrefab('f.testPrefab');
-        assert.equal(1, e.gos.length);
-        assert.equal(1, go.id);
+        
+        assert.isTrue(go.hasChildren());
+        assert.strictEqual(go.id, 1);
+        assert.strictEqual(go.children.length, 2);
+
+        assert.strictEqual(go.children[0].id, 2);
+        assert.isTrue(go.children[0].hasParent());
+        assert.isTrue(go.children[0].hasComponent('transform2d'));
+        assert.strictEqual(go.children[1].id, 3);
+        assert.isTrue(go.children[1].hasParent());
+        assert.isTrue(go.children[1].hasComponent('f.foo'));
+        
         e.destroy(go);
-        assert.equal(-1, go.id);
-        assert.equal(0, e.gos.length);
-        */
+        assert.strictEqual(e.gos.length, 0);
+    });
+    
+    it("should retrieve objects by id", function() {
+        var e = getEngine();
+        e.instantiate('f.testPrefab');
+        e.instantiate('f.managerPrefab');
         
-        //object
+        var go = e.getGameObjectById(2);
+        assert.isTrue(go.hasComponent('f.manager'));
+        
+        go = e.getGameObjectById(1);
+        assert.isTrue(go.hasComponent('sprite'));
+        assert.isTrue(go.hasComponent('transform2d'));
+    });
+    
+    it("should load and unload scenes", function() {
+        var e = getEngine();
+        assert.isFalse(e.getCurrentScene());
+        e.loadScene('f.scene1');
+        assert.strictEqual('f.scene1', e.getCurrentScene());
+        e.unloadScene();
+        assert.isFalse(e.getCurrentScene());
+    });
+    
+    it("should initialize plugins upon loading scenes", function() {
+        var e = getEngine();
+        assert.isFalse(e.getPlugin('f.test_plugin'));
+        e.loadScene('f.scene1');
+        var p = e.getPlugin('f.test_plugin');
+        assert.isTrue(p instanceof j.EnginePlugin);
+        assert.isTrue(p.initialized);
+        assert.strictEqual('baz', p.config.foo);
+    });
+    
+    it("should instantiate game objects defined in a scene", function() {
+        var e = getEngine();
+        assert.strictEqual(e.gos.length, 0);
+        e.loadScene('f.scene1');
+        assert.strictEqual(e.gos.length, 3);
+    });
+
+    it("should call a callback upon loading a scene", function(done) {
+        var e = getEngine();
+        var called = false;
+
+        var testCalled = function() {
+            assert.isTrue(called);
+            assert.strictEqual(e.getCurrentScene(), 'f.scene1');
+            done();
+        };
+
+        var sceneCallback = function() {
+            called = true;
+            testCalled();
+        };
+        
+        
+        assert.isFalse(called);
+        assert.isFalse(e.getCurrentScene());
+        e.loadScene('f.scene1', sceneCallback);
     });
     
     it("should notify plugins on game object create and destroy", function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
-        e.addPlugin(f.TestPlugin);
+        var e = getEngine();
+        e.loadPlugin('f.test_plugin');
         var p = e.getPlugin('f.test_plugin');
-        assert.equal(0, p.goCount);
-        var go = new j.GameObject(); 
-        e.__addGameObject(go);
-        assert.equal(1, p.goCount);
-        e.__destroyGameObject(go);
-        assert.equal(0, p.goCount);
+        assert.strictEqual(0, p.goCount);
+        
+        //test one
+        var go = e.instantiate('f.testPrefab');
+        assert.strictEqual(1, p.goCount);
+        
+        //test nested
+        var nested = e.instantiate('f.nestedPrefab');
+        assert.strictEqual(4, p.goCount);
+        
+        e.destroy(go);
+        assert.strictEqual(3, p.goCount);
+        
+        e.destroy(nested);
+        assert.strictEqual(0, p.goCount);
     });
     
     it("should call game object on update", function() {
-        j.registerComponent(f.Component.FooComponent);
-        j.initialize();
-        
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
-        var go = e.__addGameObject(new j.GameObject());
-        go.addComponent(f.Component.FooComponent);
+            
+        var e = getEngine();
+        var go = e.instantiate('f.prefab4');
         assert.equal(0, go.getComponent('f.foo').numUpdates);
         e.step();
         assert.equal(1, go.getComponent('f.foo').numUpdates);
     });
     
     it("should call game object on create and destroy", function() {
-        j.registerComponent(f.Component.FooComponent);
-        j.initialize();
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
-        var go = new j.GameObject();
-        var comp = go.addComponent(f.Component.FooComponent);
-        assert.isFalse(comp.started);
-        assert.isFalse(comp.destroyed);
-        
-        e.__addGameObject(go);
-        assert.isTrue(comp.started);
-        e.__destroyGameObject(go);
-        assert.isTrue(comp.destroyed);
+        var e = getEngine();
+        var go = e.instantiate('f.prefab4');
+        var c = go.getComponent('f.blah');
+        assert.isTrue(c.started);
+        assert.isFalse(c.destroyed);
+        e.destroy(go);
+        assert.isTrue(c.destroyed);        
     });
-    
-    it("should properly call callback upon loading a scene", function() {
-        j.registerComponent(f.Component.FooComponent);
-        j.registerComponent(f.Component.BarComponent);
-        j.registerComponent(f.BazComponent);
-        j.registerComponent(f.QuxComponent);
-        j.initialize();
-        
-        var called = false;
-        var cb = function() {
-            called = true;
-        };
-        
-        assert.isFalse(called);
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
-        e.loadScene(f.Scene1, cb);
-        assert.isTrue(called);
-    });
-    
-    it("should properly instantiate game objects from prefab definitions", function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
-        j.registerComponent(j.Component.Transform2d);
-        j.registerComponent(j.Component.Sprite);
-        j.initialize();
-        
-        var go = e.instantiateObject(f.Prefab1);
-        assert.isTrue(go instanceof j.GameObject);
-        assert.isTrue(go.getComponent('transform2d') instanceof j.GameObjectComponent);
-        assert.isTrue(go.getComponent('sprite') instanceof j.GameObjectComponent);
-    });
-    
+            
     it("should properly instantiate and destroy game objects during update step", function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
-        j.registerComponent(f.Component.FooComponent);
-        j.registerComponent(f.Component.BarComponent);
-        j.registerComponent(f.BazComponent);
-        j.registerComponent(f.QuxComponent);
-        j.registerComponent(f.ManagerComponent);
-        j.initialize();
+        var e = getEngine();
         assert.equal(0, e.gos.length);
-        e.instantiateObject(f.Prefab2);
+        e.instantiatePrefab('f.managerPrefab');
         assert.equal(5, e.gos.length);
         e.step();
         assert.equal(4, e.gos.length);
@@ -233,35 +304,5 @@ describe("Javelin Engine", function() {
         e.step();
         assert.equal(0, e.gos.length);
     });
-    
-    it("should instantiate prefabs when requested as a string", function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
-        j.registerPrefab(f.Prefab1);
-        j.initialize();
-        var go = e.instantiate('Test Object');
-        assert.isTrue(go instanceof j.GameObject);
-        assert.isTrue(go.getComponent('transform2d') instanceof j.GameObjectComponent);
-    });
-    
-    it("should load a scene when requested as a string");
-    
-    it("should instantiate necessary plugins upon loading initial config", function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), f.GameConfig);
-        assert.isFalse(e.getPlugin('canvas2d'));
-        e.initialize();
-        assert.isTrue(e.getPlugin('canvas2d') instanceof j.EnginePlugin);
-    });
-    
-    it("should automatically register scenes, prefabs, components and plugins from config upon initialization", function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), f.GameConfig);
-        assert.isFalse(j.getPluginHandler('f.test_plugin'));
-        e.initialize();
-        assert.isFunction(j.getPluginHandler('f.test_plugin'));
-    });
-    
-    it("should properly create and add components to game objects");
-        
-    it("should properly initialize plugins upon loading a scene");
-    
-    it("should instantiate add game objects defined in a scene");
+                
 });
