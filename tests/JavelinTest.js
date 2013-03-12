@@ -3,12 +3,14 @@
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
-var j = require('../build/javelin.js');
-var f = require('./fixtures/fixtures.js');
 
 describe("Javelin Registry", function() {
-
+    
+    var j, f;
+    
     beforeEach(function() {
+        j = require('../build/javelin.js');
+        f = require('./fixtures/fixtures.js');
         j.reset();
     });
     
@@ -141,6 +143,7 @@ describe("Javelin Registry", function() {
         j.registerPrefab(f.Prefab.Prefab1);
         j.registerPrefab(f.Prefab.Prefab2);
         j.registerPrefab(f.Prefab.Prefab3);
+
         assert.isString(f.Prefab.Prefab3.children[0]);
         assert.isUndefined(f.Prefab.Prefab3.children[0].name);
 

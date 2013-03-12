@@ -5,7 +5,8 @@
 Javelin.Engine = function(environment, config) {
     //this should persist
     this.config = config;
-    this.debug = false;
+    this.debug = config.debug || false;
+    this.targetFps = config.stepsPerSecond || 1000/30;
     this.environment = environment;
     this.environment.engine = this;
 
@@ -17,7 +18,9 @@ Javelin.Engine.prototype.reset = function() {
     //general state
     this.running = false;
     this.updating = false;
-    
+    this.isRunningSlowly = false;
+    this.currentFps = 0.0;
+    this.lastUpdateTimeTaken = 0.0;
     //game object
     this.gos = [];
     this.lastGoId = 0;
@@ -41,10 +44,6 @@ Javelin.Engine.prototype.reset = function() {
     if (this.config.loader) {
         this.loader = new Javelin.AssetLoader(this.config.loader.assetUrl || '');
     }
-};
-
-Javelin.Engine.prototype.processConfig = function(config) {
-
 };
 
 /* Managing Game Objects */
@@ -268,7 +267,7 @@ Javelin.Engine.prototype.initialize = function() {
 
 Javelin.Engine.prototype.run = function() {
     this.running = true;
-    this.environment.run();
+    this.environment.run(this.targetFps);
 };
 
 Javelin.Engine.prototype.stop = function() {
@@ -283,14 +282,29 @@ Javelin.Engine.prototype.step = function() {
     this.time = new Date().getTime();
     this.deltaTime = this.time - this.prevStepTime;
     
+    //TODO: pre-update plugins
+    
     this.updateGameObjects(this.deltaTime);
+    
+    //TODO: post-update plugins
+
+    this.updatePlugins(this.deltaTime);
+    this.updating = false;
 
     //clean now, so plugins can update with proper go array
     this.cleanupStep();
 
-    this.updatePlugins(this.deltaTime);
-    this.updating = false;
-        
+    this.lastUpdateTimeTaken = new Date().getTime() - this.time;
+    
+    if(this.lastUpdateTimeTaken > this.targetFps) {
+        this.isRunningSlowly = true;
+    } else {
+        this.isRunningSlowly = false;
+    }
+    
+    if (this.debug) {
+        console.log("Updated  " + this.gos.length + ' gos in ' + this.lastUpdateTimeTaken + ' targeting ' + this.targetFps + ' fps.');
+    }
 };
 
 Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
@@ -367,9 +381,17 @@ Javelin.Engine.prototype.loadScene = function(name, callback) {
     this.sceneDefinition = scene;
     this.currentScene = name;
     
-    for (var alias in scene.plugins) {
-        var config = !Javelin.isEmpty(scene.plugins[alias]) ? scene.plugins[alias] : {};
-        this.loadPlugin(alias, config);
+    //load plugins defined in scene - otherwise, check main config
+    var alias;
+    if (scene.plugins) {
+        for (alias in scene.plugins) {
+            var config = !Javelin.isEmpty(scene.plugins[alias]) ? scene.plugins[alias] : {};
+            this.loadPlugin(alias, config);
+        }
+    } else {
+        for (alias in this.config.plugins) {
+            this.loadPlugin(alias, {});
+        }
     }
 
     for (var i = 0; i < scene.objects.length; i++) {
@@ -407,7 +429,7 @@ Javelin.Engine.prototype.loadPlugin = function(alias, config) {
         throw new Error("Required plugin [" + alias + "] not registered.");
     }
     
-    if (Javelin.isEmpty(config) && handler.defaults) {
+    if (Javelin.isEmpty(config)) {
         config = this.config.plugins[alias] || handler.defaults;
     }
     

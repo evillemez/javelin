@@ -3,11 +3,17 @@
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
-var j = require('../build/javelin.js');
-var f = require('./fixtures/fixtures.js');
 
 describe("Javelin Engine", function() {
     
+    var j, f;
+    
+    beforeEach(function() {
+        j = require('../build/javelin.js');
+        f = require('./fixtures/fixtures.js');
+        j.reset();
+    });
+
     //for convenience
     var getEngine = function() {
         var e = new j.Engine(new f.Env.TestEnvironment(), f.GameConfig);
@@ -19,11 +25,7 @@ describe("Javelin Engine", function() {
         var e = new j.Engine(new f.Env.TestEnvironment(), {});
         e.initialize();
         return e;
-    };
-    
-    beforeEach(function() {
-        j.reset();
-    });
+    };    
     
     it("should instantiate with game configuration and environment", function() {
         var e = new j.Engine(new f.Env.TestEnvironment(), f.GameConfig);

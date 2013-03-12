@@ -3,10 +3,16 @@
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
-var j = require('../build/javelin.js');
-var f = require('./fixtures/fixtures.js');
 
 describe("GameObject", function() {
+    
+    var j, f;
+    
+    beforeEach(function() {
+        j = require('../build/javelin.js');
+        f = require('./fixtures/fixtures.js');
+        j.reset();
+    });
     
     it("should instantiate properly", function() {
         var go = new j.GameObject();

@@ -16,6 +16,6 @@ Javelin.Environment.prototype.initialize = function() {};
 
 Javelin.Environment.prototype.validatePlugin = function(plugin) {};
 
-Javelin.Environment.prototype.run = function() {};
+Javelin.Environment.prototype.run = function(stepsPerSecond) {};
 
 Javelin.Environment.prototype.stop = function() {};

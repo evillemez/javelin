@@ -3,9 +3,16 @@
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
-var j = require('../build/javelin.js');
 
 describe("GameObjectComponent", function() {
+    
+    var j;
+    
+    beforeEach(function() {
+        j = require('../build/javelin.js');
+        j.reset();
+    });
+    
     it("should return false if requested callback does not exist", function() {
         var c = new j.GameObjectComponent();
         assert.isFalse(c.$getCallback("update"));

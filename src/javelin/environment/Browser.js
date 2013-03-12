@@ -9,12 +9,12 @@ manner.
 
 Javelin.Env.Browser = function(config) {
     this.config = config;
-    this.engine = {};
+    this.engine = null;
 };
 
 Javelin.Env.Browser.prototype = new Javelin.Environment();
 
-Javelin.Env.Browser.prototype.run = function() {
+Javelin.Env.Browser.prototype.run = function(stepsPerSecond) {
     var engine = this.engine;
     setInterval(function() {
         try {
@@ -22,5 +22,5 @@ Javelin.Env.Browser.prototype.run = function() {
         } catch (e) {
             console.log(e);
         }
-    }, 1000/30);
+    }, stepsPerSecond);
 };
