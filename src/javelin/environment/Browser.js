@@ -1,4 +1,4 @@
-/*global Javelin:true */
+/*global Javelin:true alert:true */
 
 /*
 An interface (or something) for functionality that must be implemented in an environment-specific
@@ -21,6 +21,10 @@ Javelin.Env.Browser.prototype.run = function(stepsPerSecond) {
             engine.step();
         } catch (e) {
             console.log(e);
+
+            if (this.engine.debug) {
+                alert(e);
+            }
         }
     }, stepsPerSecond);
 };

@@ -58,7 +58,7 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
 
                     if (s.image instanceof Javelin.Asset.AtlasImage) {
                         var spr = s.image;
-                        ctx.drawImage(spr.image, pos.x, pos.y, spr.width, spr.height, pos.x + spr.cx, pos.y + spr.cy, spr.width, spr.height);
+                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, pos.x + spr.cx, pos.y + spr.cy, spr.width, spr.height);
                     } else {
                         ctx.drawImage(s.image, pos.x, pos.y);
                     }
