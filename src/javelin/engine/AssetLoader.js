@@ -47,6 +47,10 @@ Javelin.AssetLoader = function(basePath) {
         loader.loadAssetAsType(relPath, 'json', loadJsonCallback);
     };
     
+    var tiledMapLoader = function(loader, relPath, absPath, callback) {
+        throw new Error("Tiled map loading not yet implemented.");
+    };
+    
     //generic json file loader
     var jsonLoader = function(loader, relPath, absPath, callback) {
         var xhr = new XMLHttpRequest();
@@ -72,6 +76,7 @@ Javelin.AssetLoader = function(basePath) {
         'png': imageLoader,
         'jpg': imageLoader,
         'atlas.json': imageAtlasLoader,
+        'map.json': tiledMapLoader,
         'json': jsonLoader,
         'ogg': soundLoader,
         'mp3': soundLoader
@@ -142,8 +147,8 @@ Javelin.AssetLoader.prototype.loadAssets = function(arr, callback) {
     //load individual asset, calling custom register function when done
     for (var i in arr) {
 
-        //warning: yes, I'm creating a function in a loop, and it's probably bad,
-        //feel free to refactor :)
+        //warning: yes, I'm creating a function in a loop, and jshint tells
+        //me it's bad, feel free to refactor :)
         this.loadAsset(arr[i], function(obj) {
             register(arr[i], obj);
         });
