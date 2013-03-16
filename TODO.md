@@ -18,10 +18,6 @@ Things that I'll be working on in the near-term, organized by category.
 * implement a default *loading* scene, easily overwritten by game config
     * actually treat it like any other scene
 
-### Core ###
-
-Some items related to the core code in `src/javelin/engine`.
-
 ### Engine ###
 
 * implement pre/post update plugin loops - a plugin should specify where it belongs
