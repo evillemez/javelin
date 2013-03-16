@@ -88,10 +88,125 @@ describe("Javelin Engine", function() {
         assert.equal(1, p.stepCount);
     });
     
-    it.skip("should properly add game object components to game objects", function() {
-        //TODO: need much better tests here, test for equality between components as well
+    it("should properly add game object components to game objects", function() {
+        var e = getEngine();
+        var go;
+        
+        //basic inheritence
+        go = new j.GameObject();
+        assert.isFalse(go.hasComponent('f.foo'));
+        assert.isFalse(go.hasComponent('f.bar'));
+        assert.isFalse(go.hasComponent('f.baz'));
+        e.addComponentToGameObject(go, 'f.baz');
+        assert.isTrue(go.hasComponent('f.foo'));
+        assert.isTrue(go.hasComponent('f.bar'));
+        assert.isTrue(go.hasComponent('f.baz'));
+        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.bar'));
+        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.baz'));
+        assert.deepEqual(go.getComponent('f.bar'), go.getComponent('f.baz'));
+        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.foo'));
+        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.bar'));
+        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.baz'));
+        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.bar'));
+        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.foo'));
+        assert.isTrue(go.getComponent('f.foo').$instanceOf('f.foo'));
+
+        //basic requirements
+        go = new j.GameObject();
+        assert.isFalse(go.hasComponent('f.blar'));
+        assert.isFalse(go.hasComponent('f.blag'));
+        assert.isFalse(go.hasComponent('f.blaz'));
+        e.addComponentToGameObject(go, 'f.blaz');
+        assert.isTrue(go.hasComponent('f.blar'));
+        assert.isTrue(go.hasComponent('f.blag'));
+        assert.isTrue(go.hasComponent('f.blaz'));
+        
+        //complex add - inherits from components that require other components, which inherit from others
+        go = new j.GameObject();
+        assert.isFalse(go.hasComponent('f.foo'));
+        assert.isFalse(go.hasComponent('f.bar'));
+        assert.isFalse(go.hasComponent('f.baz'));
+        assert.isFalse(go.hasComponent('f.blar'));
+        assert.isFalse(go.hasComponent('f.blag'));
+        assert.isFalse(go.hasComponent('f.blaz'));
+        assert.isFalse(go.hasComponent('f.quip'));
+        assert.isFalse(go.hasComponent('f.shqip'));
+        e.addComponentToGameObject(go, 'f.shqip');
+        assert.isTrue(go.hasComponent('f.foo'));
+        assert.isTrue(go.hasComponent('f.bar'));
+        assert.isTrue(go.hasComponent('f.baz'));
+        assert.isTrue(go.hasComponent('f.blar'));
+        assert.isTrue(go.hasComponent('f.blag'));
+        assert.isTrue(go.hasComponent('f.blaz'));
+        assert.isTrue(go.hasComponent('f.quip'));
+        assert.isTrue(go.hasComponent('f.shqip'));
+        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.bar'));
+        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.baz'));
+        assert.deepEqual(go.getComponent('f.bar'), go.getComponent('f.baz'));
+        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.foo'));
+        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.bar'));
+        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.baz'));
+        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.bar'));
+        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.foo'));
+        assert.isTrue(go.getComponent('f.foo').$instanceOf('f.foo'));
+        assert.isTrue(go.getComponent('f.quip').$instanceOf('f.blav'));
+        assert.deepEqual(go.getComponent('f.quip'), go.getComponent('f.blav'));
     });
     
+    it("should instantiate objects with proper components", function() {
+        //TODO: similar test as above, but configuring multiple components
+        var e = getEngine();
+        var obj = {
+            name: 'test',
+            components: {
+                'f.bar': {
+                    foo: 'blip',
+                },
+                'f.blar': {
+                    bar: 'bling'
+                },
+                'f.shqip': {},
+                'f.blav': {
+                    baz: 'turtles'
+                }
+            }
+        };
+        
+        var go = e.instantiateObject(obj);
+        
+        //assert all the things...  ALL OF THEM!
+        
+        assert.isTrue(go.hasComponent('f.foo'));
+        assert.isTrue(go.hasComponent('f.bar'));
+        assert.isTrue(go.hasComponent('f.baz'));
+        assert.isTrue(go.hasComponent('f.blar'));
+        assert.isTrue(go.hasComponent('f.blag'));
+        assert.isTrue(go.hasComponent('f.blaz'));
+        assert.isTrue(go.hasComponent('f.quip'));
+        assert.isTrue(go.hasComponent('f.shqip'));
+        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.bar'));
+        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.baz'));
+        assert.deepEqual(go.getComponent('f.bar'), go.getComponent('f.baz'));
+        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.foo'));
+        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.bar'));
+        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.baz'));
+        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.bar'));
+        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.foo'));
+        assert.isTrue(go.getComponent('f.foo').$instanceOf('f.foo'));
+        assert.isTrue(go.getComponent('f.quip').$instanceOf('f.blav'));
+        assert.deepEqual(go.getComponent('f.quip'), go.getComponent('f.blav'));
+        assert.strictEqual('blip', go.getComponent('f.foo').foo);
+        assert.strictEqual('blip', go.getComponent('f.bar').foo);
+        assert.strictEqual('blip', go.getComponent('f.baz').foo);
+        assert.strictEqual(1, go.getCallbacks('update').length);
+        assert.strictEqual('baz', go.getComponent('f.foo').test());
+        
+        //NOTE: even though the object has 'f.baz', when it exports it will
+        //export under the alias of 'f.bar', because it was added first, and
+        //shouldn't be overwritten ... see comments in `GameObject.setComponent`
+        
+    });
+
     it("should instantiate and destroy game objects", function() {
         var go;
         var obj = {

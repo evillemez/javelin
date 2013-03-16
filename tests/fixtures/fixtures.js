@@ -55,9 +55,26 @@ Fixtures.Component.BlahComponent.alias = 'f.blah';
 Fixtures.Component.BlahComponent.inherits = 'f.foo';
 
 /* GO Components with requirements */
+Fixtures.Component.Blar = function() {};
+Fixtures.Component.Blar.alias = 'f.blar';
+Fixtures.Component.Blag = function() {};
+Fixtures.Component.Blag.alias = 'f.blag';
+Fixtures.Component.Blaz = function() {};
+Fixtures.Component.Blaz.alias = 'f.blaz';
+Fixtures.Component.Blaz.requires = ['f.blar','f.blag'];
+Fixtures.Component.Blav = function() {};
+Fixtures.Component.Blav.alias = 'f.blav';
+Fixtures.Component.Blav.requires = ['f.blar', 'f.blaz'];
 
 /* GO Components with inheritence & requirements */
 
+Fixtures.Component.Quip = function() {};
+Fixtures.Component.Quip.alias = 'f.quip';
+Fixtures.Component.Quip.inherits = 'f.blav';
+Fixtures.Component.Quip.requires = ['f.blaz'];
+Fixtures.Component.Shqip = function() {};
+Fixtures.Component.Shqip.alias = 'f.shqip';
+Fixtures.Component.Shqip.requires = ['f.quip', 'f.baz'];
 
 Fixtures.Component.ManagerComponent = function(go, comp) {
     var max = 4;

@@ -101,6 +101,9 @@ Javelin.Engine.prototype.instantiateObject = function(def) {
     return go;
 };
 
+//NOTE: this needs to be as optimized as possible, I think some work could
+//be done here - maybe more work during Javelin.initialize() could prevent
+//certain checks here... maybe not, look into it at some point
 Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
     if (go.hasComponent(alias)) {
         return go.getComponent(alias);
@@ -118,15 +121,28 @@ Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
         throw new Error("Unknown component [" + alias + "] requested");
     }
 
-    //instantiate new component instance
-    var comp = new Javelin.GameObjectComponent();
-    comp.$id = go.id;
-    comp.$go = go;
-    comp.$alias = handler.alias;
     
-    //call hierarchy in proper inheritence order
     var handlers = Javelin.getComponentChain(alias);
     l = handlers.length;
+    var comp;
+
+    //get inherited instance if it exists, or create new instance
+    //TODO: this maybe could be made more performant by implementing a reference
+    //map in GameObject (separate from the components map)
+    for (i = 0; i < l; i++) {
+        if (comp = go.getComponent(handlers[i].alias)) {
+            break;
+        }
+    }
+    if (!comp) {
+        comp = new Javelin.GameObjectComponent();
+        comp.$id = go.id;
+        comp.$go = go;
+    }
+    
+    comp.$alias = handler.alias;
+
+    //call hierarchy in proper inheritence order
     for (i = 0; i < l; i++) {
 
         //NOTE: if the format of components changes, this
@@ -137,7 +153,6 @@ Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
         
         comp.$inheritedAliases.push(handlers[i].alias);
     }
-    
     
     go.setComponent(alias, comp);
     
@@ -160,6 +175,7 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
         //TODO: move notification of plugins and create callbacks to only happen
         //if !engine.updating
         
+        //TODO: move this to do a recursive create on an instantiated object
         //notify object
         var cbs = go.getCallbacks('create') || [];
         for (var j = 0; j < cbs.length; j++) {
@@ -306,7 +322,7 @@ Javelin.Engine.prototype.step = function() {
     }
     
     if (this.debug) {
-        console.log("Updated  " + this.gos.length + ' gos in ' + this.lastUpdateTimeTaken + ' targeting ' + this.targetFps + ' fps.');
+        console.log("Updated  " + this.gos.length + ' gos in ' + this.lastUpdateTimeTaken + 'ms, targeting ' + Math.floor(this.targetFps) + ' fps; DT: ' + this.deltaTime + ' seconds.');
     }
 };
 

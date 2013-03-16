@@ -35,7 +35,8 @@ Javelin.reset = function() {
 };
 
 /* utility methods: note that these are for checking LITERALS only, as they are used internally
-quite a bit, and have an expected format */
+quite a bit, and have an expected format, there may be edge cases where these don't give the
+expected result */
 
 Javelin.isString = function(value) {
     return typeof value === 'string';
@@ -187,6 +188,13 @@ Javelin.buildComponentRequirements = function(handler) {
                         exists = true;
                     }
                 }
+
+                //also, don't add if it will be included via inheritence anyway
+                var inherited = Javelin.getComponentChain(handler.requires[i]);
+                if (-1 !== inherited.indexOf(handler.requires[i])) {
+                    exists = true;
+                }
+                
                 if (!exists) {
                     getRequirements(handler.requires[i]);
                     reqs.push(Javelin.getComponentHandler(handler.requires[i]));

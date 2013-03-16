@@ -205,7 +205,7 @@ describe("Javelin Registry", function() {
         assert.isFunction(j.getPluginHandler('f.test_plugin'));
     });
 
-    it.skip("should properly assemble component chain on initialize()", function() {
+    it("should properly assemble component chain on initialize()", function() {
         j.registerComponent(f.Component.FooComponent);
         j.registerComponent(f.Component.BarComponent);
         j.registerComponent(f.Component.BazComponent);
@@ -237,34 +237,31 @@ describe("Javelin Registry", function() {
         assert.deepEqual(expectedQux, j.getComponentChain('f.qux'));
     });
     
-    it.skip("should properly assemble component requirements on initialize()", function() {
-        j.registerComponent(f.Component.FooComponent);
-        j.registerComponent(f.Component.BarComponent);
-        j.registerComponent(f.Component.BazComponent);        
-        j.registerComponent(f.Component.QuxComponent);
+    it("should properly assemble component requirements on initialize()", function() {
+        j.registerComponent(f.Component.Blar);
+        j.registerComponent(f.Component.Blag);
+        j.registerComponent(f.Component.Blaz);
+        j.registerComponent(f.Component.Blav);
         j.initialize();
         
-        var expectedFoo = [];
+        var expectedBlar = [];
+        var expectedBlag = [];
         
-        var expectedBar = [
-            f.Component.FooComponent
+        var expectedBlaz = [
+            f.Component.Blar,
+            f.Component.Blag
         ];
         
-        var expectedBaz = [
-            f.Component.FooComponent,
-            f.Component.BarComponent
+        var expectedBlav = [
+            f.Component.Blar,
+            f.Component.Blag,
+            f.Component.Blaz,
         ];
         
-        var expectedQux = [
-            f.Component.FooComponent,
-            f.Component.BarComponent,
-            f.Component.BazComponent
-        ];
-        
-        assert.deepEqual(expectedFoo, j.getComponentRequirements('f.foo'));
-        assert.deepEqual(expectedBar, j.getComponentRequirements('f.bar'));
-        assert.deepEqual(expectedBaz, j.getComponentRequirements('f.baz'));
-        assert.deepEqual(expectedQux, j.getComponentRequirements('f.qux'));
+        assert.deepEqual(expectedBlar, j.getComponentRequirements('f.blar'));
+        assert.deepEqual(expectedBlag, j.getComponentRequirements('f.blag'));
+        assert.deepEqual(expectedBlaz, j.getComponentRequirements('f.blaz'));
+        assert.deepEqual(expectedBlav, j.getComponentRequirements('f.blav'));
     });
 
     it("should register Javelin objects upon intialize()", function() {
@@ -285,8 +282,11 @@ describe("Javelin Registry", function() {
     });
     
     it("should properly unpack prefab definitions upon initialize()", function() {
+
         //this is a bit of a hack to force node.js to re-require the original file
-        //which should include prefabs that reference other prefabs as strings
+        //which should include prefabs that reference other prefabs as strings,
+        //if I don't this, the test fails when run with other tests because the
+        //included fixture prefabs get modified directly
         var name = require.resolve('./fixtures/fixtures.js');
         delete require.cache[name];
 

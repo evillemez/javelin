@@ -77,6 +77,8 @@ detailed output.
 
 If you run `grunt watch`, then any time you edit a test or code file, all of the build tasks mentioned here will be run automatically.
 
+There is also an IRC channel on freenode at `#javelinjs`.
+
 ## Working TODO ##
 
 See `TODO.md`
