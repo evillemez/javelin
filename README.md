@@ -8,7 +8,7 @@ Javelin is a component-based game engine that can be deployed in the browser, an
 
 As it is component-based, other libraries can be substituted for the ones provide with the default implementation.  Currently,
 the project only provides engine components and plugins for creating 2d games.  However, it will be expanded over time to provide
-plugins for [*Three.js*]() and [*Cannnon.js*]() to also allow for the creation of 3d games.
+plugins for [*Three.js*](http://mrdoob.github.com/three.js/) and [*Cannon.js*](http://schteppe.github.com/cannon.js/) to also allow for the creation of 3d games.
 
 > Note: this is very much a work in progress, though the core is generally stable.   However, until there are more plugins and components, it will be minimally useful.
 
@@ -43,7 +43,7 @@ included with the engine are:
     * *spriteAnimator* - A component for defining animations for a sprite comprised of multiple images
     * *rigidbody2d (planned)* - Requires *transform2d*, is processed by the *Box2d* plugin for simulating 2d physics
     * *transform3d (planned)* - Contains 3d spatial data regarding position and rotation
-    * *renderer3d (planned)* - Requires the *transform* component, and contains objects required by the *ThreeJs* plugin to visually render a given object
+    * *renderer3d (planned)* - Contains objects required by the *ThreeJs* plugin to render a given object
     * *rigidbody3d (planned)* - Requires the *transform3d* component, is proccessed by the *CannonJs* plugin to simulate 3d physics
 * **Engine Environment** - The engine "runs" in the context of an environment.  So far there are only two: *browser* and *server*. 
 This allows the engine to reconfigure certain internal aspects, like asset loading and plugin activation, based on the environment in 
@@ -69,4 +69,4 @@ automate tasks like *linting*, *concatenation*, *minification* and *testing*.  I
 installed you can simply run `grunt watch` and start editing files.  New builds will be published in `builds/` automatically, and
 you'll be notified of failing tests and bad syntax.
 
-The tests are run with mocha, using node's built-in assertion library.  They are pretty basic, and probably lacking for now.
+The tests are run with mocha, using the *chai* assertion library.  They are pretty basic, and probably lacking for now.

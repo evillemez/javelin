@@ -4,8 +4,13 @@ The general TODO list for various subsystems and what not.  Testing doesn't get 
 
 **The short list:**
 
+* autoinitialize
+* more Javelin tests for resolving inheritence and requirements
+* change deltaTime format to seconds
+    * calculate delta time in the environment, pass to `engine.step`
 * Tiled map loading
-* player input
+* player input component
+* box2d component
 
 ## Near-term ##
 
@@ -24,6 +29,7 @@ Some items related to the core code in `src/javelin/engine`.
 
 * implement pre/post update plugin loops - a plugin should specify where it belongs
 * implement engine-level event dispatching
+* load requiredAssets before calling scene load callback
 
 ### Environments ###
 
@@ -39,7 +45,7 @@ Some items related to the core code in `src/javelin/engine`.
         will have to document the necessary format for the callback
         * GO event - standard api for listeners, probably same as engine-level event system
 
-## Plugins ##
+### Plugins ###
 
 * Player input
 * Box2d
