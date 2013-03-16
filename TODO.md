@@ -4,10 +4,7 @@ The general TODO list for various subsystems and what not.  Testing doesn't get 
 
 **The short list:**
 
-* autoinitialize
 * more Javelin tests for resolving inheritence and requirements
-* change deltaTime format to seconds
-    * calculate delta time in the environment, pass to `engine.step`
 * Tiled map loading
 * player input component
 * box2d component

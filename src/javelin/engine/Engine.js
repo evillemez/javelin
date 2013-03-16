@@ -9,6 +9,7 @@ Javelin.Engine = function(environment, config) {
     this.targetFps = config.stepsPerSecond || 1000/30;
     this.environment = environment;
     this.environment.engine = this;
+    this.initialized = false;
 
     //everything else can be reset
     this.reset();
@@ -263,6 +264,8 @@ Javelin.Engine.prototype.initialize = function() {
     Javelin.initialize();
     
     //TODO: load required assets
+    
+    this.initialized = true;
 };
 
 Javelin.Engine.prototype.run = function() {
@@ -372,6 +375,11 @@ Javelin.Engine.prototype.getCurrentScene = function() {
 
 Javelin.Engine.prototype.loadScene = function(name, callback) {
     this.reset();
+    
+    if(!this.initialized) {
+        this.initialize();
+    }
+    
     var scene = Javelin.getScene(name);
     
     if(!scene) {

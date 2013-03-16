@@ -10,7 +10,7 @@ Fixtures.Scene = {};
 Fixtures.Plugin = {};
 Fixtures.Env = {};
 
-/* GO Components */
+/* GO Components with inheritence */
 
 Fixtures.Component.FooComponent = function(go, comp) {
     comp.numUpdates = 0;
@@ -31,32 +31,33 @@ Fixtures.Component.FooComponent = function(go, comp) {
     });
 };
 Fixtures.Component.FooComponent.alias = 'f.foo';
-
 Fixtures.Component.BarComponent = function(go, comp) {
     comp.test = function() { return "bar"; };
 };
 Fixtures.Component.BarComponent.alias = 'f.bar';
 Fixtures.Component.BarComponent.inherits = 'f.foo';
-Fixtures.Component.BarComponent.requires = ['f.foo'];
 
 Fixtures.Component.BazComponent = function(go, comp) {
     comp.test = function() { return "baz"; };
 };
 Fixtures.Component.BazComponent.alias = 'f.baz';
 Fixtures.Component.BazComponent.inherits = 'f.bar';
-Fixtures.Component.BazComponent.requires = ['f.bar'];
         
 Fixtures.Component.QuxComponent = function(go, comp) {
     comp.test = function() { return "qux"; };
 };
 Fixtures.Component.QuxComponent.alias = 'f.qux';
-Fixtures.Component.QuxComponent.requires = ['f.foo','f.baz'];
 
 Fixtures.Component.BlahComponent = function(go, comp) {
     comp.test = function() { return "blah"; };
 };
 Fixtures.Component.BlahComponent.alias = 'f.blah';
 Fixtures.Component.BlahComponent.inherits = 'f.foo';
+
+/* GO Components with requirements */
+
+/* GO Components with inheritence & requirements */
+
 
 Fixtures.Component.ManagerComponent = function(go, comp) {
     var max = 4;
