@@ -34,7 +34,8 @@ Javelin.reset = function() {
     Javelin.__scenes = {};
 };
 
-/* utility methods */
+/* utility methods: note that these are for checking LITERALS only, as they are used internally
+quite a bit, and have an expected format */
 
 Javelin.isString = function(value) {
     return typeof value === 'string';
@@ -48,17 +49,35 @@ Javelin.isEmpty = function(item) {
     return true;
 };
 
+Javelin.isFunction = function(value) {
+    return typeof value === 'function';
+};
+
+Javelin.isObject = function(value) {
+    return value != null && !Javelin.isArray(value) && typeof value === 'object';
+};
+
+Javelin.isArray = function(value) {
+    return Object.prototype.toString.apply(value) === '[object Array]';
+};
+
+/* Registry methods */
+
 //register a GameObject Component handler function
 Javelin.registerComponent = function(handler) {
+    if (!Javelin.isFunction(handler)) {
+        throw new Error("Components must be functions.");
+    }
+    
     if (!handler.alias) {
         throw new Error("Components must specify their alias.");
     }
     
-    if (handler.requires && !handler.requires instanceof Array) {
+    if (handler.requires && !Javelin.isArray(handler.requires)) {
         throw new Error("Component.requires must be an array in " + handler.alias + ".");
     }
     
-    if (handler.inherits && typeof handler.inherits !== 'string') {
+    if (handler.inherits && !Javelin.isString(handler.inherits)) {
         throw new Error("Component.inherits should be a reference to another component alias string in (" + handler.alias + ").");
     }
     
@@ -70,36 +89,49 @@ Javelin.registerComponent = function(handler) {
 };
 
 Javelin.registerPrefab = function(obj) {
-    if (!obj.name) {
-        throw new Error("Prefabs must have a name!");
+    if (!Javelin.isObject(obj)) {
+        throw new Error("Prefabs must be object literals.");
+    }
+    
+    if (!obj.name || !Javelin.isString(obj.name)) {
+        throw new Error("Prefabs must specify a string name property!");
     }
 
-    //TODO: serious validation
-    
     Javelin.__prefabs[obj.name] = obj;
+};
+
+Javelin.registerScene = function(obj) {
+    if (!Javelin.isObject(obj)) {
+        throw new Error("Scenes must be object literals.");
+    }
+    
+    if (!obj.name || !Javelin.isString(obj.name)) {
+        throw new Error("Scenes must specify a string name property!");
+    }
+        
+    Javelin.__scenes[obj.name] = obj;
+};
+
+Javelin.registerPlugin = function(handler) {
+    
+    if (!Javelin.isFunction(handler)) {
+        throw new Error("Engine plugins must be functions");
+    }
+    
+    if (!handler.alias || !Javelin.isString(handler.alias)) {
+        throw new Error("Engine plugins must specify a string alias.");
+    }
+    
+    this.__pluginHandlers[handler.alias] = handler;
 };
 
 Javelin.getPrefab = function(name) {
     return Javelin.__prefabs[name] || false;
 };
 
-Javelin.registerScene = function(obj) {
-    if (!obj.name) {
-        throw new Error("Scenes must have a name!");
-    }
-    
-    //TODO: serious validation
-    
-    Javelin.__scenes[obj.name] = obj;
-};
 
 Javelin.getScene = function(name) {
     return Javelin.__scenes[name] || false;
-};
-
-Javelin.registerPlugin = function(handler) {
-    //TODO: validation
-    this.__pluginHandlers[handler.alias] = handler;
 };
 
 Javelin.getComponentHandler = function(alias) {

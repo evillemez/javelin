@@ -44,8 +44,10 @@ Some items related to the core code in `src/javelin/engine`.
 
 ### Plugins ###
 
-* Player input
-* Box2d
+* implement an `onPrefabInstantiate` & `onPrefabDestroy` - this way plugins can optimize at a nested object level, or an
+individual GO level, whichever is more efficient for that particular plugin
+* Player input plugin
+* Box2d plugin
 
 ### Canvas2d Plugin ###
 

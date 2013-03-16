@@ -37,6 +37,149 @@ describe("Javelin Registry", function() {
         assert.isFalse(j.isEmpty(c));
         assert.isFalse(j.isEmpty(d));
     });
+
+    it("should determine if a value is an array literal", function() {
+        assert.isFalse(j.isArray(5));
+        assert.isFalse(j.isArray('foo'));
+        assert.isFalse(j.isArray({foo: 'bar'}));
+        assert.isTrue(j.isArray([]));
+        assert.isTrue(j.isArray([5, 'foo']));        
+    });
+    
+    it("should determine if a value is a function", function() {
+        assert.isFalse(j.isFunction(5));
+        assert.isFalse(j.isFunction('foo'));
+        assert.isFalse(j.isFunction([5]));
+        assert.isFalse(j.isFunction({foo: 'bar'}));
+        assert.isTrue(j.isFunction(function() {}));
+    });
+    
+    it("should determine if a value is an object", function() {
+        assert.isFalse(j.isObject(5));
+        assert.isFalse(j.isObject('foo'));
+        assert.isFalse(j.isObject([5]));
+        assert.isTrue(j.isObject({}));
+    });
+
+    it("should not allow registering invalid components", function() {
+        //non-function
+        assert.throws(function() {
+            j.registerComponent(5);
+        }, /must be functions/);
+        assert.throws(function() {
+            j.registerComponent('foo');
+        }, /must be functions/);
+        assert.throws(function() {
+            j.registerComponent({foo: 'bar'});
+        }, /must be functions/);
+        
+        
+        //test for missing alias
+        var FooComp = function() {};
+        assert.throws(function() {
+            j.registerComponent(FooComp);
+        }, /specify their alias/);
+        
+        //test for proper requires array
+        FooComp.alias = 'fooComponent';
+        FooComp.requires = 5;
+        assert.throws(function() {
+            j.registerComponent(FooComp);
+        }, /be an array/);
+        FooComp.requires = 'f.foo';
+        assert.throws(function() {
+            j.registerComponent(FooComp);
+        }, /be an array/);
+        
+        //test for proper inherits
+        var BarComp = function() {};
+        BarComp.alias = 'barComponent';
+        BarComp.inherits = 34;
+        assert.throws(function() {
+            j.registerComponent(BarComp);
+        }, /component alias string/);
+        BarComp.inherits = ['foo','bar'];
+        assert.throws(function() {
+            j.registerComponent(BarComp);
+        }, /component alias string/);
+        
+        //can't inherit and require the same thing
+        var BazComp = function() {};
+        BazComp.alias = 'bazComponent';
+        BazComp.inherits = 'foo';
+        BazComp.requires = ['foo'];
+        assert.throws(function() {
+            j.registerComponent(BazComp);
+        }, /cannot both require and inherit/);
+    });
+    
+    it("should not allow registering invalid prefabs", function() {
+        //object literals only
+        assert.throws(function() {
+            j.registerPrefab(5);
+        }, /must be object literals/);
+        assert.throws(function() {
+            j.registerPrefab('foo');
+        }, /must be object literals/);
+        assert.throws(function() {
+            j.registerPrefab([5]);
+        }, /must be object literals/);
+        
+        //must define a name
+        assert.throws(function() {
+            j.registerPrefab({});
+        }, /must specify a string name/);
+    });
+    
+    it("should not allow registering invalid plugins", function() {
+        //must be functions
+        assert.throws(function() {
+            j.registerPlugin(5);
+        }, /must be functions/);
+        assert.throws(function() {
+            j.registerPlugin('foo');
+        }, /must be functions/);
+        assert.throws(function() {
+            j.registerPlugin([5]);
+        }, /must be functions/);
+        assert.throws(function() {
+            j.registerPlugin({foo: 'bar'});
+        }, /must be functions/);
+        
+        //must specify alias
+        var plugin = function() {};
+        assert.throws(function() {
+            j.registerPlugin(plugin);
+        }, /must specify a string alias/);
+        plugin.alias = 5;
+        assert.throws(function() {
+            j.registerPlugin(plugin);
+        }, /must specify a string alias/);
+        plugin.alias = ['foo'];
+        assert.throws(function() {
+            j.registerPlugin(plugin);
+        }, /must specify a string alias/);
+        plugin.alias = {};
+        
+    });
+    
+    it("should not allow registering invalid scenes", function() {
+        //object literals only
+        assert.throws(function() {
+            j.registerScene(5);
+        }, /must be object literals/);
+        assert.throws(function() {
+            j.registerScene('foo');
+        }, /must be object literals/);
+        assert.throws(function() {
+            j.registerScene([5]);
+        }, /must be object literals/);
+        
+        //must define a name
+        assert.throws(function() {
+            j.registerScene({});
+        }, /must specify a string name/);
+    });
     
     it("should register scenes", function() {
         assert.isFalse(j.getScene('f.scene1'));
