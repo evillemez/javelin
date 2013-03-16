@@ -280,7 +280,7 @@ Javelin.Engine.prototype.step = function() {
     this.stepId++;
     this.prevStepTime = this.time;
     this.time = new Date().getTime();
-    this.deltaTime = this.time - this.prevStepTime;
+    this.deltaTime = (this.time - this.prevStepTime) * 0.001;
     
     //TODO: pre-update plugins
     

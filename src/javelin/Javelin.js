@@ -62,6 +62,10 @@ Javelin.registerComponent = function(handler) {
         throw new Error("Component.inherits should be a reference to another component alias string in (" + handler.alias + ").");
     }
     
+    if (handler.inherits && handler.requires && -1 !== handler.requires.indexOf(handler.inherits)) {
+        //throw new Error("Component cannot both require and inherit the same component, must be one or the other.");
+    }
+    
     Javelin.__componentHandlers[handler.alias] = handler;
 };
 
