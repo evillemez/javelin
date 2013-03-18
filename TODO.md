@@ -35,11 +35,6 @@ Things that I'll be working on in the near-term, organized by category.
 
 * implement tag system
 * implement layers
-* implement GO-level event dispatching (emit up, broadcast down)
-    * difference between component-level callback and GO-level event:
-        * Component callback - potentiall unique API per callback, most likely called by an engine plugin, it 
-        will have to document the necessary format for the callback
-        * GO event - standard api for listeners, probably same as engine-level event system
 
 ### Plugins ###
 

@@ -11,12 +11,12 @@ Javelin.GameObject = function () {
     this.children = [];                             //child gameobject instances
     this.parent = null;                             //parent gameobject instance
     this.dispatcher = new Javelin.Dispatcher();
-    this.root = false;                  //TODO: implement, if in a hierarchy, true if this is the root node
-    this.modified = false;              //whether or not the hierarchy or components have been modified
-    this.ownCallbackCache = {};         //cached callbacks from own components
-    this.allCallbackCache = {};         //cached callbacks from all children
-    this.tags = [];                     //TODO: implement
-    this.layer = 'default';             //TODO: implement
+    this.root = false;                              //TODO: implement, if in a hierarchy, true if this is the root node
+    this.modified = false;                          //whether or not the hierarchy or components have been modified
+    this.ownCallbackCache = {};                     //cached callbacks from own components
+    this.allCallbackCache = {};                     //cached callbacks from all children
+    this.tags = [];                                 //TODO: implement
+    this.layer = 'default';                         //TODO: implement
 };
 
 /* Lifecycle */
@@ -196,12 +196,33 @@ Javelin.GameObject.prototype.hasParent = function() {
 
 /* Messaging */
 
+Javelin.GameObject.prototype.on = function(name, listener) {
+    this.dispatcher.on(name, listener);
+};
+
+
 Javelin.GameObject.prototype.emit = function(name, data) {
-    //TODO: fill in
+    if (this.dispatcher.dispatch(name, data)) {
+        if (this.parent) {
+            this.parent.emit(name, data);
+        }
+    }
 };
 
 Javelin.GameObject.prototype.broadcast = function(name, data) {
-    //TODO: fill in
+    if (this.dispatcher.dispatch(name, data)) {
+        if (this.children) {
+            for (var i = 0; i < this.children.length; i++) {
+                if (!this.children[i].broadcast(name, data)) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    return false;
 };
 
 Javelin.GameObject.prototype.getCallbacks = function(eventName, recursive) {

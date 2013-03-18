@@ -306,19 +306,25 @@ describe("GameObject", function() {
         //go.hasTag(), go.addTag(), go.removeTag(), go.getChildrenByTag(tag, recursive)
     });
 
-    it.skip("should broadcast events to children", function(done) {
+    it("should broadcast events to children", function() {
         var parent = new j.GameObject();
         var child = new j.GameObject();
+        var child2 = new j.GameObject();
         parent.addChild(child);
         
         var parentCalled = false;
         var childCalled = false;
         
         child.on('foo', function(data) {
-            childCalled = true;
             assert.isTrue(parentCalled);
             assert.strictEqual(5, data.foo);
-            done();
+        });
+        
+        child2.on('foo', function(data) {
+            assert.isFalse(childCalled);
+            assert.isTrue(parentCalled);
+            assert.strictEqual(5, data.foo);
+            childCalled = true;
         });
         
         parent.on('foo', function(data) {
@@ -328,9 +334,10 @@ describe("GameObject", function() {
         });
         
         parent.broadcast('foo', {foo: 5});
+        assert.isTrue(parentCalled);
     });
     
-    it.skip("should emit events to parents", function(done) {
+    it("should emit events to parents", function() {
         var parent = new j.GameObject();
         var child = new j.GameObject();
         parent.addChild(child);
@@ -348,10 +355,10 @@ describe("GameObject", function() {
             assert.strictEqual(5, data.foo);
             assert.isTrue(childCalled);
             parentCalled = true;
-            done();
         });
         
         child.emit('foo', {foo: 5});
+        assert.isTrue(parentCalled);
     });
 
 });

@@ -24,19 +24,6 @@ describe("Dispatcher", function() {
         d.dispatch('qux');
     });
     
-    it("should call user-defined callback upon completion of dispatching an event", function() {
-        var d = new j.Dispatcher();
-        var called = false;
-
-        var cb = function(stopped) {
-            called = true;
-        };
-        
-        d.dispatch('foo', null, cb);
-        
-        assert.isTrue(called);
-    });
-    
     it("should dispatch data to multiple listeners", function() {
         var d = new j.Dispatcher();
         var listener1Called = false;
