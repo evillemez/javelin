@@ -11,12 +11,12 @@ Javelin.GameObject = function () {
     this.children = [];                             //child gameobject instances
     this.parent = null;                             //parent gameobject instance
     this.dispatcher = new Javelin.Dispatcher();     //for emit/broadcast functionality
-    this.root = false;                              //TODO: implement, if in a hierarchy, true if this is the root node
+    this.root = null;                               //TODO: implement, if in a hierarchy, reference to root object in hierarcy
     this.modified = false;                          //whether or not the hierarchy or components have been modified
     this.ownCallbackCache = {};                     //cached callbacks from own components
     this.allCallbackCache = {};                     //cached callbacks from all children
-    this.tags = [];                                 //TODO: implement
-    this.layer = 'default';                         //TODO: implement
+    this.tags = [];                                 //string tags for categorizing objects
+    this.layer = 'default';                         //for assigning groups of objects to specific layers (may be removed)
 };
 
 /* Lifecycle */
@@ -195,16 +195,36 @@ Javelin.GameObject.prototype.getChildrenByTag = function(name, recursive) {
 
 /* GO Hierarchy management */
 
+Javelin.GameObject.prototype.isRoot = function() {
+    return (null === this.root);
+};
+
+Javelin.GameObject.prototype.getRoot = function() {
+    return (this.isRoot()) ? this : this.root;
+};
+
+Javelin.GameObject.prototype.setRoot = function(go) {
+    this.root = go;
+    for (var i in this.children) {
+        this.children[i].setRoot(go);
+    }
+};
+
 Javelin.GameObject.prototype.addChild = function(child) {
+    //don't allow an object to be a child of more
+    //that one parent
+    if (child.parent) {
+        child.parent.removeChild(child);
+    }
+    
     this.setModified();
     child.setModified();
     child.parent = this;
+    child.setRoot(this.getRoot());
     this.children.push(child);
 };
 
 Javelin.GameObject.prototype.setParent = function(parent) {
-    this.setModified();
-    parent.setModified();
     parent.addChild(this);
 };
 

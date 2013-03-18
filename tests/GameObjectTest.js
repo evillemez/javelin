@@ -300,12 +300,47 @@ describe("GameObject", function() {
         assert.deepEqual(expected, parent.export());
     });
 
-    it.skip("should get all components in children by type", function() {
+    it("should get all components in children by type", function() {
+        var p = new j.GameObject();
+        var c1 = new j.GameObject();
+        var c2 = new j.GameObject();
+        var c3 = new j.GameObject();
+        p.addChild(c1);
+        p.addChild(c2);
+        c2.addChild(c3);
+        c1.setComponent('foo', new j.GameObjectComponent());
+        c3.setComponent('foo', new j.GameObjectComponent());
         
+        assert.deepEqual(p.getComponentsInChildren('bar'), []);
+        assert.strictEqual(p.getComponentsInChildren('foo').length, 2);
     });
 
-    it.skip("should properly mark the root object in a parent/child hierarchy", function() {
-        //test parent.getRoot() and child.getRoot(), and general obj.root
+    it("should properly mark the root object in a parent/child hierarchy", function() {
+        var p = new j.GameObject();
+        var c1 = new j.GameObject();
+        var c2 = new j.GameObject();
+        var c3 = new j.GameObject();
+        p.id = 1;
+        c1.id = 2;
+        c2.id = 3;
+        c3.id = 4;
+        
+        assert.isTrue(p.isRoot());
+        assert.isTrue(c1.isRoot());
+        assert.isTrue(c2.isRoot());
+        assert.isTrue(c3.isRoot());
+
+        c1.setParent(p);
+        c2.setParent(p);
+        c3.setParent(c1);
+
+        assert.isTrue(p.isRoot());
+        assert.isFalse(c1.isRoot());
+        assert.isFalse(c2.isRoot());
+        assert.isFalse(c3.isRoot());
+        assert.strictEqual(c1.getRoot().id, 1);
+        assert.strictEqual(c2.getRoot().id, 1);
+        assert.strictEqual(c3.getRoot().id, 1);
     });
 
     it("should manage tags", function() {
