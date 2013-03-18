@@ -363,6 +363,10 @@ describe("Javelin Engine", function() {
         assert.strictEqual(0, p.goCount);
     });
     
+    it.skip("should notify plugins on prefab instantiate and destroy", function() {
+        //TODO
+    });
+    
     it("should call game object on update", function() {
             
         var e = getEngine();

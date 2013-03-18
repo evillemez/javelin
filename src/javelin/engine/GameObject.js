@@ -3,16 +3,15 @@
 'use strict';
 
 Javelin.GameObject = function () {
-    this.id = -1;                       //UID assigned by engine
-    this.name = "Untitled";             //human-readable name (for eventual editor)
-    this.engine = null;                 //reference to engine
-    this.enabled = false;                //active flag
-    this.components = {};               //component instances
-    this.children = [];                 //child gameobject instances
-    this.parent = null;                 //parent gameobject instance
-
-//TODO: implement, if in a hierarchy, true if this is the root node
-    this.root = false;                  
+    this.id = -1;                                   //UID assigned by engine
+    this.name = "Untitled";                         //human-readable name (for eventual editor)
+    this.engine = null;                             //reference to engine
+    this.enabled = false;                           //active flag
+    this.components = {};                           //component instances
+    this.children = [];                             //child gameobject instances
+    this.parent = null;                             //parent gameobject instance
+    this.dispatcher = new Javelin.Dispatcher();
+    this.root = false;                  //TODO: implement, if in a hierarchy, true if this is the root node
     this.modified = false;              //whether or not the hierarchy or components have been modified
     this.ownCallbackCache = {};         //cached callbacks from own components
     this.allCallbackCache = {};         //cached callbacks from all children

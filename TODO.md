@@ -7,6 +7,7 @@ The general TODO list for various subsystems and what not.  Testing doesn't get 
 * simplify component adding
     * QUESTION: can an object contain two components which have both inherited from the same component?
     * Currently, they cannot - something will get overriden
+    * Alternatively, remove the concept of inheritence completely - only rely on the requires mechanism
 * Tiled map loading
 * player input component
 * box2d component

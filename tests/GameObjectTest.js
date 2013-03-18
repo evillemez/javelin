@@ -294,6 +294,10 @@ describe("GameObject", function() {
         assert.deepEqual(expected, parent.export());
     });
 
+    it.skip("should get all components in children by type", function() {
+        
+    });
+
     it.skip("should properly mark the root object in a parent/child hierarchy", function() {
         //test parent.getRoot() and child.getRoot(), and general obj.root
     });
@@ -310,20 +314,20 @@ describe("GameObject", function() {
         var parentCalled = false;
         var childCalled = false;
         
-        child.onMessage('foo', function(data) {
+        child.on('foo', function(data) {
             childCalled = true;
             assert.isTrue(parentCalled);
             assert.strictEqual(5, data.foo);
             done();
         });
         
-        parent.onMessage('foo', function(data) {
+        parent.on('foo', function(data) {
             assert.isFalse(childCalled);
             assert.strictEqual(5, data.foo);
             parentCalled = true;
         });
         
-        parent.broadcastMessage('foo', {foo: 5});
+        parent.broadcast('foo', {foo: 5});
     });
     
     it.skip("should emit events to parents", function(done) {
@@ -334,20 +338,20 @@ describe("GameObject", function() {
         var parentCalled = false;
         var childCalled = false;
         
-        child.onMessage('foo', function(data) {
+        child.on('foo', function(data) {
             childCalled = true;
             assert.isFalse(parentCalled);
             assert.strictEqual(5, data.foo);
         });
         
-        parent.onMessage('foo', function(data) {
+        parent.on('foo', function(data) {
             assert.strictEqual(5, data.foo);
             assert.isTrue(childCalled);
             parentCalled = true;
             done();
         });
         
-        child.emitMessage('foo', {foo: 5});
+        child.emit('foo', {foo: 5});
     });
 
 });
