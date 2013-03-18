@@ -269,10 +269,14 @@ describe("GameObject", function() {
         
         var expected = {
             name: 'parent',
+            layer: 'default',
+            tags: [],
             components: {},
             children: [
                 {
                     name: 'child1',
+                    layer: 'default',
+                    tags: [],
                     components: {
                         'bar': {
                             foo: 'bar'
@@ -281,6 +285,8 @@ describe("GameObject", function() {
                 },
                 {
                     name: 'child2',
+                    layer: 'default',
+                    tags: [],
                     components: {
                         'baz': {
                             foo: 'baz'
@@ -302,8 +308,45 @@ describe("GameObject", function() {
         //test parent.getRoot() and child.getRoot(), and general obj.root
     });
 
-    it.skip("should manage tags, and allow retrieving children by tag", function() {
-        //go.hasTag(), go.addTag(), go.removeTag(), go.getChildrenByTag(tag, recursive)
+    it("should manage tags", function() {
+        var go = new j.GameObject();
+        
+        assert.isFalse(go.hasTag('foo'));
+        assert.isFalse(go.hasTag('bar'));
+        go.addTag('foo');
+        assert.isTrue(go.hasTag('foo'));
+        assert.isFalse(go.hasTag('bar'));
+        go.addTag('bar');
+        assert.isTrue(go.hasTag('foo'));
+        assert.isTrue(go.hasTag('bar'));
+        assert.deepEqual(go.getTags(), ['foo','bar']);
+        go.removeTag('foo');
+        assert.isFalse(go.hasTag('foo'));
+        assert.isTrue(go.hasTag('bar'));
+        go.removeTag('bar');
+        assert.isFalse(go.hasTag('foo'));
+        assert.isFalse(go.hasTag('bar'));
+    });
+    
+    it("should allow retrieving children by tag", function() {
+        var parent = new j.GameObject();
+        var c1 = new j.GameObject();
+        var c2 = new j.GameObject();
+        var c3 = new j.GameObject();
+        var c4 = new j.GameObject();
+        
+        parent.addChild(c1);
+        parent.addChild(c2);
+        c2.addChild(c3);
+        c3.addChild(c4);
+        c4.addTag('foo');
+        c1.addTag('foo');
+        
+        var children = parent.getChildrenByTag('foo');
+        assert.strictEqual(1, children.length);
+        
+        children = parent.getChildrenByTag('foo', true);
+        assert.strictEqual(2, children.length);
     });
 
     it("should broadcast events to children", function() {

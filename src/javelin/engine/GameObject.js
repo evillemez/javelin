@@ -4,13 +4,13 @@
 
 Javelin.GameObject = function () {
     this.id = -1;                                   //UID assigned by engine
-    this.name = "Untitled";                         //human-readable name (for eventual editor)
+    this.name = "Anonymous";                        //human-readable name (for eventual editor)
     this.engine = null;                             //reference to engine
     this.enabled = false;                           //active flag
     this.components = {};                           //component instances
     this.children = [];                             //child gameobject instances
     this.parent = null;                             //parent gameobject instance
-    this.dispatcher = new Javelin.Dispatcher();
+    this.dispatcher = new Javelin.Dispatcher();     //for emit/broadcast functionality
     this.root = false;                              //TODO: implement, if in a hierarchy, true if this is the root node
     this.modified = false;                          //whether or not the hierarchy or components have been modified
     this.ownCallbackCache = {};                     //cached callbacks from own components
@@ -150,6 +150,48 @@ Javelin.GameObject.prototype.getComponentsInChildren = function(name) {
     return components;
 };
 
+/* tag management */
+
+Javelin.GameObject.prototype.hasTag = function(name) {
+    return (-1 !== this.tags.indexOf(name));
+};
+
+Javelin.GameObject.prototype.addTag = function(name) {
+    if (!this.hasTag(name)) {
+        this.tags.push(name);
+    }
+};
+
+Javelin.GameObject.prototype.removeTag = function(name) {
+    if (this.hasTag(name)) {
+        this.tags.splice(this.tags.indexOf(name), 1);
+    }
+};
+
+Javelin.GameObject.prototype.getTags = function() {
+    return this.tags;
+};
+
+Javelin.GameObject.prototype.getChildrenByTag = function(name, recursive) {
+    var children = [];
+    for (var i = 0; i < this.children.length; i++) {
+        if (this.children[i].hasTag(name)) {
+            children.push(this.children[i]);
+        }
+        
+        if (recursive) {
+            var nested = this.children[i].getChildrenByTag(name, true);
+            if (nested) {
+                for (var j in nested) {
+                    children.push(nested[j]);
+                }
+            }
+        }
+    }
+    
+    return children;
+};
+
 
 /* GO Hierarchy management */
 
@@ -287,6 +329,8 @@ Javelin.GameObject.prototype.setModified = function() {
 Javelin.GameObject.prototype.export = function() {
     var serialized = {
         name: this.name,
+        layer: this.layer,
+        tags: this.tags,
         components: {}
     };
     
