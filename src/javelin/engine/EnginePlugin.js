@@ -4,7 +4,13 @@ Javelin.EnginePlugin = function() {
     this.$alias = '';
     this.$active = false;
     this.$engine = null;
+    this.$when = Javelin.EnginePlugin.AFTER;
 };
+
+//constants, denote whether a given plugin should execute
+//pre or post update
+Javelin.EnginePlugin.BEFORE = 0;
+Javelin.EnginePlugin.AFTER = 1;
 
 Javelin.EnginePlugin.prototype.$onLoad = function() {
     // body...

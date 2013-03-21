@@ -4,12 +4,17 @@ The general TODO list for various subsystems and what not.  Testing doesn't get 
 
 **The short list:**
 
+* player input component
+    * use [*hammer.js*](https://github.com/EightMedia/hammer.js/) for dealing with touch input
+* rename engine callbacks to:
+    * `engine.update`, `engine.create`, `engine.destroy`
+* implement `canvas2d.draw` component callback, receives `context` argument
 * simplify component adding
     * QUESTION: can an object contain two components which have both inherited from the same component?
     * Currently, they cannot - something will get overriden
     * Alternatively, remove the concept of inheritence completely - only rely on the requires mechanism
+        * probably will go for this option, dramatically simplifies a lot, and prevents shooting yourself in the foot
 * Tiled map loading
-* player input component
 * box2d component
 
 ## Near-term ##
