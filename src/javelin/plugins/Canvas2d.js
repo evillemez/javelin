@@ -45,10 +45,11 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
             //clear the canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-            //loop over gos and draw any sprite components
+            //loop over gos and draw any sprite components, and execute any `canvas2d.draw` callbacks
             var gos = plugin.$engine.gos;
             var l = gos.length;
             for (var i = 0; i < l; i++) {
+                ctx.save();
                 var s = gos[i].getComponent('sprite');
                 if (s && s.visible && s.image) {
                     var t = gos[i].getComponent('transform2d');
@@ -60,18 +61,28 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
 
                     if (s.image instanceof Javelin.Asset.AtlasImage) {
                         var spr = s.image;
-                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, pos.x + spr.cx, pos.y + spr.cy, spr.width * scale.x, spr.height * scale.y);
+
+                        ctx.translate(pos.x + spr.cx, pos.y + spr.cy);
+                        
+                        //convert degrees to radians
+                        ctx.rotate(rot * Math.PI/180);
+
+                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, 0, 0, spr.width * scale.x, spr.height * scale.y);
                     } else {
+                        //TODO: rotation here as well
                         var h = s.image.height * s.scale.y;
                         var w = s.image.width * s.scale.x;
                         ctx.drawImage(s.image, pos.x, pos.y, w, h);
                     }
+                    
                 }
                 
                 var cbs = gos[i].getCallbacks('canvas2d.draw');
                 for (var j in cbs) {
                     cbs[j](ctx);
                 }
+
+                ctx.restore();
             }
             
             plugin.lastTimeRendered = plugin.$engine.time;
