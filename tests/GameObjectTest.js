@@ -193,9 +193,9 @@ describe("GameObject", function() {
     
     it("should assemble callback cache properly", function() {
         var c1 = new j.GameObjectComponent();
-        c1.$on('update', function() {});
+        c1.$on('engine.update', function() {});
         var c2 = new j.GameObjectComponent();
-        c2.$on('update', function() {});
+        c2.$on('engine.update', function() {});
         
         var parent = new j.GameObject();
         var child1 = new j.GameObject();
@@ -206,8 +206,8 @@ describe("GameObject", function() {
         
         //test parent alone
         assert.isTrue(parent.modified);
-        assert.strictEqual(2, parent.getCallbacks('update').length);
-        assert.strictEqual(2, parent.getCallbacks('update', true).length);
+        assert.strictEqual(2, parent.getCallbacks('engine.update').length);
+        assert.strictEqual(2, parent.getCallbacks('engine.update', true).length);
         assert.isFalse(parent.modified);
         
         //now setup children and do the same assertions
@@ -215,8 +215,8 @@ describe("GameObject", function() {
         child1.setComponent('bar', c2);
         child2.setComponent('foo', c1);
         child2.setComponent('bar', c2);
-        assert.strictEqual(2, child1.getCallbacks('update').length);
-        assert.strictEqual(2, child2.getCallbacks('update').length);
+        assert.strictEqual(2, child1.getCallbacks('engine.update').length);
+        assert.strictEqual(2, child2.getCallbacks('engine.update').length);
         parent.addChild(child1);
         parent.addChild(child2);
         assert.isTrue(parent.modified);
@@ -224,20 +224,20 @@ describe("GameObject", function() {
         assert.isTrue(child2.modified);
         
         //did the callbacks come back from the children as well?
-        assert.strictEqual(2, parent.getCallbacks('update').length);
-        assert.strictEqual(6, parent.getCallbacks('update', true).length);
+        assert.strictEqual(2, parent.getCallbacks('engine.update').length);
+        assert.strictEqual(6, parent.getCallbacks('engine.update', true).length);
         assert.isFalse(parent.modified);
         assert.isFalse(child1.modified);
         assert.isFalse(child2.modified);
         
         //test actual getCallback method
         var cbs;
-        cbs = parent.getCallbacks('update');
+        cbs = parent.getCallbacks('engine.update');
         assert.strictEqual(2, cbs.length);
         for (var i in cbs) {
             assert.isFunction(cbs[i]);
         }
-        cbs = parent.getCallbacks('update', true);
+        cbs = parent.getCallbacks('engine.update', true);
         assert.strictEqual(6, cbs.length);
         for (i in cbs) {
             assert.isFunction(cbs[i]);

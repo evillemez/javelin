@@ -1,6 +1,5 @@
 'use strict';
 
-//NOTE: should probably split a lot of this out into separate files per control method
 Javelin.Plugin.Input = function (engine, plugin, config) {
 	plugin.config = config;
 	plugin.$when = Javelin.EnginePlugin.BEFORE;
@@ -70,7 +69,7 @@ Javelin.Plugin.Input = function (engine, plugin, config) {
     //private event listener for handling mouse events
     var mouseListener = function (e) {};
     
-	/* public API */
+	// public API
 	
 	plugin.setControlConfig = function(config) {
 		plugin.config = config;
@@ -106,47 +105,8 @@ Javelin.Plugin.Input = function (engine, plugin, config) {
 };
 Javelin.Plugin.Input.alias = 'input';
 
-//mostly taken from: http://www.webonweboff.com/tips/js/event_key_codes.aspx
-Javelin.Plugin.Input.KEYBOARD_KEYCODES = {
-    'a': 65,
-    'b': 66,
-    'c': 67,
-    'd': 68,
-    'e': 69,
-    'f': 70,
-    'g': 71,
-    'h': 72,
-    'i': 73,
-    'j': 74,
-    'k': 75,
-    'l': 76,
-    'm': 77,
-    'n': 78,
-    'o': 79,
-    'p': 80,
-    'q': 81,
-    'r': 82,
-    's': 83,
-    't': 84,
-    'u': 85,
-    'v': 86,
-    'w': 87,
-    'x': 88,
-    'y': 89,
-    'z': 90,
-    'space': 32,
-    'enter': 13,
-    'control': 17,
-    'alt': 18,
-    'delete': 46, 
-    'backspace': 8,
-    'shift': 16,
-    'escape': 27,
-    'uparrow': 38,
-    'downarrow': 40,
-    'leftarrow': 37,
-    'rightarrow': 39
-};
+//declare subnamespce for specific input implementations
+Javelin.Plugin.Input.Handler = Javelin.Plugin.Input.Handler || {};
 
 /* Example config */
 /*

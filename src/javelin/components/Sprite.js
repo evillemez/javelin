@@ -1,17 +1,17 @@
 'use strict';
 
-Javelin.Component.Sprite = function(go, comp) {
+Javelin.Component.Sprite = function(gameObject, component) {
     
     //set by plugin (probably)    
-    comp.visible = false;
+    component.visible = false;
 
     //can be Image or Javelin.Asset.AtlasImage
-    comp.image = null;
+    component.image = null;
 
     //plugin could theoretically have multiple canvases, we could treat those as 'layers'
-    comp.layer = 'default';
+    component.layer = 'default';
     
-    comp.scale = {
+    component.scale = {
         x: 1.0,
         y: 1.0
     };

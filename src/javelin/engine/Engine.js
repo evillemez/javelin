@@ -104,6 +104,8 @@ Javelin.Engine.prototype.instantiateObject = function(def) {
 //NOTE: this needs to be as optimized as possible, I think some work could
 //be done here - maybe more work during Javelin.initialize() could prevent
 //certain checks here... maybe not, look into it at some point
+//... or, removing the idea of inheritence altogether would simplify
+//things quite a bit
 Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
     if (go.hasComponent(alias)) {
         return go.getComponent(alias);
@@ -177,7 +179,7 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
         
         //TODO: move this to do a recursive create on an instantiated object
         //notify object
-        var cbs = go.getCallbacks('create') || [];
+        var cbs = go.getCallbacks('engine.create') || [];
         for (var j = 0; j < cbs.length; j++) {
             cbs[j]();
         }
@@ -219,7 +221,7 @@ Javelin.Engine.prototype.__destroyGameObject = function(go) {
         }
         
         //notify destroy callbacks
-        var cbs = go.getCallbacks('destroy');
+        var cbs = go.getCallbacks('engine.destroy');
         for (i = 0; i < cbs.length; i++) {
             cbs[i]();
         }
@@ -335,7 +337,7 @@ Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
         //for nested hierarchies, which will allow
         //for efficient caching
         if (this.gos[i].enabled) {
-            var cbs = this.gos[i].getCallbacks('update', false);
+            var cbs = this.gos[i].getCallbacks('engine.update', false);
             for (var j = 0; j < cbs.length; j++) {
                 cbs[j](deltaTime);
             }

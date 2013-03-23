@@ -6,9 +6,7 @@ The general TODO list for various subsystems and what not.  Testing doesn't get 
 
 * player input component
     * use [*hammer.js*](https://github.com/EightMedia/hammer.js/) for dealing with touch input
-* rename engine callbacks to:
-    * `engine.update`, `engine.create`, `engine.destroy`
-* implement `canvas2d.draw` component callback, receives `context` argument
+* implement canvas2d sprite rotation
 * simplify component adding
     * QUESTION: can an object contain two components which have both inherited from the same component?
     * Currently, they cannot - something will get overriden
@@ -28,8 +26,10 @@ Things that I'll be working on in the near-term, organized by category.
 
 ### Engine ###
 
+* implement gameObject pooling and component object pooling
 * implement pre/post update plugin loops - a plugin should specify where it belongs
 * implement engine-level event dispatching
+* implement engine-level config key/val store
 * load requiredAssets before calling scene load callback
 
 ### Environments ###

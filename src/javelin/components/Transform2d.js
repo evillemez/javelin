@@ -1,45 +1,50 @@
 'use strict';
 
-Javelin.Component.Transform2d = function(go, comp) {
-    /* Values are generally relative to parent */
+Javelin.Component.Transform2d = function(gameObject, component) {
+    //private reference to parent transform
+    var parentTransform;
     
-    comp.position =  {
+    //float for x & y
+    component.position =  {
         x: 0.0,
         y: 0.0
     };
-
-    comp.rotation = {
-        x: 0.0,
-        y: 0.0
-    };
     
-    /* Absolute world coordinates */
-    
-    //if there's a parent, cache it's transform
-    var parentTransform = (go.parent) ? go.parent.getComponent('transform2d') : false;
+    //float of 0 - 360 degrees
+    component.rotation = 0.0;
     
     //absolute world coordinates
-    comp.getWorldX = function() {
-        return (parentTransform) ? parentTransform.position.x + comp.position.x : comp.position.x;
+    component.getWorldX = function() {
+        return (parentTransform) ? parentTransform.position.x + component.position.x : component.position.x;
     };
     
-    comp.getWorldY = function() {
-        return (parentTransform) ? parentTransform.position.y + comp.position.y : comp.position.y;
+    component.getWorldY = function() {
+        return (parentTransform) ? parentTransform.position.y + component.position.y : component.position.y;
+    };
+    
+    component.getWorldRotation = function() {
+        return (parentTransform) ? parentTransform.rotation + component.rotation : component.rotation;
     };
 
-    comp.getPositionVector = function() {
-        return [comp.position.x, comp.position.y];
-    };
-    
-    comp.getRotationVector = function() {
-        return [comp.rotation.x, comp.rotation.y];
-    };
-    
     //movement
-    comp.translate = function(arr) {
-        comp.position.x += arr[0];
-        comp.position.y += arr[1];
+    component.translate = function(x, y) {
+        x = x || 0.0;
+        y = y || 0.0;
+        
+        component.position.x += x;
+        component.position.y += y;
     };
     
+    //todo doc
+    component.rotate = function(degrees) {
+        degrees = degrees || 0.0;
+        
+        component.rotation = component.rotation + degrees % 360;
+    };
+    
+    component.$on('engine.create', function() {
+        //if there's a parent, cache it's transform
+        parentTransform = (gameObject.parent) ? gameObject.parent.getComponent('transform2d') : false;
+    });
 };
 Javelin.Component.Transform2d.alias = 'transform2d';

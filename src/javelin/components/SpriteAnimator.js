@@ -7,20 +7,20 @@
  *
  * @author Evan Villemez
  */
-Javelin.Component.SpriteAnimator = function(go, comp) {
+Javelin.Component.SpriteAnimator = function(gameObject, component) {
     //private
-    var sprite = go.getComponent('sprite');
+    var sprite = gameObject.getComponent('sprite');
     var animations = {};
     var defaultAnimation = null;
     var currentFrame = 0;
     var currentAnimation = null;
     
     //public api
-    comp.getCurrentAnimation = function() {
+    component.getCurrentAnimation = function() {
         return currentAnimation;
     };
     
-    comp.define = function(name, images) {
+    component.define = function(name, images) {
         animations[name] = images;
         
         if (!defaultAnimation) {
@@ -31,41 +31,41 @@ Javelin.Component.SpriteAnimator = function(go, comp) {
         //then update can figure out when to switch frames
     };
     
-    comp.getCurrentAnimation = function() {
+    component.getCurrentAnimation = function() {
         return currentAnimation;
     };
 
     //start, if not already playing
-    comp.play = function(name) {
+    component.play = function(name) {
         currentAnimation = name;
     };
     
-    comp.playOnce = function(name) {
+    component.playOnce = function(name) {
         
     };
     
     //start from beginning
-    comp.start = function(name) {
+    component.start = function(name) {
         
     };
     
     //once
-    comp.startOnce = function(name) {
+    component.startOnce = function(name) {
         
     };
     
     //stop playing
-    comp.interrupt = function() {};
+    component.interrupt = function() {};
     
     //set default
-    comp.setDefaultAnimation = function(name) {
+    component.setDefaultAnimation = function(name) {
         
     };
     
     //each frame, figure out which image to draw
-    comp.$on('update', function(deltaTime) {
+    component.$on('engine.update', function(deltaTime) {
         if (sprite.visible) {
-            var current = comp.currentAnimation || defaultAnimation;
+            var current = component.currentAnimation || defaultAnimation;
             var anim = animations[current];
             
             //TODO: write proper logic

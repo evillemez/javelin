@@ -198,7 +198,7 @@ describe("Javelin Engine", function() {
         assert.strictEqual('blip', go.getComponent('f.foo').foo);
         assert.strictEqual('blip', go.getComponent('f.bar').foo);
         assert.strictEqual('blip', go.getComponent('f.baz').foo);
-        assert.strictEqual(1, go.getCallbacks('update').length);
+        assert.strictEqual(1, go.getCallbacks('engine.update').length);
         assert.strictEqual('baz', go.getComponent('f.foo').test());
         
         //NOTE: even though the object has 'f.baz', when it exports it will

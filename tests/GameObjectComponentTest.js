@@ -15,32 +15,32 @@ describe("GameObjectComponent", function() {
     
     it("should return false if requested callback does not exist", function() {
         var c = new j.GameObjectComponent();
-        assert.isFalse(c.$getCallback("update"));
+        assert.isFalse(c.$getCallback("engine.update"));
     });
     
     it("should return registered callback function if exists", function() {
         var c = new j.GameObjectComponent();
 
-        c.$on('update', function() {
+        c.$on('engine.update', function() {
             return "foo";
         });
 
-        var cb = c.$getCallback("update");
+        var cb = c.$getCallback("engine.update");
         assert.strictEqual("foo", cb());
     });
     
     it("should overwrite previously registered callback", function() {
         var c = new j.GameObjectComponent();
 
-        c.$on('update', function() {
+        c.$on('engine.update', function() {
             return "foo";
         });
 
-        c.$on('update', function() {
+        c.$on('engine.update', function() {
             return "bar";
         });
         
-        var cb = c.$getCallback("update");
+        var cb = c.$getCallback("engine.update");
         assert.strictEqual("bar", cb());
     });
     
@@ -88,7 +88,7 @@ describe("GameObjectComponent", function() {
             comp.x = 5.0;
             
             //callback to return something "private"
-            comp.$on("update", function() {
+            comp.$on("engine.update", function() {
                 return foo;
             });
         };
@@ -100,8 +100,8 @@ describe("GameObjectComponent", function() {
         var c2 = new j.GameObjectComponent();
         Namespace.FooComponent(c1, 'bar');
         Namespace.FooComponent(c2, 'baz');
-        var cb1 = c1.$getCallback("update");
-        var cb2 = c2.$getCallback("update");
+        var cb1 = c1.$getCallback("engine.update");
+        var cb2 = c2.$getCallback("engine.update");
         
         //generally the two instances should be equal, but their
         //callbacks should return different values

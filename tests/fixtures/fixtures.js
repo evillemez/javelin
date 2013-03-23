@@ -18,15 +18,15 @@ Fixtures.Component.FooComponent = function(go, comp) {
     comp.destroyed = false;
     comp.test = function() { return "foo"; };
     
-    comp.$on('create', function() {
+    comp.$on('engine.create', function() {
         comp.started = true;
     });
     
-    comp.$on('update', function(deltaTime) {
+    comp.$on('engine.update', function(deltaTime) {
         comp.numUpdates++;
     });
     
-    comp.$on('destroy', function() {
+    comp.$on('engine.destroy', function() {
         comp.destroyed = true;
     });
 };
@@ -80,13 +80,13 @@ Fixtures.Component.ManagerComponent = function(go, comp) {
     var max = 4;
     var gos = [];
     
-    comp.$on('create', function() {
+    comp.$on('engine.create', function() {
         for (var i=0; i < max; i++) {
             gos.push(go.engine.instantiateObject({components: {'f.qux': {}}}));
         }
     });
     
-    comp.$on('update', function(deltaTime) {
+    comp.$on('engine.update', function(deltaTime) {
         if (gos.length) {
             var go = gos[0];
             gos.splice(0, 1);

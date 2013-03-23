@@ -51,17 +51,26 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
             for (var i = 0; i < l; i++) {
                 var s = gos[i].getComponent('sprite');
                 if (s && s.visible && s.image) {
-                    var pos = gos[i].getComponent('transform2d').position;
-                    var rot = gos[i].getComponent('transform2d').rotation;
+                    var t = gos[i].getComponent('transform2d');
+                    var pos = t.position;
+                    var rot = t.getWorldRotation();
+                    var scale = s.scale;
 
                     //TODO: implement rotation (http://stackoverflow.com/questions/3793397/html5-canvas-drawimage-with-at-an-angle)
 
                     if (s.image instanceof Javelin.Asset.AtlasImage) {
                         var spr = s.image;
-                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, pos.x + spr.cx, pos.y + spr.cy, spr.width, spr.height);
+                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, pos.x + spr.cx, pos.y + spr.cy, spr.width * scale.x, spr.height * scale.y);
                     } else {
-                        ctx.drawImage(s.image, pos.x, pos.y);
+                        var h = s.image.height * s.scale.y;
+                        var w = s.image.width * s.scale.x;
+                        ctx.drawImage(s.image, pos.x, pos.y, w, h);
                     }
+                }
+                
+                var cbs = gos[i].getCallbacks('canvas2d.draw');
+                for (var j in cbs) {
+                    cbs[j](ctx);
                 }
             }
             
