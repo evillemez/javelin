@@ -4,6 +4,7 @@ Javelin.Plugin.Input = function (plugin, config) {
 	plugin.config = config;
 	plugin.$when = Javelin.EnginePlugin.BEFORE;
     plugin.handlers = {};
+    plugin.callbacks = {};
 	
     //process config and setup relevant listeners
 	plugin.$onLoad = function() {
@@ -20,11 +21,35 @@ Javelin.Plugin.Input = function (plugin, config) {
 	};
 	
 	plugin.$onStep = function(deltaTime) {
+        var i, j;
+        
 		//all configured handlers process their own input
-        for (var i in this.handlers) {
+        for (i in plugin.handlers) {
             plugin.handlers[i].processInputEvents(deltaTime);
         }
+        
+        //call any registered `input.resolve` callbacks
+        for (i in plugin.callbacks) {
+            if (plugin.callbacks[i]) {
+                for (j in plugin.callbacks[i]) {
+                    plugin.callbacks[i][j](plugin);
+                }
+            }
+        }
 	};
+    
+    plugin.$onGameObjectCreate = function(gameObject) {
+        var cbs = gameObject.getCallbacks('input.resolve');
+        if (cbs.length) {
+            plugin.callbacks[gameObject.id] = cbs;
+        }
+    };
+    
+    plugin.$onGameObjectDestroy = function(gameObject) {
+        if (plugin.callbacks[gameObject.id]) {
+            plugin.callbacks[gameObject.id] = null;
+        }
+    };
 
     //generic GET by name - will internally decide which input to call, so you need
     //to already know what type of value will be returned
@@ -71,6 +96,10 @@ Javelin.Plugin.Input = function (plugin, config) {
     plugin.getTouch = function (index) {};
     plugin.getTouches = function () {};
     //plugin.getGesture(); abstract common gestures or something?
+    
+    plugin.getHandler = function(key) {
+        return this.handlers[key] || false;
+    };
 };
 Javelin.Plugin.Input.alias = 'input';
 
