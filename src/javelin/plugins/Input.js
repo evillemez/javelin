@@ -1,92 +1,62 @@
 'use strict';
 
-Javelin.Plugin.Input = function (engine, plugin, config) {
+Javelin.Plugin.Input = function (plugin, config) {
 	plugin.config = config;
 	plugin.$when = Javelin.EnginePlugin.BEFORE;
+    plugin.handlers = {};
 	
-    //private input values
-    var kbRaw, mouseRaw, gamepadRaw, touchRaw, kbProcessed, mouseProcessed, gamepadProcessed, touchProcessed;
-    
-    //build internal state based on config, and do
-    //whatever setup needs to be done
-	var processConfig = function() {
-
-        //clear all input values
-        kbRaw = {};
-        kbProcessed = {};
-        mouseRaw = {};
-        mouseProcessed = {};
-        gamepadRaw = {};
-        gamepadProcessed = {};
-        touchRaw = {};
-        touchProcessed = [];
-        
-        //initialize relevant input config
-        
-	};
-
     //process config and setup relevant listeners
-	plugin.$onInitialize = function() {
-		processConfig();
+	plugin.$onLoad = function() {
         
 		//setup keyboard controls
-        if (this.config.keyboard) {
-            
-            //register listeners
-            if (window) {
-                window.addEventListener('keyup', keyboardListener);
-                window.addEventListener('keydown', keyboardListener);
-            }
+        if (plugin.config.keyboard && window) {
+            var kb = plugin.handlers['keyboard'] = new Javelin.Plugin.Input.Handler.Keyboard(plugin.config.keyboard);
+            kb.registerListeners();
         }
         
-        //setup mouse controls
-        if (this.config.mouse) {
-            if (window && document && this.config.mouse.captureTarget) {
-                var elem = document.getElementById(this.config.mouse.captureTarget);
-                elem.addEventListener('mousemove', mouseListener);
-                elem.addEventListener('mousedown', mouseListener);
-                elem.addEventListener('mouseup', mouseListener);
-            }
-        }
-        
-        //TODO: setup gamepad controls
-        if (false) {
-            //do stuff....
-        }
-        
-        //TODO: setup touch controls... ?
+        //TODO: setup mouse controls
+        //TODO: setup gamepad controls        
+        //TODO: setup touch controls
 	};
 	
 	plugin.$onStep = function(deltaTime) {
-		//loop through configured axes, check 'raw' input and calculate 'processed'
+		//all configured handlers process their own input
+        for (var i in this.handlers) {
+            plugin.handlers[i].processInputEvents(deltaTime);
+        }
 	};
-	
-    //private event listener for handling keyboard input
-    var keyboardListener = function(e) {
-        
-    };
-    
-    //private event listener for handling mouse events
-    var mouseListener = function (e) {};
-    
-	// public API
-	
-	plugin.setControlConfig = function(config) {
-		plugin.config = config;
-		processConfig();
-	};
-	
+
     //generic GET by name - will internally decide which input to call, so you need
     //to already know what type of value will be returned
-    plugin.getInput = function (name) {};
+    plugin.getInput = function (name) {
+        if (plugin.handlers['keyboard']) {
+            return plugin.handlers['keyboard'].getInput(name);
+        }
+    };
     
-	plugin.getButton = function(name) {};
+	plugin.getButton = function(name) {
+        if (plugin.handlers['keyboard']) {
+            return plugin.handlers['keyboard'].getButton(name);
+        }
+	};
 	
-	plugin.getButtonDown = function(name) {};
+	plugin.getButtonDown = function(name) {
+        if (plugin.handlers['keyboard']) {
+            return plugin.handlers['keyboard'].getButtonDown(name);
+        }
+	};
 	
-	plugin.getButtonUp = function(name) {};
+	plugin.getButtonUp = function(name) {
+        if (plugin.handlers['keyboard']) {
+            return plugin.handlers['keyboard'].getButtonUp(name);
+        }
+	};
 	
-	plugin.getAxis = function(name) {};
+	plugin.getAxis = function(name) {
+        if (plugin.handlers['keyboard']) {
+            return plugin.handlers['keyboard'].getAxis(name);
+        }
+	};
 	
     plugin.getMousePosition = function() {
         //if not present will return null values
@@ -100,7 +70,6 @@ Javelin.Plugin.Input = function (engine, plugin, config) {
     
     plugin.getTouch = function (index) {};
     plugin.getTouches = function () {};
-    
     //plugin.getGesture(); abstract common gestures or something?
 };
 Javelin.Plugin.Input.alias = 'input';
@@ -108,8 +77,10 @@ Javelin.Plugin.Input.alias = 'input';
 //declare subnamespce for specific input implementations
 Javelin.Plugin.Input.Handler = Javelin.Plugin.Input.Handler || {};
 
-/* Example config */
-/*
+/* 
+
+//Example config:
+
 var config = {
     //joystick, same as gamepad?
 	joystick: {},

@@ -43,10 +43,17 @@ Things that I'll be working on in the near-term, organized by category.
 
 ### Plugins ###
 
+* implement a way to fake input for testing purposes
 * implement an `onPrefabInstantiate` & `onPrefabDestroy` - this way plugins can optimize at a nested object level, or an
 individual GO level, whichever is more efficient for that particular plugin
 * Player input plugin
 * Box2d plugin
+
+### Input plugin ###
+
+* implement easy way to fake input for testing
+* implement `input.resolve` callback for components
+* input handlers should set input values directly on the input plugin
 
 ### Canvas2d Plugin ###
 
