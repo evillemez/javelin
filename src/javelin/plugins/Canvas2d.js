@@ -8,6 +8,12 @@
 Javelin.Plugin.Canvas2d = function(plugin, config) {
     plugin.config = config;
     
+    //todo, implement
+    plugin.viewport = {
+        x: 0.0,
+        y: 0.0
+    };
+    
     plugin.$onLoad = function() {
         plugin.fps = plugin.config.framesPerSecond || plugin.$engine.stepsPerSecond;
         plugin.lastTimeRendered = 0.0;        
@@ -49,9 +55,11 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
             var gos = plugin.$engine.gos;
             var l = gos.length;
             for (var i = 0; i < l; i++) {
-                ctx.save();
+                
+                //check for a sprite component to draw
                 var s = gos[i].getComponent('sprite');
                 if (s && s.visible && s.image) {
+                    ctx.save();
                     var t = gos[i].getComponent('transform2d');
                     var pos = t.position;
                     var rot = t.getWorldRotation();
@@ -75,14 +83,15 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                         ctx.drawImage(s.image, pos.x, pos.y, w, h);
                     }
                     
+                    ctx.restore();
                 }
                 
+                //check for a draw callback to run
                 var cbs = gos[i].getCallbacks('canvas2d.draw');
                 for (var j in cbs) {
                     cbs[j](ctx);
                 }
 
-                ctx.restore();
             }
             
             plugin.lastTimeRendered = plugin.$engine.time;
