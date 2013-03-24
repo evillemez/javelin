@@ -5,6 +5,7 @@ Javelin.Plugin.Input = function (plugin, config) {
 	plugin.$when = Javelin.EnginePlugin.BEFORE;
     plugin.handlers = {};
     plugin.callbacks = {};
+    plugin.input = {};
 	
     //process config and setup relevant listeners
 	plugin.$onLoad = function() {
@@ -19,6 +20,12 @@ Javelin.Plugin.Input = function (plugin, config) {
         //TODO: setup gamepad controls        
         //TODO: setup touch controls
 	};
+    
+    plugin.$onUnload = function() {
+        if (plugin.handlers['keyboard']) {
+            plugin.handlers['keyboard'].unregisterListeners();
+        }
+    };
 	
 	plugin.$onStep = function(deltaTime) {
         var i, j;
@@ -54,33 +61,23 @@ Javelin.Plugin.Input = function (plugin, config) {
     //generic GET by name - will internally decide which input to call, so you need
     //to already know what type of value will be returned
     plugin.getInput = function (name) {
-        if (plugin.handlers['keyboard']) {
-            return plugin.handlers['keyboard'].getInput(name);
-        }
+        return this.input[name] || false;
     };
     
 	plugin.getButton = function(name) {
-        if (plugin.handlers['keyboard']) {
-            return plugin.handlers['keyboard'].getButton(name);
-        }
+        return this.input[name] || 0;
 	};
 	
 	plugin.getButtonDown = function(name) {
-        if (plugin.handlers['keyboard']) {
-            return plugin.handlers['keyboard'].getButtonDown(name);
-        }
+        return this.input[name] || false;
 	};
 	
 	plugin.getButtonUp = function(name) {
-        if (plugin.handlers['keyboard']) {
-            return plugin.handlers['keyboard'].getButtonUp(name);
-        }
+        return this.input[name] || false;
 	};
 	
 	plugin.getAxis = function(name) {
-        if (plugin.handlers['keyboard']) {
-            return plugin.handlers['keyboard'].getAxis(name);
-        }
+        return this.input[name] || 0;
 	};
 	
     plugin.getMousePosition = function() {
@@ -99,6 +96,22 @@ Javelin.Plugin.Input = function (plugin, config) {
     
     plugin.getHandler = function(key) {
         return this.handlers[key] || false;
+    };
+    
+    plugin.setButton = function(name, val) {
+        this.input[name] = val;
+    };
+    
+    plugin.setButtonUp = function(name, val) {
+        this.input[name] = val;
+    };
+    
+    plugin.setButtonDown = function(name, val) {
+        this.input[name] = val;
+    };
+    
+    plugin.setAxis = function(name, val) {
+        this.input[name] = val;
     };
 };
 Javelin.Plugin.Input.alias = 'input';

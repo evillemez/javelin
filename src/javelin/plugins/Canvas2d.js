@@ -75,7 +75,7 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                         //convert degrees to radians
                         ctx.rotate(rot * Math.PI/180);
 
-                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, 0, 0, spr.width * scale.x, spr.height * scale.y);
+                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, +spr.cx, +spr.cy, spr.width * scale.x, spr.height * scale.y);
                     } else {
                         //TODO: rotation here as well
                         var h = s.image.height * s.scale.y;

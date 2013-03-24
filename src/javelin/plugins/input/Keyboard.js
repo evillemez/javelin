@@ -48,21 +48,27 @@ Javelin.Plugin.Input.Handler.Keyboard = function(config) {
     if (config) {
         this.processConfig(config);
     }
+    
+    var kb = this;
+    
+    this.keyUpListener = function(e) {
+        kb.handleKeyUp(e);
+    };
+    
+    this.keyDownListener = function(e) {
+        kb.handleKeyDown(e);
+    };
 };
 
 Javelin.Plugin.Input.Handler.Keyboard.prototype.registerListeners = function() {
-    var kb = this;
-
-    window.addEventListener('keyup', function(e) {
-        kb.handleKeyUp(e);
-    });
-
-    window.addEventListener('keydown', function(e) {
-        kb.handleKeyDown(e);
-    });
-    
+    window.addEventListener('keyup', this.keyUpListener);
+    window.addEventListener('keydown', this.keyDownListener);    
 };
 
+Javelin.Plugin.Input.Handler.Keyboard.prototype.unregisterListeners = function() {
+    window.removeEventListener('keyup', this.keyUpListener);
+    window.removeEventListener('keydown', this.keyDownListener);
+};
 
 Javelin.Plugin.Input.Handler.Keyboard.prototype.processConfig = function(config) {
     this.config = config;
