@@ -65,11 +65,11 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                     var rot = t.getWorldRotation();
                     var scale = s.scale;
 
-                    //TODO: implement rotation (http://stackoverflow.com/questions/3793397/html5-canvas-drawimage-with-at-an-angle)
-
                     if (s.image instanceof Javelin.Asset.AtlasImage) {
                         var spr = s.image;
-
+                        
+                        //TODO: fix rotation when sprite is also scaled
+                        
                         ctx.translate(pos.x + spr.cx, pos.y + spr.cy);
                         
                         //convert degrees to radians

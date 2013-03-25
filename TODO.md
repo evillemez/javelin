@@ -4,8 +4,7 @@ The general TODO list for various subsystems and what not.  Testing doesn't get 
 
 **The short list:**
 
-* player input component
-    * use [*hammer.js*](https://github.com/EightMedia/hammer.js/) for dealing with touch input
+* player input component, process basic keyboard events
 * implement canvas2d sprite rotation
 * simplify component adding
     * QUESTION: can an object contain two components which have both inherited from the same component?
@@ -28,6 +27,7 @@ Things that I'll be working on in the near-term, organized by category.
 
 * implement gameObject pooling and component object pooling
 * implement pre/post update plugin loops - a plugin should specify where it belongs
+* implement bucket array for main game object storage, possibly for component storage
 * implement engine-level event dispatching
 * implement engine-level config key/val store
 * load requiredAssets before calling scene load callback
@@ -43,7 +43,6 @@ Things that I'll be working on in the near-term, organized by category.
 
 ### Plugins ###
 
-* implement a way to fake input for testing purposes
 * implement an `onPrefabInstantiate` & `onPrefabDestroy` - this way plugins can optimize at a nested object level, or an
 individual GO level, whichever is more efficient for that particular plugin
 * Player input plugin
@@ -51,13 +50,12 @@ individual GO level, whichever is more efficient for that particular plugin
 
 ### Input plugin ###
 
-* implement easy way to fake input for testing
-* implement `input.resolve` callback for components
-* input handlers should set input values directly on the input plugin
+* implement axes for keyboard
+* use [*hammer.js*](https://github.com/EightMedia/hammer.js/) for dealing with touch input
 
 ### Canvas2d Plugin ###
 
-* fix rotation
+* fix rotation when sprite is scaled
 * implement viewport
 * implement layers for multiple canvases
 

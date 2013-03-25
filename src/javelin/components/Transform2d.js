@@ -33,7 +33,7 @@ Javelin.Component.Transform2d = function(gameObject, component) {
         
         component.position.x += x;
         component.position.y += y;
-    };
+    };    
     
     //todo doc
     component.rotate = function(degrees) {
@@ -42,6 +42,12 @@ Javelin.Component.Transform2d = function(gameObject, component) {
         component.rotation = component.rotation + degrees % 360;
     };
     
+    //TODO: return values relative to self
+    component.UP = function() {};
+    component.DOWN = function() {};
+    component.LEFT = function() {};
+    component.RIGHT = function() {};
+
     component.$on('engine.create', function() {
         //if there's a parent, cache it's transform
         parentTransform = (gameObject.parent) ? gameObject.parent.getComponent('transform2d') : false;

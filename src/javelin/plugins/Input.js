@@ -1,5 +1,22 @@
 'use strict';
 
+/**
+ * This callback can be executed by registering a listener for the
+ * `input.resolve` event in any component.  This will allow user code
+ * to override or modify user input values.
+ * 
+ * @param {Object} plugin The instance of the `input` plugin
+ * @callback
+ */
+
+/**
+ * This plugin processes and stores user input.  It uses separate handlers to listen for 
+ * and process the raw input values.  These handlers are loaded and unloaded automatically
+ * based on the configuration passed to the plugin.
+ * 
+ * @class Javelin.Plugin.Input
+ * @author Evan Villemez
+ */
 Javelin.Plugin.Input = function (plugin, config) {
 	plugin.config = config;
 	plugin.$when = Javelin.EnginePlugin.BEFORE;
@@ -28,11 +45,14 @@ Javelin.Plugin.Input = function (plugin, config) {
     };
 	
 	plugin.$onStep = function(deltaTime) {
-        var i, j;
+        var i, j, currTime, lastTime;
+        
+        currTime = plugin.$engine.time;
+        lastTime = plugin.$engine.prevTime;
         
 		//all configured handlers process their own input
         for (i in plugin.handlers) {
-            plugin.handlers[i].processInputEvents(deltaTime);
+            plugin.handlers[i].processInputEvents(currTime, lastTime, deltaTime);
         }
         
         //call any registered `input.resolve` callbacks
@@ -64,18 +84,42 @@ Javelin.Plugin.Input = function (plugin, config) {
         return this.input[name] || false;
     };
     
+    /**
+     * Get value of a button control, will be between 0 and 1
+     * 
+     * @param {String} name The name of the control to get
+     * @returns {Number} A number in the range of 0 to 1
+     */    
 	plugin.getButton = function(name) {
-        return this.input[name] || 0;
+        return this.input[name].val || 0;
 	};
 	
+    /**
+     * Get whether or not a button was pressed down during the last frame.
+     * 
+     * @param {String} name The name of the control to get
+     * @returns {Boolean}
+     */    
 	plugin.getButtonDown = function(name) {
-        return this.input[name] || false;
+        return this.input[name].down || false;
 	};
 	
+    /**
+     * Get whether or not a button was released during the last frame.
+     * 
+     * @param {String} name The name of the control to get
+     * @returns {Boolean}
+     */    
 	plugin.getButtonUp = function(name) {
-        return this.input[name] || false;
+        return this.input[name].up || false;
 	};
 	
+    /**
+     * Get the value for an axis control, will be between -1 and 1
+     * 
+     * @param {String} name The name of the control to get
+     * @returns {Number} A number in the range of -1 to 1
+     */    
 	plugin.getAxis = function(name) {
         return this.input[name] || 0;
 	};
@@ -98,16 +142,24 @@ Javelin.Plugin.Input = function (plugin, config) {
         return this.handlers[key] || false;
     };
     
+    plugin.defineButton = function(name) {
+        this.input[name] = {
+            up: false,
+            down: false,
+            val: 0
+        };
+    };
+    
     plugin.setButton = function(name, val) {
-        this.input[name] = val;
+        this.input[name].val = val;
     };
     
     plugin.setButtonUp = function(name, val) {
-        this.input[name] = val;
+        this.input[name].up = val;
     };
     
     plugin.setButtonDown = function(name, val) {
-        this.input[name] = val;
+        this.input[name].down = val;
     };
     
     plugin.setAxis = function(name, val) {

@@ -1,9 +1,10 @@
 'use strict';
 
-Javelin.Plugin.Input.Handler.Keyboard = function(config) {
+Javelin.Plugin.Input.Handler.Keyboard = function(plugin, config) {
     this.config = config;
     this.raw = {};
     this.processed = {};
+    this.plugin = plugin;
     this.MAP = {
         'a': 65,
         'b': 66,
@@ -70,10 +71,57 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.unregisterListeners = function()
     window.removeEventListener('keydown', this.keyDownListener);
 };
 
+Javelin.Plugin.Input.Handler.Keyboard.prototype.processInputEvents = function(currTime, lastTime, deltaTime) {
+    //TODO: start here, this is wrong
+    for (var control in this.raw) {
+        var raw = this.raw[control];
+        
+        //process buttons
+        if (!raw.axis) {
+            var pressed;
+            
+            //if we didn't process this key during this frame, then whether or not 
+            //it's "pressed" depends on the last state, and up/down are both false
+            if (raw.time < lastTime) {
+                if (raw.up) {
+                    pressed = false;
+                    raw.up = false;
+                    raw.down = false;
+                }
+                if (raw.down) {
+                    raw.up = false;
+                    raw.down = false;
+                    pressed = true;
+                }
+
+                this.plugin.setButtonUp(control, raw.up);
+                this.plugin.setButtonDown(control, raw.down);
+                this.plugin.setButton(control, (pressed) ? 1 : 0);
+
+            } else {
+                if (raw.up) {
+                    this.plugin.setButtonUp(control, true);
+                    this.plugin.setButtonDown(control, false);
+                    this.plugin.setButton(control, 1);
+                }
+                
+                if (raw.down) {
+                    this.plugin.setButtonUp(control, false);
+                    this.plugin.setButtonDown(control, true);
+                    this.plugin.setButton(control, 0);
+                }
+            }
+            
+        } else {
+            //TODO: process axis
+        }
+    }
+};
+
+
 Javelin.Plugin.Input.Handler.Keyboard.prototype.processConfig = function(config) {
     this.config = config;
     this.raw = {};
-    this.processed = {};
     
     var control;
     
@@ -81,18 +129,17 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.processConfig = function(config)
     if (config.buttons) {
         for (control in config.buttons) {
             if (this.MAP[config.buttons[control]]) {
+
+                //tells plugin to create spot for final values
+                this.plugin.defineButton(control);
+                
+                //create internal raw storage spot for later processing
                 this.raw[this.MAP[config.buttons[control]]] = {
                     up: false,
                     down: false,
                     time: Date.now(),
                     axis: false,
                     control: control
-                };
-                
-                this.processed[control] = {
-                    value: 0,
-                    up: false,
-                    down: false
                 };
             }
         }
@@ -109,22 +156,18 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.processConfig = function(config)
 Javelin.Plugin.Input.Handler.Keyboard.prototype.getKeyId = function(event) {
     var codes = [];
     if (event.keyCode) {
-        console.log(event.keyCode);
         codes.push(event.keyCode);
     }
 
     if (event.altKey) {
-        console.log(18);
         codes.push(18);
     }
     
     if (event.ctrlKey) {
-        console.log(17);
         codes.push(17);
     }
     
     if (event.shift) {
-        console.log(16);
         codes.push(16);
     }
     
@@ -158,17 +201,3 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.handleKeyUp = function(event) {
         }
     }
 };
-
-Javelin.Plugin.Input.Handler.Keyboard.prototype.processInputEvents = function(deltaTime) {
-    // body...
-};
-
-Javelin.Plugin.Input.Handler.Keyboard.prototype.getButton = function(name) {};
-
-Javelin.Plugin.Input.Handler.Keyboard.prototype.getButtonUp = function(name) {};
-
-Javelin.Plugin.Input.Handler.Keyboard.prototype.getDown = function(name) {};
-
-Javelin.Plugin.Input.Handler.Keyboard.prototype.getAxis = function(name) {};
-
-Javelin.Plugin.Input.Handler.Keyboard.prototype.getInput = function(name) {};

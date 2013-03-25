@@ -22,7 +22,7 @@ Javelin.Env.Browser.prototype.run = function(stepsPerSecond) {
         } catch (e) {
             console.log(e);
 
-            if (this.engine.debug) {
+            if (engine.debug) {
                 alert(e);
             }
         }
