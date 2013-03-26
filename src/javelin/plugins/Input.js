@@ -28,9 +28,11 @@ Javelin.Plugin.Input = function (plugin, config) {
 	plugin.$onLoad = function() {
         
 		//setup keyboard controls
-        if (plugin.config.keyboard && window) {
-            var kb = plugin.handlers['keyboard'] = new Javelin.Plugin.Input.Handler.Keyboard(plugin.config.keyboard);
-            kb.registerListeners();
+        if (plugin.config.keyboard) {
+            var kb = plugin.handlers['keyboard'] = new Javelin.Plugin.Input.Handler.Keyboard(plugin, plugin.config.keyboard);
+            if ('undefined' !== typeof window) {
+                kb.registerListeners();
+            }
         }
         
         //TODO: setup mouse controls
@@ -81,6 +83,10 @@ Javelin.Plugin.Input = function (plugin, config) {
     //generic GET by name - will internally decide which input to call, so you need
     //to already know what type of value will be returned
     plugin.getInput = function (name) {
+        if (!this.input[name]) {
+            throw new Error("Requested input [" + name + "] is not defined.");
+        }
+
         return this.input[name] || false;
     };
     
@@ -91,6 +97,10 @@ Javelin.Plugin.Input = function (plugin, config) {
      * @returns {Number} A number in the range of 0 to 1
      */    
 	plugin.getButton = function(name) {
+        if (!this.input[name]) {
+            throw new Error("Requested input [" + name + "] is not defined.");
+        }
+
         return this.input[name].val || 0;
 	};
 	
@@ -101,6 +111,10 @@ Javelin.Plugin.Input = function (plugin, config) {
      * @returns {Boolean}
      */    
 	plugin.getButtonDown = function(name) {
+        if (!this.input[name]) {
+            throw new Error("Requested input [" + name + "] is not defined.");
+        }
+
         return this.input[name].down || false;
 	};
 	
@@ -111,6 +125,10 @@ Javelin.Plugin.Input = function (plugin, config) {
      * @returns {Boolean}
      */    
 	plugin.getButtonUp = function(name) {
+        if (!this.input[name]) {
+            throw new Error("Requested input [" + name + "] is not defined.");
+        }
+
         return this.input[name].up || false;
 	};
 	
@@ -121,6 +139,10 @@ Javelin.Plugin.Input = function (plugin, config) {
      * @returns {Number} A number in the range of -1 to 1
      */    
 	plugin.getAxis = function(name) {
+        if (!this.input[name]) {
+            throw new Error("Requested input [" + name + "] is not defined.");
+        }
+
         return this.input[name] || 0;
 	};
 	

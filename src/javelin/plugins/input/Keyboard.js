@@ -1,9 +1,13 @@
 'use strict';
 
+/**
+ * Keyboard input handler.  The input plugin uses this for processing raw keyboard
+ * input.
+ * 
+ * @author Evan Villemez
+ */
 Javelin.Plugin.Input.Handler.Keyboard = function(plugin, config) {
-    this.config = config;
     this.raw = {};
-    this.processed = {};
     this.plugin = plugin;
     this.MAP = {
         'a': 65,
@@ -45,7 +49,7 @@ Javelin.Plugin.Input.Handler.Keyboard = function(plugin, config) {
         'leftarrow':    37,
         'rightarrow':   39
     };
-    
+
     if (config) {
         this.processConfig(config);
     }
@@ -59,6 +63,7 @@ Javelin.Plugin.Input.Handler.Keyboard = function(plugin, config) {
     this.keyDownListener = function(e) {
         kb.handleKeyDown(e);
     };
+        
 };
 
 Javelin.Plugin.Input.Handler.Keyboard.prototype.registerListeners = function() {
@@ -72,13 +77,13 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.unregisterListeners = function()
 };
 
 Javelin.Plugin.Input.Handler.Keyboard.prototype.processInputEvents = function(currTime, lastTime, deltaTime) {
-    //TODO: start here, this is wrong
-    for (var control in this.raw) {
-        var raw = this.raw[control];
+
+    for (var code in this.raw) {
+        var raw = this.raw[code];
         
         //process buttons
         if (!raw.axis) {
-            var pressed;
+            var pressed = false;
             
             //if we didn't process this key during this frame, then whether or not 
             //it's "pressed" depends on the last state, and up/down are both false
@@ -88,27 +93,28 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.processInputEvents = function(cu
                     raw.up = false;
                     raw.down = false;
                 }
+
                 if (raw.down) {
                     raw.up = false;
                     raw.down = false;
                     pressed = true;
                 }
 
-                this.plugin.setButtonUp(control, raw.up);
-                this.plugin.setButtonDown(control, raw.down);
-                this.plugin.setButton(control, (pressed) ? 1 : 0);
+                this.plugin.setButtonUp(raw.control, raw.up);
+                this.plugin.setButtonDown(raw.control, raw.down);
+                this.plugin.setButton(raw.control, (pressed) ? 1 : 0);
 
             } else {
                 if (raw.up) {
-                    this.plugin.setButtonUp(control, true);
-                    this.plugin.setButtonDown(control, false);
-                    this.plugin.setButton(control, 1);
+                    this.plugin.setButtonUp(raw.control, true);
+                    this.plugin.setButtonDown(raw.control, false);
+                    this.plugin.setButton(raw.control, 1);
                 }
                 
                 if (raw.down) {
-                    this.plugin.setButtonUp(control, false);
-                    this.plugin.setButtonDown(control, true);
-                    this.plugin.setButton(control, 0);
+                    this.plugin.setButtonUp(raw.control, false);
+                    this.plugin.setButtonDown(raw.control, true);
+                    this.plugin.setButton(raw.control, 0);
                 }
             }
             

@@ -456,7 +456,11 @@ Javelin.Engine.prototype.loadPlugin = function(alias, config) {
     }
     
     if (Javelin.isEmpty(config)) {
-        config = this.config.plugins[alias] || handler.defaults;
+        if (this.config && this.config.plugins && this.config.plugins[alias]) {
+            config = this.config.plugins[alias];
+        } else {
+            config = handler.defaults || {};
+        }
     }
     
     var plugin = new Javelin.EnginePlugin();
