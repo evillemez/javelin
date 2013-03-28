@@ -15,18 +15,20 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
     };
     
     plugin.$onLoad = function() {
-        plugin.fps = plugin.config.framesPerSecond || plugin.$engine.stepsPerSecond;
-        plugin.lastTimeRendered = 0.0;        
-        var target = document.getElementById(plugin.config.renderTargetId);
-        if (!target) {
-            throw new Error("No render target defined!");
+        if (document) {
+            plugin.fps = plugin.config.framesPerSecond || plugin.$engine.stepsPerSecond;
+            plugin.lastTimeRendered = 0.0;        
+            var target = document.getElementById(plugin.config.renderTargetId);
+            if (!target) {
+                throw new Error("No render target defined!");
+            }
+            var canvas = document.createElement('canvas');
+            plugin.canvas = canvas;
+            plugin.context = canvas.getContext('2d');
+            plugin.canvas.height = plugin.config.height;
+            plugin.canvas.width = plugin.config.width;
+            target.appendChild(canvas);
         }
-        var canvas = document.createElement('canvas');
-        plugin.canvas = canvas;
-        plugin.context = canvas.getContext('2d');
-        plugin.canvas.height = plugin.config.height;
-        plugin.canvas.width = plugin.config.width;
-        target.appendChild(canvas);
         
         //TODO: implement layers, create canvas(es) internally
     };
@@ -74,18 +76,37 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                         //TODO: take into account viewport x/y
                         
                         //move canvas to draw the image in proper location
-                        ctx.translate(pos.x + spr.cx * scale.x, pos.y + spr.cy * scale.y);
+                        ctx.translate(
+                            pos.x + spr.cx,
+                            pos.y + spr.cy
+                        );
                         
                         //convert degrees to radians
                         ctx.rotate(rot * Math.PI/180);
                         
                         //draw the image fo' reals
-                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, +spr.cx * scale.x, +spr.cy * scale.y, spr.width * scale.x, spr.height * scale.y);
+                        ctx.drawImage(
+                            spr.image,
+                            spr.x,
+                            spr.y,
+                            spr.width,
+                            spr.height,
+                            +spr.cx * scale.x,
+                            +spr.cy * scale.y,
+                            spr.width * scale.x,
+                            spr.height * scale.y
+                        );
                     } else {
                         //TODO: rotation  & scaling here as well
                         var h = s.image.height * s.scale.y;
                         var w = s.image.width * s.scale.x;
-                        ctx.drawImage(s.image, pos.x, pos.y, w, h);
+                        ctx.drawImage(
+                            s.image,
+                            pos.x,
+                            pos.y,
+                            w,
+                            h
+                        );
                     }
                     
                     ctx.restore();
