@@ -83,39 +83,17 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.processInputEvents = function(cu
         
         //process buttons
         if (!raw.axis) {
-            var pressed = false;
+
+            if (raw.up) {
+                this.plugin.setButtonUp(raw.control, true);
+                this.plugin.setButtonDown(raw.control, false);
+                this.plugin.setButton(raw.control, 0);
+            }
             
-            //if we didn't process this key during this frame, then whether or not 
-            //it's "pressed" depends on the last state, and up/down are both false
-            if (raw.time < lastTime) {
-                if (raw.up) {
-                    pressed = false;
-                    raw.up = false;
-                    raw.down = false;
-                }
-
-                if (raw.down) {
-                    raw.up = false;
-                    raw.down = false;
-                    pressed = true;
-                }
-
-                this.plugin.setButtonUp(raw.control, raw.up);
-                this.plugin.setButtonDown(raw.control, raw.down);
-                this.plugin.setButton(raw.control, (pressed) ? 1 : 0);
-
-            } else {
-                if (raw.up) {
-                    this.plugin.setButtonUp(raw.control, true);
-                    this.plugin.setButtonDown(raw.control, false);
-                    this.plugin.setButton(raw.control, 1);
-                }
-                
-                if (raw.down) {
-                    this.plugin.setButtonUp(raw.control, false);
-                    this.plugin.setButtonDown(raw.control, true);
-                    this.plugin.setButton(raw.control, 0);
-                }
+            if (raw.down) {
+                this.plugin.setButtonUp(raw.control, false);
+                this.plugin.setButtonDown(raw.control, true);
+                this.plugin.setButton(raw.control, 1);
             }
             
         } else {
