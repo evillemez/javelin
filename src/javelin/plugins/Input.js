@@ -19,7 +19,6 @@
  */
 Javelin.Plugin.Input = function (plugin, config) {
 	plugin.config = config;
-	plugin.$when = Javelin.EnginePlugin.BEFORE;
     plugin.handlers = {};
     plugin.callbacks = {};
     plugin.input = {};
@@ -46,7 +45,7 @@ Javelin.Plugin.Input = function (plugin, config) {
         }
     };
 	
-	plugin.$onStep = function(deltaTime) {
+	plugin.$onPreUpdateStep = function(deltaTime) {
         var i, j, currTime, lastTime;
         
         currTime = plugin.$engine.time;
@@ -66,6 +65,10 @@ Javelin.Plugin.Input = function (plugin, config) {
             }
         }
 	};
+    
+    plugin.$onPostUpdateStep = function(deltaTime) {
+        //TODO: clear anything?
+    };
     
     plugin.$onGameObjectCreate = function(gameObject) {
         var cbs = gameObject.getCallbacks('input.resolve');

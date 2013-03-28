@@ -116,7 +116,7 @@ Fixtures.Plugin.TestPlugin = function(plugin, config) {
         plugin.initialized = false;
     };
     
-    plugin.$onStep = function(deltaTime) {
+    plugin.$onPostUpdateStep = function(deltaTime) {
         plugin.stepCount++;
     };
     

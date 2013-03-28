@@ -10,10 +10,14 @@ Javelin.Engine = function(environment, config) {
     this.environment = environment;
     this.environment.engine = this;
     this.initialized = false;
-
+    
     //everything else can be reset
     this.reset();
 };
+
+//constant flags
+Javelin.Engine.PRE_UPDATE = 0;
+Javelin.Engine.POST_UPDATE = 1;
 
 Javelin.Engine.prototype.reset = function() {
     //general state
@@ -37,8 +41,6 @@ Javelin.Engine.prototype.reset = function() {
     //scene
     this.sceneDefinition = {};
     this.plugins = {};
-    this.plugins[Javelin.EnginePlugin.BEFORE] = {};
-    this.plugins[Javelin.EnginePlugin.AFTER] = {};
     this.currentScene = false;
         
     //configure the loader
@@ -306,12 +308,12 @@ Javelin.Engine.prototype.step = function() {
     this.deltaTime = (this.time - this.prevStepTime) * 0.001;
     
     //some plugins process in the beginning
-    this.updatePlugins(Javelin.EnginePlugin.BEFORE, this.deltaTime);
+    this.updatePlugins(Javelin.Engine.PRE_UPDATE, this.deltaTime);
     
     this.updateGameObjects(this.deltaTime);
     
     //some process after
-    this.updatePlugins(Javelin.EnginePlugin.AFTER, this.deltaTime);
+    this.updatePlugins(Javelin.Engine.POST_UPDATE, this.deltaTime);
     this.updating = false;
 
     //clean now, so next step contains the modifications
@@ -353,7 +355,13 @@ Javelin.Engine.prototype.updatePlugins = function(which, deltaTime) {
     
     for (var i in plugins) {
         if (plugins[i].$active) {
-            plugins[i].$onStep(deltaTime);
+            if (Javelin.Engine.PRE_UPDATE === which) {
+                plugins[i].$onPreUpdateStep(deltaTime);
+            }
+            
+            if (Javelin.Engine.POST_UPDATE === which) {
+                plugins[i].$onPostUpdateStep(deltaTime);
+            }
         }
     }
 };
@@ -379,30 +387,14 @@ Javelin.Engine.prototype.cleanupStep = function() {
 };
 
 Javelin.Engine.prototype.pluginsCreateGameObject = function(go) {
-    var i, plugins;
-    
-    plugins = this.plugins[Javelin.EnginePlugin.BEFORE];
-    for (i in plugins) {
-        plugins[i].$onGameObjectCreate(go);
-    }
-
-    plugins = this.plugins[Javelin.EnginePlugin.AFTER];
-    for (i in plugins) {
-        plugins[i].$onGameObjectCreate(go);
+    for (var i in this.plugins) {
+        this.plugins[i].$onGameObjectCreate(go);
     }
 };
 
 Javelin.Engine.prototype.pluginsDestroyGameObject = function(go) {
-    var i, plugins;
-    
-    plugins = this.plugins[Javelin.EnginePlugin.BEFORE];
-    for (i in plugins) {
-        plugins[i].$onGameObjectDestroy(go);
-    }
-
-    plugins = this.plugins[Javelin.EnginePlugin.AFTER];
-    for (i in plugins) {
-        plugins[i].$onGameObjectDestroy(go);
+    for (var i in this.plugins) {
+        this.plugins[i].$onGameObjectDestroy(go);
     }
 };
 
@@ -467,7 +459,7 @@ Javelin.Engine.prototype.loadAssets = function(arr, callback) {
 
 /* Plugin Management */
 Javelin.Engine.prototype.loadPlugin = function(alias, config) {
-    if (this.plugins[Javelin.EnginePlugin.BEFORE][alias] || this.plugins[Javelin.EnginePlugin.AFTER][alias]) {
+    if (this.plugins[alias]) {
         return;
     }
     
@@ -491,7 +483,7 @@ Javelin.Engine.prototype.loadPlugin = function(alias, config) {
     handler(plugin, config);
     plugin.$onLoad();
     plugin.$active = true;
-    this.plugins[plugin.$when][plugin.$alias] = plugin;
+    this.plugins[plugin.$alias] = plugin;
 };
 
 Javelin.Engine.prototype.unloadPlugin = function(name) {
@@ -499,21 +491,16 @@ Javelin.Engine.prototype.unloadPlugin = function(name) {
     if(p) {
         p.$active = false;
         p.$onUnload();
-        this.plugins[p.$when][name] = null;
+        this.plugins[name] = null;
     }
 };
 
 Javelin.Engine.prototype.unloadPlugins = function() {
-    var alias;
-    for (alias in this.plugins[Javelin.EnginePlugin.BEFORE]) {
-        this.unloadPlugin(alias);
-    }
-
-    for (alias in this.plugins[Javelin.EnginePlugin.AFTER]) {
+    for (var alias in this.plugins) {
         this.unloadPlugin(alias);
     }
 };
 
-Javelin.Engine.prototype.getPlugin = function(name) {
-    return this.plugins[Javelin.EnginePlugin.AFTER][name] || this.plugins[Javelin.EnginePlugin.BEFORE][name] || false;
+Javelin.Engine.prototype.getPlugin = function(alias) {
+    return this.plugins[alias] || false;
 };
