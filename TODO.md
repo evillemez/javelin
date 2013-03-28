@@ -26,7 +26,6 @@ Things that I'll be working on in the near-term, organized by category.
 ### Engine ###
 
 * implement gameObject pooling and component object pooling
-* implement pre/post update plugin loops - a plugin should specify where it belongs
 * implement bucket array for main game object storage, possibly for component storage
 * implement engine-level event dispatching
 * implement engine-level config key/val store
@@ -38,7 +37,6 @@ Things that I'll be working on in the near-term, organized by category.
 
 ### Game Object ###
 
-* implement tag system
 * implement layers
 
 ### Plugins ###
