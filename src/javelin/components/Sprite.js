@@ -11,6 +11,7 @@ Javelin.Component.Sprite = function(gameObject, component) {
     //plugin could theoretically have multiple canvases, we could treat those as 'layers'
     component.layer = 'default';
     
+    //how much to scale the image in x and y directions
     component.scale = {
         x: 1.0,
         y: 1.0

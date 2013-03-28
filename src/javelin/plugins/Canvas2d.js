@@ -68,16 +68,21 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                     if (s.image instanceof Javelin.Asset.AtlasImage) {
                         var spr = s.image;
                         
-                        //TODO: fix rotation when sprite is also scaled
+                        //NOTE: if performance becomes an issue, scaling could be implemented slightly differently,
+                        //as it currently requires constantly multiplying various values by these scale values
                         
-                        ctx.translate(pos.x + spr.cx, pos.y + spr.cy);
+                        //TODO: take into account viewport x/y
+                        
+                        //move canvas to draw the image in proper location
+                        ctx.translate(pos.x + spr.cx * scale.x, pos.y + spr.cy * scale.y);
                         
                         //convert degrees to radians
                         ctx.rotate(rot * Math.PI/180);
-
-                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, +spr.cx, +spr.cy, spr.width * scale.x, spr.height * scale.y);
+                        
+                        //draw the image fo' reals
+                        ctx.drawImage(spr.image, spr.x, spr.y, spr.width, spr.height, +spr.cx * scale.x, +spr.cy * scale.y, spr.width * scale.x, spr.height * scale.y);
                     } else {
-                        //TODO: rotation here as well
+                        //TODO: rotation  & scaling here as well
                         var h = s.image.height * s.scale.y;
                         var w = s.image.width * s.scale.x;
                         ctx.drawImage(s.image, pos.x, pos.y, w, h);

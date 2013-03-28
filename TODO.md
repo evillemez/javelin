@@ -53,7 +53,6 @@ individual GO level, whichever is more efficient for that particular plugin
 
 ### Canvas2d Plugin ###
 
-* fix rotation when sprite is scaled
 * implement viewport
 * implement layers for multiple canvases
 
