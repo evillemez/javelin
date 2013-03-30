@@ -45,7 +45,6 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
     };
     
     plugin.$onPostUpdateStep = function(deltaTime) {
-        
         if (plugin.$engine.time - plugin.lastTimeRendered >= plugin.fps && !plugin.$engine.isRunningSlowly) {
             var ctx = plugin.context;
             var canvas = plugin.canvas;

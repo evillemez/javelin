@@ -25,6 +25,7 @@ Things that I'll be working on in the near-term, organized by category.
 
 ### Engine ###
 
+* change pre/post plugin stuff to plugin.$preUpdateStep and plugin.$postUpdateStep
 * implement gameObject pooling and component object pooling
 * implement bucket array for main game object storage, possibly for component storage
 * implement engine-level event dispatching

@@ -351,16 +351,14 @@ Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
 };
 
 Javelin.Engine.prototype.updatePlugins = function(which, deltaTime) {
-    var plugins = this.plugins[which];
-    
-    for (var i in plugins) {
-        if (plugins[i].$active) {
+    for (var i in this.plugins) {
+        if (this.plugins[i].$active) {
             if (Javelin.Engine.PRE_UPDATE === which) {
-                plugins[i].$onPreUpdateStep(deltaTime);
+                this.plugins[i].$onPreUpdateStep(deltaTime);
             }
             
             if (Javelin.Engine.POST_UPDATE === which) {
-                plugins[i].$onPostUpdateStep(deltaTime);
+                this.plugins[i].$onPostUpdateStep(deltaTime);
             }
         }
     }
