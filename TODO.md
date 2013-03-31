@@ -4,8 +4,7 @@ The general TODO list for various subsystems and what not.  Testing doesn't get 
 
 **The short list:**
 
-* player input component, process basic keyboard events
-* implement canvas2d sprite rotation
+* audio component
 * simplify component adding
     * QUESTION: can an object contain two components which have both inherited from the same component?
     * Currently, they cannot - something will get overriden
@@ -44,7 +43,7 @@ Things that I'll be working on in the near-term, organized by category.
 
 * implement an `onPrefabInstantiate` & `onPrefabDestroy` - this way plugins can optimize at a nested object level, or an
 individual GO level, whichever is more efficient for that particular plugin
-* Player input plugin
+* audio plugin
 * Box2d plugin
 
 ### Input plugin ###
@@ -54,7 +53,6 @@ individual GO level, whichever is more efficient for that particular plugin
 
 ### Canvas2d Plugin ###
 
-* implement rotation/scaling for single images
 * implement viewport
 * implement layers for multiple canvases
 

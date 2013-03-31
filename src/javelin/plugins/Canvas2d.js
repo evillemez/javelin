@@ -96,13 +96,25 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                             spr.height * scale.y
                         );
                     } else {
-                        //TODO: rotation  & scaling here as well
+                        var cx, cy;
+                        
+                        //TODO: would be good to do this
+                        //once when it loads - or when set
+                        //in the sprite component
+                        cx = s.image.height * 0.5;
+                        cy = s.image.width * 0.5;
+                        
+                        ctx.translate(pos.x + cx, pos.y + cy);
+                        
+                        //convert degrees to radians
+                        ctx.rotate(rot * Math.PI/180);
+
                         var h = s.image.height * s.scale.y;
                         var w = s.image.width * s.scale.x;
                         ctx.drawImage(
                             s.image,
-                            pos.x,
-                            pos.y,
+                            -cx * s.scale.x,
+                            -cy * s.scale.y,
                             w,
                             h
                         );
