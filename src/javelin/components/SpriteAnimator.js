@@ -14,6 +14,7 @@ Javelin.Component.SpriteAnimator = function(gameObject, component) {
     var defaultAnimation = null;
     var currentFrame = 0;
     var currentAnimation = null;
+    var animating = true;
     
     //public api
     component.getCurrentAnimation = function() {
@@ -37,25 +38,31 @@ Javelin.Component.SpriteAnimator = function(gameObject, component) {
 
     //start, if not already playing
     component.play = function(name) {
+        animating = true;
         currentAnimation = name;
     };
     
     component.playOnce = function(name) {
+        animating = true;
         
     };
     
     //start from beginning
     component.start = function(name) {
+        animating = true;
         
     };
     
     //once
     component.startOnce = function(name) {
+        animating = true;
         
     };
     
     //stop playing
-    component.interrupt = function() {};
+    component.stop = function() {
+        animating = false;
+    };
     
     //set default
     component.setDefaultAnimation = function(name) {
@@ -64,7 +71,7 @@ Javelin.Component.SpriteAnimator = function(gameObject, component) {
     
     //each frame, figure out which image to draw
     component.$on('engine.update', function(deltaTime) {
-        if (sprite.visible) {
+        if (sprite.visible && animating) {
             var current = component.currentAnimation || defaultAnimation;
             var anim = animations[current];
             

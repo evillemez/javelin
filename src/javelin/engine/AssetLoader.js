@@ -3,6 +3,13 @@
 /**
  * The AssetLoader returns objects based on string filepaths.  The object is loaded
  * by a function mapped to the file extension.
+ *
+ * Note: This implementation is likely to drastically change - it kinda sucks as it is, and is going
+ * to get increasingly messy.
+ * 
+ * Ultimately, how an asset is loaded should be determined by the "environment".  So, a lot of this
+ * functinoality will probably move or be implemented differently.  However, the API for actual
+ * games creaters is probably correct, so that should stay as it is.
  */
 Javelin.AssetLoader = function(basePath) {
     this.assets = {};
@@ -65,7 +72,14 @@ Javelin.AssetLoader = function(basePath) {
     
     //generic file loader
     var soundLoader = function(loader, relPath, absPath, callback) {
-        throw new Error("NOT IMPLEMENTED");
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", absPath, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function() {
+            loader.register(relPath, xhr.response);
+            callback(xhr.response);
+        };
+        xhr.send();
     };
     
     //map loader functions to types, note more specific extensions

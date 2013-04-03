@@ -82,9 +82,18 @@ Javelin.Engine.prototype.instantiatePrefab = function(name) {
 };
 
 Javelin.Engine.prototype.instantiateObject = function(def) {
-    var go = new Javelin.GameObject();
+    var go;
 
-    go.name = def.name || "Anonymous";
+    if (def.fromPrefab) {
+        go = this.instantiatePrefab(def.fromPrefab);
+    } else {
+        go = new Javelin.GameObject();
+        go.engine = this;
+    }
+    
+    if (!go.name) {
+        go.name = def.name || "Anonymous";
+    }
 
     if (def.components) {
         for (var key in def.components) {
@@ -169,7 +178,6 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
     if (-1 === go.id) {
         //register for engine
         go.setId(++this.lastGoId);
-        go.engine = this;
         go.enable();
         
         if (this.updating) {
@@ -328,9 +336,10 @@ Javelin.Engine.prototype.step = function() {
         this.isRunningSlowly = false;
     }
     
-    if (this.debug) {
-        console.log("Updated  " + this.gos.length + ' gos in ' + this.lastUpdateTimeTaken + 'ms, targeting ' + Math.floor(this.targetFps) + ' fps; DT: ' + this.deltaTime + ' seconds.');
-    }
+};
+
+Javelin.Engine.prototype.getLastStepStats = function() {
+    console.log("Updated  " + this.gos.length + ' gos in ' + this.lastUpdateTimeTaken + 'ms, targeting ' + Math.floor(this.targetFps) + ' fps; DT: ' + this.deltaTime + ' seconds.');
 };
 
 Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {

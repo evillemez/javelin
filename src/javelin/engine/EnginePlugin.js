@@ -10,6 +10,9 @@ Javelin.EnginePlugin.prototype.$onLoad = function() {};
 
 Javelin.EnginePlugin.prototype.$onUnload = function() {};
 
+//TODO: implement & test this
+Javelin.EnginePlugin.prototype.$onSceneLoaded = function() {};
+
 /* GameObject Lifecycle */
 Javelin.EnginePlugin.prototype.$onPreUpdateStep = function(deltaTime) {};
 
