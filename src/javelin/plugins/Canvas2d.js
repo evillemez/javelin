@@ -76,8 +76,8 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                         
                         //move canvas to draw the image in proper location
                         ctx.translate(
-                            pos.x + spr.cx,
-                            pos.y + spr.cy
+                            pos.x,
+                            pos.y
                         );
                         
                         //convert degrees to radians
@@ -104,7 +104,7 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                         cx = s.image.height * 0.5;
                         cy = s.image.width * 0.5;
                         
-                        ctx.translate(pos.x + cx, pos.y + cy);
+                        ctx.translate(pos.x, pos.y);
                         
                         //convert degrees to radians
                         ctx.rotate(rot * Math.PI/180);
