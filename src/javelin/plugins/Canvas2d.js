@@ -81,7 +81,7 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                         );
                         
                         //convert degrees to radians
-                        ctx.rotate(rot * Math.PI/180);
+                        ctx.rotate(rot * Javelin.PI_OVER_180);
                         
                         //draw the image fo' reals
                         ctx.drawImage(

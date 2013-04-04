@@ -10,7 +10,7 @@
  */
 Javelin.Component.Sprite = function(gameObject, component) {
     
-    //set by plugin (probably)    
+    //set by plugin (probably)
     component.visible = false;
 
     //can be Image or Javelin.Asset.AtlasImage
@@ -21,8 +21,8 @@ Javelin.Component.Sprite = function(gameObject, component) {
         x: 1.0,
         y: 1.0
     };
-        
-    //DEBUG: draw a point exactly at the transform location for debugging
+    
+    //DEBUG: draw sprite center and bounding boxes
     if (gameObject.engine && gameObject.engine.debug) {
         var transform = gameObject.getComponent('transform2d');
 
