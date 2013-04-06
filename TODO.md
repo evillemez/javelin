@@ -25,8 +25,7 @@ Things that I'll be working on in the near-term, organized by category.
 
 ### Engine ###
 
-* GO update and create callbacks should be called after entire object chain is created and plugins are notified
-* implement engine-level event dispatching
+* change GO creation logic to instantiate entire object chain first before adding/notifying plugins of new gameobjects
 * load requiredAssets before calling scene load callback
 * implement `flush` in engine and `$onFlush` in plugins to force GC and do any cleanup necessary
 * implement gameObject pooling and component object pooling

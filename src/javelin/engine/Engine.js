@@ -26,6 +26,7 @@ Javelin.Engine.prototype.reset = function() {
     this.isRunningSlowly = false;
     this.currentFps = 0.0;
     this.lastUpdateTimeTaken = 0.0;
+
     //game object
     this.gos = [];
     this.lastGoId = 0;
@@ -42,6 +43,9 @@ Javelin.Engine.prototype.reset = function() {
     this.sceneDefinition = {};
     this.plugins = {};
     this.currentScene = false;
+    
+    //other
+    this.dispatcher = new Javelin.Dispatcher();
         
     //configure the loader
     //TODO: think of better way to do this, possibly require it
@@ -91,10 +95,6 @@ Javelin.Engine.prototype.instantiateObject = function(def) {
         go.engine = this;
     }
     
-    if (!go.name) {
-        go.name = def.name || "Anonymous";
-    }
-
     if (def.components) {
         for (var key in def.components) {
             var c = this.addComponentToGameObject(go, key);
@@ -189,6 +189,9 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
         //TODO: move notification of plugins and create callbacks to only happen
         //if !engine.updating
         
+        //notify plugins
+        this.pluginsCreateGameObject(go);
+        
         //TODO: move this to do a recursive create on an instantiated object
         //notify object
         var cbs = go.getCallbacks('engine.create') || [];
@@ -196,9 +199,6 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
             cbs[j]();
         }
 
-        //notify plugins
-        this.pluginsCreateGameObject(go);
-        
         return go;
     }
     
@@ -510,4 +510,31 @@ Javelin.Engine.prototype.unloadPlugins = function() {
 
 Javelin.Engine.prototype.getPlugin = function(alias) {
     return this.plugins[alias] || false;
+};
+
+Javelin.Engine.prototype.on = function(event, callback) {
+    this.dispatcher.on(event, callback);
+};
+
+Javelin.Engine.prototype.emit = function(event, data) {
+    //just dispatch own events
+    return this.dispatcher.dispatch(event, data);
+};
+
+Javelin.Engine.prototype.broadcast = function(event, data) {
+    //dispatch own events first
+    if(!this.dispatcher.dispatch(event, data)) {
+        return false;
+    }
+
+    //then broadcast to root game objects
+    for (var i in this.gos) {
+        if (this.gos[i].isRoot()) {
+            if (!this.gos[i].broadcast(event, data)) {
+                return false;
+            }
+        }
+    }
+    
+    return true;
 };

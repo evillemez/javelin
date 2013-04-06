@@ -402,5 +402,56 @@ describe("Javelin Engine", function() {
         e.step();
         assert.equal(0, e.gos.length);
     });
-                
+    
+    it("should emit events emitted by root gameObjects", function() {
+        var e = getEngine();
+        var parent = e.instantiateObject({});
+        var child = e.instantiateObject({});
+        parent.addChild(child);
+        
+        var data = {
+            foo: true
+        };
+        
+        child.on('some.event', function(eventData) {
+            assert.isTrue(eventData.foo);
+        });
+
+        parent.on('some.event', function(eventData) {
+            assert.isTrue(eventData.foo);
+        });
+        
+        e.on('some.event', function(eventData) {
+            assert.isTrue(eventData.foo);
+            eventData.foo = false;
+        });
+        
+        assert.isTrue(data.foo);
+        child.emit('some.event', data);
+        assert.isFalse(data.foo);
+    });
+    
+    it("should dispatch events to root level gameObjects", function() {
+        var e = getEngine();
+        var parent = e.instantiateObject({});
+        var child = e.instantiateObject({});
+        parent.addChild(child);
+        
+        var data = {
+            foo: true
+        };
+        
+        parent.on('some.event', function(eventData) {
+            assert.isTrue(eventData.foo);
+        });
+
+        child.on('some.event', function(eventData) {
+            assert.isTrue(eventData.foo);
+            eventData.foo = false;
+        });
+
+        assert.isTrue(data.foo);
+        e.broadcast('some.event', data);
+        assert.isFalse(data.foo);
+    });
 });

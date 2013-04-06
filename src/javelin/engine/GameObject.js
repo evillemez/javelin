@@ -268,6 +268,9 @@ Javelin.GameObject.prototype.emit = function(name, data) {
         if (this.parent) {
             this.parent.emit(name, data);
         }
+        if (this.isRoot() && this.engine) {
+            this.engine.emit(name, data);
+        }
     }
 };
 
