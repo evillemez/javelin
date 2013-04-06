@@ -20,16 +20,18 @@ Things that I'll be working on in the near-term, organized by category.
 ### General ###
 
 * implement a default *loading* scene, easily overwritten by game config
-    * actually treat it like any other scene
+    * actually treat it like any other scene (internally instantiate an engine and load the loading scene)
+    * internally instantiate engine, load assets
 
 ### Engine ###
 
-* change pre/post plugin stuff to plugin.$preUpdateStep and plugin.$postUpdateStep
+* GO update and create callbacks should be called after entire object chain is created and plugins are notified
+* implement engine-level event dispatching
+* load requiredAssets before calling scene load callback
+* implement `flush` in engine and `$onFlush` in plugins to force GC and do any cleanup necessary
 * implement gameObject pooling and component object pooling
 * implement bucket array for main game object storage, possibly for component storage
-* implement engine-level event dispatching
 * implement engine-level config key/val store
-* load requiredAssets before calling scene load callback
 
 ### Environments ###
 
@@ -37,24 +39,33 @@ Things that I'll be working on in the near-term, organized by category.
 
 ### Game Object ###
 
-* implement layers
+* implement reset for eventual pooling
 
 ### Plugins ###
 
 * implement an `onPrefabInstantiate` & `onPrefabDestroy` - this way plugins can optimize at a nested object level, or an
 individual GO level, whichever is more efficient for that particular plugin
-* audio plugin
 * Box2d plugin
 
 ### Input plugin ###
 
 * implement axes for keyboard
+* implement gamepad input handler
 * use [*hammer.js*](https://github.com/EightMedia/hammer.js/) for dealing with touch input
 
 ### Canvas2d Plugin ###
 
+* move sprite draw logic into sprite component
 * implement viewport
+    * pass viewport as 2nd argument to canvas2d.draw callbacks
 * implement layers for multiple canvases
+* viewport per layer
+
+### Audio plugin ###
+
+* in playLoop/Once methods, return handle to audio file
+* implement proper spatial audio
+* implement easy API for defining filters
 
 ### Assets ###
 
