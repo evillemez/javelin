@@ -108,6 +108,7 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 plugin.worldInstance.Step(stepHz, velocityIterations, positionIterations);
                 
                 if (clearForces) {
+                    console.log('cleared');
                     plugin.worldInstance.ClearForces();
                 }
                 

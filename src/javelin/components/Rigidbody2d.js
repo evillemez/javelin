@@ -11,7 +11,8 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     var box2d = gameObject.engine.getPlugin('box2d');
     //the gameObject's transform
     var transform = gameObject.getComponent('transform2d');
-
+    var debug = gameObject.engine.debug;
+    
     //box2d stuff used internally
     var bodyDef = null;
     var fixtureDef = null;
@@ -193,6 +194,50 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         transform.position.y = pos.y;
         transform.rotation = body.GetAngle();
     });
+    
+    if (debug) {
+        component.$on('canvas2d.draw', function(context, camera) {
+            context.save();
+            context.translate(transform.position.x, transform.position.y);
+            context.rotate(transform.rotation * Javelin.PI_OVER_180);
+            context.strokeStyle = '#0F0';
+
+            //draw center of transform
+            context.beginPath();
+            context.arc(0, 0, 3, 0, 2 * Math.PI, true);
+            context.closePath();
+            context.stroke();
+
+            //draw sprite image bounding box
+            if (component.image) {
+                var img = component.image;
+                var topLeftX = 0 - (img.width * 0.5);
+                var topLeftY = 0 - (img.height * 0.5);
+                var height = img.height;
+                var width = img.width;
+        
+                context.strokeRect(topLeftX, topLeftY, width, height);
+            }
+            
+            if (component.radius) {                
+                context.beginPath();
+                context.arc(0, 0, component.radius, 0, 2 * Math.PI, true);
+                context.closePath();
+                context.stroke();
+            } else if (component.height && component.width) {
+                context.strokeRect(
+                    -component.width * 0.5,
+                    -component.height * 0.5,
+                    component.width,
+                    component.height
+                );
+            } else if (component.shape) {
+                //TODO
+            }
+            
+            context.restore();
+        });
+    }
     
 };
 Javelin.Component.Rigidbody2d.alias = 'rigidbody2d';
