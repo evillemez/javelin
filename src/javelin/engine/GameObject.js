@@ -66,22 +66,9 @@ Javelin.GameObject.prototype.disable = function() {
 /* Component management */
 
 //explicitly set a component instance
-Javelin.GameObject.prototype.setComponent = function(alias, component) {
-    
+Javelin.GameObject.prototype.setComponent = function(alias, component) {    
     component.$alias = alias;
     component.$id = this.id;
-
-    //TODO: make this better somehow
-    //this is making sure we don't set two component instances
-    //which have inherited from a component that has already been added
-    //... this sucks, and it is probably a case that should not happen anyway,
-    //if it shouldn't happen, it should be detected and throw errors during initialize
-    for (var key in this.components) {
-        if (component.$instanceOf(key)) {
-            return;
-        }
-    }
-    
     this.components[alias] = component;
 
     this.setModified();
@@ -99,28 +86,12 @@ Javelin.GameObject.prototype.setComponents = function(arr) {
 };
 
 Javelin.GameObject.prototype.getComponent = function(name) {
-    if (this.components[name]) {
-        return this.components[name];
-    }
-    
-    for (var comp in this.components) {
-        if (this.components[comp].$instanceOf(name)) {
-            return this.components[comp];
-        }
-    }
-
-    return false;
+    return this.components[name] || false;
 };
 
 Javelin.GameObject.prototype.hasComponent = function(name) {
     if (this.components[name]) {
         return true;
-    }
-    
-    for (var alias in this.components) {
-        if (this.components[alias].$instanceOf(name)) {
-            return true;
-        }
     }
     
     return false;

@@ -92,25 +92,6 @@ describe("Javelin Engine", function() {
         var e = getEngine();
         var go;
         
-        //basic inheritence
-        go = new j.GameObject();
-        assert.isFalse(go.hasComponent('f.foo'));
-        assert.isFalse(go.hasComponent('f.bar'));
-        assert.isFalse(go.hasComponent('f.baz'));
-        e.addComponentToGameObject(go, 'f.baz');
-        assert.isTrue(go.hasComponent('f.foo'));
-        assert.isTrue(go.hasComponent('f.bar'));
-        assert.isTrue(go.hasComponent('f.baz'));
-        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.bar'));
-        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.baz'));
-        assert.deepEqual(go.getComponent('f.bar'), go.getComponent('f.baz'));
-        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.foo'));
-        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.bar'));
-        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.baz'));
-        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.bar'));
-        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.foo'));
-        assert.isTrue(go.getComponent('f.foo').$instanceOf('f.foo'));
-
         //basic requirements
         go = new j.GameObject();
         assert.isFalse(go.hasComponent('f.blar'));
@@ -121,36 +102,6 @@ describe("Javelin Engine", function() {
         assert.isTrue(go.hasComponent('f.blag'));
         assert.isTrue(go.hasComponent('f.blaz'));
         
-        //complex add - inherits from components that require other components, which inherit from others
-        go = new j.GameObject();
-        assert.isFalse(go.hasComponent('f.foo'));
-        assert.isFalse(go.hasComponent('f.bar'));
-        assert.isFalse(go.hasComponent('f.baz'));
-        assert.isFalse(go.hasComponent('f.blar'));
-        assert.isFalse(go.hasComponent('f.blag'));
-        assert.isFalse(go.hasComponent('f.blaz'));
-        assert.isFalse(go.hasComponent('f.quip'));
-        assert.isFalse(go.hasComponent('f.shqip'));
-        e.addComponentToGameObject(go, 'f.shqip');
-        assert.isTrue(go.hasComponent('f.foo'));
-        assert.isTrue(go.hasComponent('f.bar'));
-        assert.isTrue(go.hasComponent('f.baz'));
-        assert.isTrue(go.hasComponent('f.blar'));
-        assert.isTrue(go.hasComponent('f.blag'));
-        assert.isTrue(go.hasComponent('f.blaz'));
-        assert.isTrue(go.hasComponent('f.quip'));
-        assert.isTrue(go.hasComponent('f.shqip'));
-        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.bar'));
-        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.baz'));
-        assert.deepEqual(go.getComponent('f.bar'), go.getComponent('f.baz'));
-        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.foo'));
-        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.bar'));
-        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.baz'));
-        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.bar'));
-        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.foo'));
-        assert.isTrue(go.getComponent('f.foo').$instanceOf('f.foo'));
-        assert.isTrue(go.getComponent('f.quip').$instanceOf('f.blav'));
-        assert.deepEqual(go.getComponent('f.quip'), go.getComponent('f.blav'));
     });
     
     it("should instantiate objects with proper components", function() {
@@ -174,37 +125,13 @@ describe("Javelin Engine", function() {
         
         var go = e.instantiateObject(obj);
         
-        //assert all the things...  ALL OF THEM!
-        
-        assert.isTrue(go.hasComponent('f.foo'));
+        //assert all the things...  ALL OF THEM!        
         assert.isTrue(go.hasComponent('f.bar'));
-        assert.isTrue(go.hasComponent('f.baz'));
         assert.isTrue(go.hasComponent('f.blar'));
         assert.isTrue(go.hasComponent('f.blag'));
         assert.isTrue(go.hasComponent('f.blaz'));
         assert.isTrue(go.hasComponent('f.quip'));
         assert.isTrue(go.hasComponent('f.shqip'));
-        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.bar'));
-        assert.deepEqual(go.getComponent('f.foo'), go.getComponent('f.baz'));
-        assert.deepEqual(go.getComponent('f.bar'), go.getComponent('f.baz'));
-        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.foo'));
-        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.bar'));
-        assert.isTrue(go.getComponent('f.baz').$instanceOf('f.baz'));
-        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.bar'));
-        assert.isTrue(go.getComponent('f.bar').$instanceOf('f.foo'));
-        assert.isTrue(go.getComponent('f.foo').$instanceOf('f.foo'));
-        assert.isTrue(go.getComponent('f.quip').$instanceOf('f.blav'));
-        assert.deepEqual(go.getComponent('f.quip'), go.getComponent('f.blav'));
-        assert.strictEqual('blip', go.getComponent('f.foo').foo);
-        assert.strictEqual('blip', go.getComponent('f.bar').foo);
-        assert.strictEqual('blip', go.getComponent('f.baz').foo);
-        assert.strictEqual(1, go.getCallbacks('engine.update').length);
-        assert.strictEqual('baz', go.getComponent('f.foo').test());
-        
-        //NOTE: even though the object has 'f.baz', when it exports it will
-        //export under the alias of 'f.bar', because it was added first, and
-        //shouldn't be overwritten ... see comments in `GameObject.setComponent`
-        
     });
 
     it("should instantiate and destroy game objects", function() {
@@ -276,7 +203,7 @@ describe("Javelin Engine", function() {
         assert.isTrue(go.children[0].hasComponent('transform2d'));
         assert.strictEqual(go.children[1].id, 3);
         assert.isTrue(go.children[1].hasParent());
-        assert.isTrue(go.children[1].hasComponent('f.foo'));
+        assert.isTrue(go.children[1].hasComponent('f.bar'));
         
         e.destroy(go);
         assert.strictEqual(e.gos.length, 0);
@@ -379,7 +306,7 @@ describe("Javelin Engine", function() {
     it("should call game object on create and destroy", function() {
         var e = getEngine();
         var go = e.instantiate('f.prefab4');
-        var c = go.getComponent('f.blah');
+        var c = go.getComponent('f.foo');
         assert.isTrue(c.started);
         assert.isFalse(c.destroyed);
         e.destroy(go);

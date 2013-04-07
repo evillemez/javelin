@@ -113,16 +113,4 @@ describe("GameObjectComponent", function() {
         assert.strictEqual('baz', cb2());
     });
     
-    it("should properly report if it is an instance of a given alias", function() {
-        var c = new j.GameObjectComponent();
-        assert.isFalse(c.$instanceOf('foo'));
-        assert.isFalse(c.$instanceOf('bar'));
-        c.$inheritedAliases.push('foo');
-        assert.isTrue(c.$instanceOf('foo'));
-        assert.isFalse(c.$instanceOf('bar'));
-        c.$inheritedAliases.push('bar');
-        assert.isTrue(c.$instanceOf('foo'));
-        assert.isTrue(c.$instanceOf('bar'));
-    });
-    
 });

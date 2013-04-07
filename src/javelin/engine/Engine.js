@@ -136,39 +136,13 @@ Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
         throw new Error("Unknown component [" + alias + "] requested");
     }
 
-    
-    var handlers = Javelin.getComponentChain(alias);
-    l = handlers.length;
-    var comp;
-
-    //get inherited instance if it exists, or create new instance
-    //TODO: this maybe could be made more performant by implementing a reference
-    //map in GameObject (separate from the components map)
-    for (i = 0; i < l; i++) {
-        if (comp = go.getComponent(handlers[i].alias)) {
-            break;
-        }
-    }
-    if (!comp) {
-        comp = new Javelin.GameObjectComponent();
-        comp.$id = go.id;
-        comp.$go = go;
-    }
-    
+    var comp = new Javelin.GameObjectComponent();
+    comp.$id = go.id;
+    comp.$go = go;
     comp.$alias = handler.alias;
 
-    //call hierarchy in proper inheritence order
-    for (i = 0; i < l; i++) {
+    handler(go, comp);
 
-        //NOTE: if the format of components changes, this
-        //will need to be modified... easy change for the engine
-        //but sucks for users, need to figure out the best way
-        //of writing components ASAP
-        handlers[i](go, comp);
-        
-        comp.$inheritedAliases.push(handlers[i].alias);
-    }
-    
     go.setComponent(alias, comp);
     
     return comp;

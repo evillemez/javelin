@@ -35,13 +35,11 @@ Fixtures.Component.BarComponent = function(go, comp) {
     comp.test = function() { return "bar"; };
 };
 Fixtures.Component.BarComponent.alias = 'f.bar';
-Fixtures.Component.BarComponent.inherits = 'f.foo';
 
 Fixtures.Component.BazComponent = function(go, comp) {
     comp.test = function() { return "baz"; };
 };
 Fixtures.Component.BazComponent.alias = 'f.baz';
-Fixtures.Component.BazComponent.inherits = 'f.bar';
         
 Fixtures.Component.QuxComponent = function(go, comp) {
     comp.test = function() { return "qux"; };
@@ -52,7 +50,6 @@ Fixtures.Component.BlahComponent = function(go, comp) {
     comp.test = function() { return "blah"; };
 };
 Fixtures.Component.BlahComponent.alias = 'f.blah';
-Fixtures.Component.BlahComponent.inherits = 'f.foo';
 
 /* GO Components with requirements */
 Fixtures.Component.Blar = function() {};
@@ -70,7 +67,6 @@ Fixtures.Component.Blav.requires = ['f.blar', 'f.blaz'];
 
 Fixtures.Component.Quip = function() {};
 Fixtures.Component.Quip.alias = 'f.quip';
-Fixtures.Component.Quip.inherits = 'f.blav';
 Fixtures.Component.Quip.requires = ['f.blaz'];
 Fixtures.Component.Shqip = function() {};
 Fixtures.Component.Shqip.alias = 'f.shqip';
@@ -174,7 +170,7 @@ Fixtures.Prefab.Prefab3 = {
 Fixtures.Prefab.Prefab4 = {
     name: 'f.prefab4',
     components: {
-        'f.blah': {}
+        'f.foo': {}
     }
 };
 

@@ -204,38 +204,6 @@ describe("Javelin Registry", function() {
         j.registerPlugin(f.Plugin.TestPlugin);
         assert.isFunction(j.getPluginHandler('f.test_plugin'));
     });
-
-    it("should properly assemble component chain on initialize()", function() {
-        j.registerComponent(f.Component.FooComponent);
-        j.registerComponent(f.Component.BarComponent);
-        j.registerComponent(f.Component.BazComponent);
-        j.registerComponent(f.Component.QuxComponent);
-        j.initialize();
-        
-        var expectedFoo = [
-            f.Component.FooComponent
-        ];
-
-        var expectedBar = [
-            f.Component.FooComponent,
-            f.Component.BarComponent
-        ];
-        
-        var expectedBaz = [
-            f.Component.FooComponent,
-            f.Component.BarComponent,
-            f.Component.BazComponent
-        ];
-        
-        var expectedQux = [
-            f.Component.QuxComponent,
-        ];
-        
-        assert.deepEqual(expectedFoo, j.getComponentChain('f.foo'));
-        assert.deepEqual(expectedBar, j.getComponentChain('f.bar'));
-        assert.deepEqual(expectedBaz, j.getComponentChain('f.baz'));
-        assert.deepEqual(expectedQux, j.getComponentChain('f.qux'));
-    });
     
     it("should properly assemble component requirements on initialize()", function() {
         j.registerComponent(f.Component.Blar);

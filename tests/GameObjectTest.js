@@ -22,27 +22,18 @@ describe("GameObject", function() {
     it("should allow setting component instances", function() {
         var go = new j.GameObject();
         var c = new j.GameObjectComponent();
-        c.$inheritedAliases.push('foo');
-        c.$inheritedAliases.push('bar');
         assert.isFalse(go.hasComponent('foo'));
-        assert.isFalse(go.hasComponent('bar'));
         assert.isFalse(go.getComponent('foo'));
-        assert.isFalse(go.getComponent('bar'));
         
         go.setComponent('foo', c);
         assert.isTrue(go.hasComponent('foo'));
-        assert.isTrue(go.hasComponent('bar'));
         assert.isObject(go.getComponent('foo'));
-        assert.isObject(go.getComponent('bar'));
-        assert.equal(go.getComponent('foo'), go.getComponent('bar'));
         
         go = new j.GameObject();
         var c1 = new j.GameObjectComponent();
         c1.$alias = 'foo';
-        c1.$inheritedAliases.push('foo');
         var c2 = new j.GameObjectComponent();
         c2.$alias = 'bar';
-        c2.$inheritedAliases.push('bar');
         assert.isFalse(go.hasComponent('foo'));
         assert.isFalse(go.hasComponent('bar'));
         go.setComponents([c1, c2]);

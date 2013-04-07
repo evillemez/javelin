@@ -21,7 +21,6 @@ Javelin.PI_OVER_180 = Math.PI / 180;
 
 //registry for stuff used in the engine, don't manipulate these
 Javelin.__componentHandlers = {};
-Javelin.__componentChain = {};
 Javelin.__componentRequirements = {};
 Javelin.__pluginHandlers = {};
 Javelin.__prefabs = {};
@@ -30,7 +29,6 @@ Javelin.__scenes = {};
 //mostly for testing and internal use; generally, don't call this from your own code
 Javelin.reset = function() {
     Javelin.__componentHandlers = {};
-    Javelin.__componentChain = {};
     Javelin.__componentRequirements = {};
     Javelin.__pluginHandlers = {};
     Javelin.__prefabs = {};
@@ -146,33 +144,8 @@ Javelin.getPluginHandler = function(alias) {
     return Javelin.__pluginHandlers[alias] || false;
 };
 
-Javelin.getComponentChain = function(alias) {
-    return Javelin.__componentChain[alias] || [];
-};
-
 Javelin.getComponentRequirements = function(alias) {
     return Javelin.__componentRequirements[alias] || [];
-};
-
-Javelin.buildComponentChain = function(handler) {
-    var chain = [];
-
-    var getParent = function(alias) {
-        var func = Javelin.getComponentHandler(alias);
-        if (!func) {
-            throw new Error("Missing component for requirement ["+alias+"]!");
-        }
-
-        if (func.inherits) {
-            getParent(func.inherits);
-        }
-
-        chain.push(func);
-    };
-    
-    getParent(handler.alias);
-    
-    this.__componentChain[handler.alias] = chain;
 };
 
 Javelin.buildComponentRequirements = function(handler) {
@@ -192,12 +165,6 @@ Javelin.buildComponentRequirements = function(handler) {
                     }
                 }
 
-                //also, don't add if it will be included via inheritence anyway
-                var inherited = Javelin.getComponentChain(handler.requires[i]);
-                if (-1 !== inherited.indexOf(handler.requires[i])) {
-                    exists = true;
-                }
-                
                 if (!exists) {
                     getRequirements(handler.requires[i]);
                     reqs.push(Javelin.getComponentHandler(handler.requires[i]));
@@ -261,10 +228,7 @@ Javelin.initialize = function() {
     
     //resolve component hierarchies/dependencies
     for (var alias in Javelin.__componentHandlers) {
-        
-        //build inheritance chain
-        Javelin.buildComponentChain(Javelin.__componentHandlers[alias]);
-        
+                
         //build requirements
         Javelin.buildComponentRequirements(Javelin.__componentHandlers[alias]);
     }
