@@ -133,6 +133,7 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         
         if (component.radius) {
             shape = new box2d.CircleShape(component.radius);
+            return shape;
         } else if (component.shape) {
             var points = component.shape;
             var vecs = [];
