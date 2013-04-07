@@ -193,7 +193,6 @@ describe("Javelin Engine", function() {
         assert.strictEqual(e.gos.length, 3);
         assert.strictEqual(e.lastGoId, 3);
         
-        
         assert.isTrue(go.hasChildren());
         assert.strictEqual(go.id, 1);
         assert.strictEqual(go.children.length, 2);

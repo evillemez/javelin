@@ -25,7 +25,6 @@ Things that I'll be working on in the near-term, organized by category.
 
 ### Engine ###
 
-* change GO creation logic to instantiate entire object chain first before adding/notifying plugins of new gameobjects
 * load requiredAssets before calling scene load callback
 * implement `flush` in engine and `$onFlush` in plugins to force GC and do any cleanup necessary
 * implement gameObject pooling and component object pooling
@@ -52,10 +51,6 @@ individual GO level, whichever is more efficient for that particular plugin
 * implement gamepad input handler
 * use [*hammer.js*](https://github.com/EightMedia/hammer.js/) for dealing with touch input
 
-### Canvas2d Plugin ###
-
-* implement camera in sprite component
-
 ### Audio plugin ###
 
 * in playLoop/Once methods, return handle to audio file
@@ -68,6 +63,7 @@ individual GO level, whichever is more efficient for that particular plugin
 
 ### Components ###
 
+* implement camera in sprite component
 * TiledMapEnvironment ?
 
 ## Long-term features ##

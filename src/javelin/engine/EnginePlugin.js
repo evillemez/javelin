@@ -22,6 +22,6 @@ Javelin.EnginePlugin.prototype.$onGameObjectDestroy = function(gameObject) {};
 
 Javelin.EnginePlugin.prototype.$onGameObjectCreate = function(gameObject) {};
 
-//TODO: implement these
-//Javelin.EnginePlugin.prototype.$onPrefabInstantiate = function(gameObject) {};
-//Javelin.EnginePlugin.prototype.$onPrefabDestroy = function(gameObject) {};
+Javelin.EnginePlugin.prototype.$onPrefabCreate = function(gameObject) {};
+
+Javelin.EnginePlugin.prototype.$onPrefabDestroy = function(gameObject) {};

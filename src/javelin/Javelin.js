@@ -1,5 +1,6 @@
 'use strict';
 
+//setup main namespace
 var Javelin = Javelin || {};
 
 //setup sub namespaces for categories of objects

@@ -85,16 +85,19 @@ Javelin.Engine.prototype.instantiatePrefab = function(name) {
     return this.instantiateObject(Javelin.__prefabs[name]);
 };
 
-Javelin.Engine.prototype.instantiateObject = function(def) {
+Javelin.Engine.prototype.instantiateObject = function(def, instantiatingNested) {
     var go;
-
+    
+    //instantiate game object
     if (def.fromPrefab) {
         go = this.instantiatePrefab(def.fromPrefab);
     } else {
         go = new Javelin.GameObject();
+        go.setId(++this.lastGoId);
         go.engine = this;
     }
     
+    //add required components w/ values
     if (def.components) {
         for (var key in def.components) {
             var c = this.addComponentToGameObject(go, key);
@@ -102,23 +105,20 @@ Javelin.Engine.prototype.instantiateObject = function(def) {
         }
     }
     
-    this.__addGameObject(go);
-    
+    //instantiate children
     if (def.children) {
         for (var i in def.children) {
-            var child = this.instantiateObject(def.children[i]);
-            child.setParent(go);
+            go.addChild(this.instantiateObject(def.children[i], true));
         }
+    }
+    
+    if (!instantiatingNested) {
+        this.__addGameObject(go);
     }
     
     return go;
 };
 
-//NOTE: this needs to be as optimized as possible, I think some work could
-//be done here - maybe more work during Javelin.initialize() could prevent
-//certain checks here... maybe not, look into it at some point
-//... or, removing the idea of inheritence altogether would simplify
-//things quite a bit
 Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
     if (go.hasComponent(alias)) {
         return go.getComponent(alias);
@@ -149,48 +149,50 @@ Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
 };
 
 Javelin.Engine.prototype.__addGameObject = function(go) {
-    if (-1 === go.id) {
-        //register for engine
-        go.setId(++this.lastGoId);
-        go.enable();
+    if (this.updating && go.isRoot()) {
+        this.createdGos.push(go);
+    } else {
+        this.gos.push(go);
+
+        this.pluginsOnGameObjectCreate(go);
         
-        if (this.updating) {
-            this.createdGos.push(go);
-        } else {
-            this.gos.push(go);
-        }
-        
-        //TODO: move notification of plugins and create callbacks to only happen
-        //if !engine.updating
-        
-        //notify plugins
-        this.pluginsCreateGameObject(go);
-        
-        //TODO: move this to do a recursive create on an instantiated object
-        //notify object
-        var cbs = go.getCallbacks('engine.create') || [];
-        for (var j = 0; j < cbs.length; j++) {
-            cbs[j]();
+        if (go.children.length) {
+            for (var i in go.children) {
+                this.__addGameObject(go.children[i]);
+            }
         }
 
-        return go;
+        if (go.isRoot()) {
+            go.enable();
+            
+            this.pluginsOnPrefabCreate(go);
+
+            var cbs = go.getCallbacks('engine.create', true) || [];
+            for (var j = 0; j < cbs.length; j++) {
+                cbs[j]();
+            }
+            
+        }
     }
-    
-    return false;
 };
 
 //destroy an object (if the engine is updating, it will be destroyed after the update is done)
-Javelin.Engine.prototype.destroy = function(go) {
+Javelin.Engine.prototype.destroy = function(go, destroyingNested) {
     if (this.updating) {
         this.destroyedGos.push(go);
     } else {
-        this.__destroyGameObject(go);
-    }
-};
-
-Javelin.Engine.prototype.__destroyGameObject = function(go) {
-    if (-1 !== go.id) {
         var i;
+        
+        if (!destroyingNested) {
+            //notify destroy callbacks
+            var cbs = go.getCallbacks('engine.destroy', true);
+            for (i = 0; i < cbs.length; i++) {
+                cbs[i]();
+            }
+            
+            this.pluginsOnPrefabDestroy(go);
+        }
+        
         //destroy children first
         if(go.children) {
             //copy into separate array so we can abandon now
@@ -202,18 +204,12 @@ Javelin.Engine.prototype.__destroyGameObject = function(go) {
 
             //destroy children
             for (i in children) {
-                this.__destroyGameObject(children[i]);
+                this.destroy(children[i], true);
             }
-        }
-        
-        //notify destroy callbacks
-        var cbs = go.getCallbacks('engine.destroy');
-        for (i = 0; i < cbs.length; i++) {
-            cbs[i]();
         }
 
         //notify plugins
-        this.pluginsDestroyGameObject(go);
+        this.pluginsOnGameObjectDestroy(go);
         
         //make sure this object is detached from any parents, 
         //because we abandoned and deleted children already,
@@ -353,13 +349,13 @@ Javelin.Engine.prototype.cleanupStep = function() {
     var i;
     if (lc) {
         for (i = 0; i < lc; i++) {
-            this.gos.push(this.createdGos[i]);
+            this.__addGameObject(this.createdGos[i]);
         }
     }
     
     if (ld) {
         for (i = 0; i < ld; i++) {
-            this.__destroyGameObject(this.destroyedGos[i]);
+            this.destroy(this.destroyedGos[i]);
         }
     }
     
@@ -367,15 +363,27 @@ Javelin.Engine.prototype.cleanupStep = function() {
     this.destroyedGos = [];
 };
 
-Javelin.Engine.prototype.pluginsCreateGameObject = function(go) {
+Javelin.Engine.prototype.pluginsOnGameObjectCreate = function(go) {
     for (var i in this.plugins) {
         this.plugins[i].$onGameObjectCreate(go);
     }
 };
 
-Javelin.Engine.prototype.pluginsDestroyGameObject = function(go) {
+Javelin.Engine.prototype.pluginsOnGameObjectDestroy = function(go) {
     for (var i in this.plugins) {
         this.plugins[i].$onGameObjectDestroy(go);
+    }
+};
+
+Javelin.Engine.prototype.pluginsOnPrefabCreate = function(go) {
+    for (var i in this.plugins) {
+        this.plugins[i].$onPrefabCreate(go);
+    }
+};
+
+Javelin.Engine.prototype.pluginsOnPrefabDestroy = function(go) {
+    for (var i in this.plugins) {
+        this.plugins[i].$onPrefabDestroy(go);
     }
 };
 
