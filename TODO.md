@@ -54,11 +54,7 @@ individual GO level, whichever is more efficient for that particular plugin
 
 ### Canvas2d Plugin ###
 
-* move sprite draw logic into sprite component
-* implement viewport
-    * pass viewport as 2nd argument to canvas2d.draw callbacks
-* implement layers for multiple canvases
-* viewport per layer
+* implement camera in sprite component
 
 ### Audio plugin ###
 
