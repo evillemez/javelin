@@ -85,13 +85,14 @@ Javelin.Engine.prototype.instantiatePrefab = function(name) {
     return this.instantiateObject(Javelin.__prefabs[name]);
 };
 
-Javelin.Engine.prototype.instantiateObject = function(def, instantiatingNested) {
+Javelin.Engine.prototype.instantiateObject = function(def, isNestedCall) {
     var go;
     
     //instantiate game object
     if (def.fromPrefab) {
-        //NOTE: causing duplications....
-        go = this.instantiatePrefab(def.fromPrefab, true);
+        //it's not really nested, but we say it is to avoid this call
+        //adding dupliate copies of the object
+        go = this.instantiateObject(Javelin.__prefabs[def.fromPrefab], true);
     } else {
         go = new Javelin.GameObject();
         go.layer = def.layer || 'default';
@@ -117,7 +118,7 @@ Javelin.Engine.prototype.instantiateObject = function(def, instantiatingNested) 
         }
     }
     
-    if (!instantiatingNested) {
+    if (!isNestedCall) {
         this.__addGameObject(go);
     }
     
@@ -176,7 +177,6 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
             for (var j = 0; j < cbs.length; j++) {
                 cbs[j]();
             }
-            
         }
     }
 };

@@ -4,14 +4,7 @@ The general TODO list for various subsystems and what not.  Testing doesn't get 
 
 **The short list:**
 
-* audio component
-* simplify component adding
-    * QUESTION: can an object contain two components which have both inherited from the same component?
-    * Currently, they cannot - something will get overriden
-    * Alternatively, remove the concept of inheritence completely - only rely on the requires mechanism
-        * probably will go for this option, dramatically simplifies a lot, and prevents shooting yourself in the foot
 * Tiled map loading
-* box2d component
 
 ## Near-term ##
 
@@ -26,6 +19,8 @@ Things that I'll be working on in the near-term, organized by category.
 ### Engine ###
 
 * load requiredAssets before calling scene load callback
+* re-test object creation/destruction
+* test calling plugins' $onPrefabCreate/Destroy
 * implement `flush` in engine and `$onFlush` in plugins to force GC and do any cleanup necessary
 * implement gameObject pooling and component object pooling
 * implement bucket array for main game object storage, possibly for component storage

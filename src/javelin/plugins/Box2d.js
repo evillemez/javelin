@@ -51,28 +51,29 @@ Javelin.Plugin.Box2d = function(plugin, config) {
             //setup contact listener
             var contactListener = new Box2D.Dynamics.b2ContactListener();
             contactListener.PreSolve = function(contact, manifold) {
-                //TODO: check for triggers  use contact.SetEnabled(false);
-                //and then call `box2d.trigger.enter`... ?
+                //does anything need to happen here?
             };
             contactListener.BeginContact = function(contact) {
                 var goA = contact.GetFixtureA().GetBody().GetUserData();
                 var goB = contact.GetFixtureB().GetBody().GetUserData();
-                var event = contact.IsEnabled() ? 'box2d.collision.enter' : 'box2d.trigger.enter';
+                var isTrigger = (goA.getComponent('rigidbody2d').trigger || goB.getComponent('rigidbody2d').trigger);
+                var event = (isTrigger) ? 'box2d.trigger.enter' : 'box2d.collision.enter';
+
                 plugin.callGoCallbacks(event, goA, goB, contact);
                 plugin.callGoCallbacks(event, goB, goA, contact);
-                console.log(event);
-                //check for IsEnabled(), do collision or trigger enter accordingly
             };
+
             contactListener.EndContact = function(contact) {
                 var goA = contact.GetFixtureA().GetBody().GetUserData();
                 var goB = contact.GetFixtureB().GetBody().GetUserData();
-                var event = contact.IsEnabled() ? 'box2d.collision.exit' : 'box2d.trigger.exit';
+                var isTrigger = (goA.getComponent('rigidbody2d').trigger || goB.getComponent('rigidbody2d').trigger);
+                var event = (isTrigger) ? 'box2d.trigger.exit' : 'box2d.collision.exit';
+
                 plugin.callGoCallbacks(event, goB, goA, contact);
-                console.log(event);
             };
 
             contactListener.PostSolve = function(contact, manifold) {
-                //what would this be used for?
+                //anything need to be done here?
             };
             
             plugin.worldInstance.SetContactListener(contactListener);
@@ -108,7 +109,6 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 plugin.worldInstance.Step(stepHz, velocityIterations, positionIterations);
                 
                 if (clearForces) {
-                    console.log('cleared');
                     plugin.worldInstance.ClearForces();
                 }
                 

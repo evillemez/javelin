@@ -115,6 +115,9 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         fixtureDef.density = component.density;
         fixtureDef.restitution = component.restitution;
         fixtureDef.friction = component.friction;
+        if (component.trigger) {
+            fixtureDef.isSensor = true;
+        }
 //        fixtureDef.mass = component.mass;
 
         //set the fixture's shape - oooh boy.
