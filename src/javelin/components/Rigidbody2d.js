@@ -8,7 +8,9 @@
  * @author Evan Villemez
  */
 Javelin.Component.Rigidbody2d = function(gameObject, component) {
-    var box2d;  //actually a reference to the box2d plugin, which contains shortcuts to the box2d apis
+    var box2d = gameObject.engine.getPlugin('box2d');
+    //the gameObject's transform
+    var transform = gameObject.getComponent('transform2d');
 
     //box2d stuff used internally
     var bodyDef = null;
@@ -16,8 +18,6 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     var body = null;
     var fixture = null;
     
-    //the gameObject's transform
-    var transform = null;
     
     //these values are applied to the box2d fixture definition
     component.trigger = false;
@@ -96,7 +96,8 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         //create body definition
         bodyDef = new box2d.BodyDef();
         bodyDef.type = (component.static) ? box2d.Body.b2_staticBody : box2d.Body.b2_dynamicBody;
-        bodyDef.position = transform.position;
+        bodyDef.position.x = transform.position.x / 100;
+        bodyDef.position.y = transform.position.y / 100;
         bodyDef.angle = transform.rotation;
         bodyDef.linearDamping = component.damping;
         bodyDef.angularDamping = component.angularDamping;
@@ -175,15 +176,21 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         return fixture;
     };
     
+    component.updateLocation = function() {
+    };
+    
     component.$on('engine.create', function() {
         //get references to stuff
         transform = gameObject.getComponent('transform2d');
         box2d = gameObject.engine.getPlugin('box2d');
-        
+        body.SetPosition(new box2d.Vec2(transform.position.x, transform.position.y));
+        body.SetAngle(transform.rotation);
     });
     
     component.$on('box2d.lateUpdate', function(deltaTime) {
-        transform.position = body.GetPosition();
+        var pos = body.GetPosition();
+        transform.position.x = pos.x;
+        transform.position.y = pos.y;
         transform.rotation = body.GetAngle();
     });
     

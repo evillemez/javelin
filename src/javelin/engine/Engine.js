@@ -90,15 +90,17 @@ Javelin.Engine.prototype.instantiateObject = function(def, instantiatingNested) 
     
     //instantiate game object
     if (def.fromPrefab) {
-        go = this.instantiatePrefab(def.fromPrefab);
+        //NOTE: causing duplications....
+        go = this.instantiatePrefab(def.fromPrefab, true);
     } else {
         go = new Javelin.GameObject();
-        go.setId(++this.lastGoId);
-        go.engine = this;
         go.layer = def.layer || 'default';
         go.name = def.name || 'Anonymous';
         go.tags = def.tags || [];
     }
+
+    go.setId(++this.lastGoId);
+    go.engine = this;
     
     //add required components w/ values
     if (def.components) {

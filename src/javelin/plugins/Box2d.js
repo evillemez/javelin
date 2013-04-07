@@ -136,7 +136,7 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 var fixture = body.CreateFixture(fixtureDef);
                 rigidbody.setFixture(fixture);
                 rigidbody.setBody(body);
-                
+                                
                 //storing references to all bodies (for now)
                 plugin.bodies[gameObject.id] = body;
             }
