@@ -95,6 +95,9 @@ Javelin.Engine.prototype.instantiateObject = function(def, instantiatingNested) 
         go = new Javelin.GameObject();
         go.setId(++this.lastGoId);
         go.engine = this;
+        go.layer = def.layer || 'default';
+        go.name = def.name || 'Anonymous';
+        go.tags = def.tags || [];
     }
     
     //add required components w/ values
