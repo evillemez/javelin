@@ -10,6 +10,8 @@ Javelin.Component.AudioEmitter = function(gameObject, component) {
     component.volume = 100;
     component.getAudioNode = function() {};
     
+    var activeLoops = {};
+    
     /**
      * Play a sound continually, given the path to the sound.
      * 
@@ -19,8 +21,11 @@ Javelin.Component.AudioEmitter = function(gameObject, component) {
     component.playLoop = function(path, cull) {
         cull = cull || false;
         
-        //start playing a sound and loop it
-        audio.playSound(path, component, transform, true, cull);
+        if (!activeLoops[path]) {
+            activeLoops[path] = true;
+            //start playing a sound and loop it
+            audio.playSound(path, component, transform, true, cull);
+        }
     };
     
     /**
@@ -44,6 +49,10 @@ Javelin.Component.AudioEmitter = function(gameObject, component) {
     component.stopSound = function (path) {
         path = path || false;
         audio.stopSound(gameObject.id, path);
+        
+        if (activeLoops[path]) {
+            activeLoops[path] = false;
+        }
         //TODO: tell audio plugin to stop playing a specific sound, or
         //all sounds started from this emitter's gameObject
     };
@@ -56,9 +65,8 @@ Javelin.Component.AudioEmitter = function(gameObject, component) {
 
     //stop all sounds from this emitter
     component.$on('engine.destroy', function() {
-        component.stop();
+        component.stopSound();
     });
-    
 };
 Javelin.Component.AudioEmitter.alias = 'audioEmitter';
 Javelin.Component.AudioEmitter.requires = ['transform2d'];

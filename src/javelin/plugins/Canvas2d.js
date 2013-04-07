@@ -73,7 +73,7 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
             var gos = plugin.$engine.gos;
             var l = gos.length;
             for (i = 0; i < l; i++) {
-                if (gos[i].isRoot()) {
+                if (gos[i].enabled && gos[i].isRoot()) {
                     //get layer
                     ctx = plugin.contexts[gos[i].layer];
                     camera = plugin.cameras[gos[i].layer];

@@ -38,15 +38,19 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     component.applyForce = function(degrees, power) {
         body.ApplyImpulse(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * power, Math.sin(degrees * Javelin.PI_OVER_180) * power), body.GetWorldCenter());
     };
+
     component.applyForceForward = function(amount) {
         component.applyForce(transform.rotation, amount);
     };
+
     component.applyForceBackward = function(amount) {
         component.applyForce((transform.rotation + 180 % 360), amount);
     };
+
     component.applyForceLeft = function(amount) {
         component.applyForce((transform.rotation - 90 % 360), amount);
     };
+
     component.applyForceRight = function(amount) {
         component.applyForce((transform.rotation + 90 % 360), amount);
     };
@@ -54,26 +58,46 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     component.applyImpulse = function(degrees, power) {
         body.ApplyImpulse(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * power, Math.sin(degrees * Javelin.PI_OVER_180) * power), body.GetWorldCenter());
     };
+
     component.applyImpulseForward = function(amount) {
         component.applyImpulse(transform.rotation, amount);
     };
+
     component.applyImpulseBackward = function(amount) {
         component.applyImpulse((transform.rotation + 180 % 360), amount);
     };
+
     component.applyImpulseLeft = function(amount) {
         component.applyImpulse((transform.rotation - 90 % 360), amount);
     };
+
     component.applyImpulseRight = function(amount) {
         component.applyImpulse((transform.rotation + 90 % 360), amount);
     };
     
-    //TODO
     component.applyRotationForce = function(force) {
         body.ApplyTorque(force);
     };
     
-    component.setVelocity = function(x, y) {
-        body.SetLinearVelocity(new box2d.Vec2(x, y));
+    component.applyRotationImpulse = function(force) {
+        //TODO - is this available?
+    };
+
+    component.setVelocity = function(degrees, amount) {
+        body.SetLinearVelocity(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * amount, Math.sin(degrees * Javelin.PI_OVER_180) * amount));
+    };
+    
+    component.setVelocityForward = function(amount) {
+        component.setVelocity(transform.rotation, amount);
+    };
+    component.setVelocityBackward = function(amount) {
+        component.setVelocity((transform.rotation + 180 % 360), amount);
+    };
+    component.setVelocityLeft = function(amount) {
+        component.setVelocity((transform.rotation - 90 % 360), amount);
+    };
+    component.setVelocityRight = function(amount) {
+        component.setVelocity((transform.rotation + 90 % 360), amount);
     };
     
     component.getVelocity = function() {
@@ -81,7 +105,6 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     };
 
     //TODO: fill in API
-    component.applyRotationImpulse = function(force, x, y) {};
     component.setAngularVelocity = function() {};
     component.getAngularVelocity = function() {};
     component.getInertia = function() {};

@@ -50,6 +50,8 @@ Javelin.Component.Sprite = function(gameObject, component) {
         }
     });
     
+    //actually draw the designated image on the canvas - the image could either be a regular image, or
+    //an instance of Javelin.Asset.AtlasImage
     component.$on('canvas2d.draw', function(context, camera) {
         if (component.image) {
             var pos = transform.position;
