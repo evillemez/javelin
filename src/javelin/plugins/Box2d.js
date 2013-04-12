@@ -33,12 +33,53 @@ Javelin.Plugin.Box2d = function(plugin, config) {
         plugin.bodies = {};
 
         //TODO: explosion/implosion forces
-        plugin.applyExplosionForce = function(x, y, impulse, radius, layers) {
-            //use world.QueryAABB();
+        plugin.applyRadialForce = function(x, y, impulse, radius, implode, callback) {
+            var center = new plugin.Vec2(x, y);
+            var aa = new plugin.Vec2(x - radius, y - radius);
+            var bb = new plugin.Vec2(x + radius, y + radius);
+            var aabb = new Box2D.Collision.b2AABB();
+            aabb.upperBound = bb;
+            aabb.lowerBound = aa;
+            
+            plugin.worldInstance.QueryAABB(function(fixture) {
+                var body = fixture.GetBody();
+                var go = body.GetUserData();
+                var targetPos = body.GetPosition();
+                
+                //ignore sensors
+                if (fixture.IsSensor()) {
+                    return true;
+                }
+                
+                //check actual radius
+                var distance = Box2D.Common.Math.b2Math.Distance(center, body.GetPosition());
+                if (distance >= radius) {
+                    return true;
+                }
+                
+                //figure out force
+                var amount = radius - distance;
+                var strength = amount / radius;
+                var force = impulse * strength;
+                
+                //figure out angle to apply force (depends on whether or not this is exploding or imploding)
+                var angle;
+                if (implode) {
+                    angle = Math.atan2(center.y - targetPos.y, center.x - targetPos.x);
+                } else {
+                    angle = Math.atan2(targetPos.y - center.y, targetPos.x - center.x);
+                }
+                body.ApplyForce(new plugin.Vec2(Math.cos(angle) * force, Math.sin(angle) * force), body.GetPosition());
+
+                if (callback) {
+                    callback(go);
+                }
+
+                return true;
+                
+            }, aabb);
         };
-        plugin.applyImplosionForce = function(x, y, impulse, radius, layers) {
-            //use world.QueryAABB();
-        };
+
         plugin.raycast = function() {
             
         };
@@ -58,7 +99,6 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 var goB = contact.GetFixtureB().GetBody().GetUserData();
                 var isTrigger = (goA.getComponent('rigidbody2d').trigger || goB.getComponent('rigidbody2d').trigger);
                 var event = (isTrigger) ? 'box2d.trigger.enter' : 'box2d.collision.enter';
-
                 plugin.callGoCallbacks(event, goA, goB, contact);
                 plugin.callGoCallbacks(event, goB, goA, contact);
             };
@@ -68,12 +108,12 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 var goB = contact.GetFixtureB().GetBody().GetUserData();
                 var isTrigger = (goA.getComponent('rigidbody2d').trigger || goB.getComponent('rigidbody2d').trigger);
                 var event = (isTrigger) ? 'box2d.trigger.exit' : 'box2d.collision.exit';
-
+                plugin.callGoCallbacks(event, goA, goB, contact);
                 plugin.callGoCallbacks(event, goB, goA, contact);
             };
 
             contactListener.PostSolve = function(contact, manifold) {
-                //anything need to be done here?
+                //do anything?
             };
             
             plugin.worldInstance.SetContactListener(contactListener);
@@ -97,16 +137,18 @@ Javelin.Plugin.Box2d = function(plugin, config) {
             var i, j, cbs;
             var gos = plugin.$engine.gos;
             for (i in gos) {
-                cbs = gos[i].getCallbacks('box2d.update');
-                if (cbs) {
-                    for (j in cbs) {
-                        cbs[j](lastTimeStepped);
+                if (gos[i].enabled) {
+                    cbs = gos[i].getCallbacks('box2d.update');
+                    if (cbs) {
+                        for (j in cbs) {
+                            cbs[j](lastTimeStepped);
+                        }
                     }
                 }
             }
             
             if (plugin.$engine.time - lastTimeStepped >= stepsPerSecond) {
-                plugin.worldInstance.Step(stepHz, velocityIterations, positionIterations);
+                plugin.worldInstance.Step(stepHZ, velocityIterations, positionIterations);
                 
                 if (clearForces) {
                     plugin.worldInstance.ClearForces();
@@ -116,10 +158,12 @@ Javelin.Plugin.Box2d = function(plugin, config) {
             }
 
             for (i in gos) {
-                cbs = gos[i].getCallbacks('box2d.lateUpdate');
-                if (cbs) {
-                    for (j in cbs) {
-                        cbs[j](lastTimeStepped);
+                if (gos[i].enabled) {
+                    cbs = gos[i].getCallbacks('box2d.lateUpdate');
+                    if (cbs) {
+                        for (j in cbs) {
+                            cbs[j](lastTimeStepped);
+                        }
                     }
                 }
             }
@@ -144,7 +188,7 @@ Javelin.Plugin.Box2d = function(plugin, config) {
         };
         
         plugin.$onGameObjectDestroy = function(gameObject) {
-            var rigidbody = gameObject.getComponent('rigidbody');
+            var rigidbody = gameObject.getComponent('rigidbody2d');
             if (rigidbody) {
                 plugin.worldInstance.DestroyBody(rigidbody.getBody());
             }

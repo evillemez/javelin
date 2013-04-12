@@ -60,7 +60,8 @@ Javelin.Plugin.Audio = function(plugin, config) {
         source.buffer = plugin.buffers[path];
         var id = emitter.$id;
         plugin.active[id] = plugin.active[id] || {};
-
+        var ind;
+        
         //set looping
         if (loop) {
             source.loop = true;
@@ -144,6 +145,10 @@ Javelin.Plugin.Audio = function(plugin, config) {
                 plugin.active[id] = null;
             }
         }
+    };
+    
+    plugin.clearActive = function(id) {
+        plugin.active[id] = null;
     };
         
     plugin.$onGameObjectCreate = function(gameObject) {

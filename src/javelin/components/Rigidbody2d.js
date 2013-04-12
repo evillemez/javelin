@@ -17,8 +17,7 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     var bodyDef = null;
     var fixtureDef = null;
     var body = null;
-    var fixture = null;
-    
+    var fixture = null;    
     
     //these values are applied to the box2d fixture definition
     component.trigger = false;
@@ -36,7 +35,7 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     component.width = null;
     
     component.applyForce = function(degrees, power) {
-        body.ApplyImpulse(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * power, Math.sin(degrees * Javelin.PI_OVER_180) * power), body.GetWorldCenter());
+        body.ApplyForce(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * power, Math.sin(degrees * Javelin.PI_OVER_180) * power), body.GetWorldCenter());
     };
 
     component.applyForceForward = function(amount) {
@@ -205,6 +204,10 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     };
     
     component.updateLocation = function() {
+        var pos = body.GetPosition();
+        transform.position.x = pos.x;
+        transform.position.y = pos.y;
+        transform.rotation = body.GetAngle();
     };
     
     component.$on('engine.create', function() {
@@ -213,13 +216,11 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         box2d = gameObject.engine.getPlugin('box2d');
         body.SetPosition(new box2d.Vec2(transform.position.x, transform.position.y));
         body.SetAngle(transform.rotation);
+        body.ResetMassData();
     });
     
     component.$on('box2d.lateUpdate', function(deltaTime) {
-        var pos = body.GetPosition();
-        transform.position.x = pos.x;
-        transform.position.y = pos.y;
-        transform.rotation = body.GetAngle();
+        component.updateLocation();
     });
     
     if (debug) {
@@ -227,7 +228,7 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
             context.save();
             context.translate(transform.position.x, transform.position.y);
             context.rotate(transform.rotation * Javelin.PI_OVER_180);
-            context.strokeStyle = '#0F0';
+            context.strokeStyle = component.trigger ? '#FF0' : '#0F0';
 
             //draw center of transform
             context.beginPath();

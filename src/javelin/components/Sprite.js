@@ -38,7 +38,7 @@ Javelin.Component.Sprite = function(gameObject, component) {
             gameObject.disable();
             if (component.atlasPath) {
                 gameObject.engine.loadAsset(component.atlasPath, function(atlas) {
-                    component.image = atlas[component.imagePath];
+                    component.image = atlas.images[component.imagePath];
                     gameObject.enable();
                 });
             } else {
@@ -119,10 +119,10 @@ Javelin.Component.Sprite = function(gameObject, component) {
                 //draw sprite image bounding box
                 if (component.image) {
                     var img = component.image;
-                    var topLeftX = 0 - (img.width * 0.5);
-                    var topLeftY = 0 - (img.height * 0.5);
-                    var height = img.height;
-                    var width = img.width;
+                    var topLeftX = 0 - (img.width * 0.5) * scale.x;
+                    var topLeftY = 0 - (img.height * 0.5) * scale.y;
+                    var height = img.height * scale.x;
+                    var width = img.width * scale.y;
             
                     context.strokeRect(topLeftX, topLeftY, width, height);
                 }

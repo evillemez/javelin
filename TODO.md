@@ -33,6 +33,7 @@ Things that I'll be working on in the near-term, organized by category.
 ### Game Object ###
 
 * implement reset for eventual pooling
+* make sure callback cache is invalidated on enable/disable, and don't return callbacks for disable children
 
 ### Plugins ###
 

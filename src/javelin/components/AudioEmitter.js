@@ -65,7 +65,7 @@ Javelin.Component.AudioEmitter = function(gameObject, component) {
 
     //stop all sounds from this emitter
     component.$on('engine.destroy', function() {
-        component.stopSound();
+        audio.clearActive(gameObject.id);
     });
 };
 Javelin.Component.AudioEmitter.alias = 'audioEmitter';

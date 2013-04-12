@@ -290,7 +290,7 @@ Javelin.Engine.prototype.step = function() {
     this.time = new Date().getTime();
     this.deltaTime = (this.time - this.prevStepTime) * 0.001;
     
-    //some plugins process in the beginning
+    //some plugins process before GO udpates
     this.updatePlugins(Javelin.Engine.PRE_UPDATE, this.deltaTime);
     
     this.updateGameObjects(this.deltaTime);
@@ -352,6 +352,7 @@ Javelin.Engine.prototype.cleanupStep = function() {
     var lc = this.createdGos.length;
     var ld = this.destroyedGos.length;
     var i;
+
     if (lc) {
         for (i = 0; i < lc; i++) {
             this.__addGameObject(this.createdGos[i]);
