@@ -89,6 +89,7 @@ Javelin.Plugin.Box2d = function(plugin, config) {
             plugin.worldInstance = null;
             plugin.worldInstance = new plugin.World(new plugin.Vec2(gravityX, gravityY), allowSleep);
             
+            
             //setup contact listener
             var contactListener = new Box2D.Dynamics.b2ContactListener();
             contactListener.PreSolve = function(contact, manifold) {
