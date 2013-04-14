@@ -10,13 +10,15 @@ manner.
 Javelin.Env.Browser = function(config) {
     this.config = config;
     this.engine = null;
+    this.intervalId = null;
 };
 
 Javelin.Env.Browser.prototype = new Javelin.Environment();
 
+//NOTE: yes - I know I should be using requestAnimationFrame
 Javelin.Env.Browser.prototype.run = function(stepsPerSecond) {
     var engine = this.engine;
-    setInterval(function() {
+    this.intervalId = setInterval(function() {
         try {
             engine.step();
         } catch (e) {
@@ -27,4 +29,9 @@ Javelin.Env.Browser.prototype.run = function(stepsPerSecond) {
             }
         }
     }, stepsPerSecond);
+};
+
+Javelin.Env.Browser.prototype.stop = function(callback) {
+    clearInterval(this.intervalId);
+    setTimeout(callback, 1);
 };

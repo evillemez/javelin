@@ -8,6 +8,7 @@
 Javelin.Plugin.Canvas2d = function(plugin, config) {
     plugin.config = config;
     
+    plugin.renderTarget = null;
     plugin.cameras = {};
     plugin.contexts = {};
     plugin.canvases = {};
@@ -18,6 +19,7 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
             plugin.fps = plugin.config.framesPerSecond || plugin.$engine.stepsPerSecond;
             plugin.lastTimeRendered = 0.0;        
             var target = document.getElementById(plugin.config.renderTargetId);
+            plugin.renderTarget = target;
             var top = target.offsetTop;
             var left = target.offsetLeft;
             
@@ -56,6 +58,12 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
             }
         } else {
             plugin.$active = false;
+        }
+    };
+    
+    plugin.$onUnload = function() {
+        for (var i in plugin.canvases) {
+            plugin.renderTarget.removeChild(plugin.canvases[i]);
         }
     };
     

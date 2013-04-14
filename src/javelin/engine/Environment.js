@@ -18,4 +18,4 @@ Javelin.Environment.prototype.validatePlugin = function(plugin) {};
 
 Javelin.Environment.prototype.run = function(stepsPerSecond) {};
 
-Javelin.Environment.prototype.stop = function() {};
+Javelin.Environment.prototype.stop = function(callback) {};

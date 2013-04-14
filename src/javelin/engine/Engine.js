@@ -10,6 +10,7 @@ Javelin.Engine = function(environment, config) {
     this.environment = environment;
     this.environment.engine = this;
     this.initialized = false;
+    this.dispatcher = new Javelin.Dispatcher();
     
     //everything else can be reset
     this.reset();
@@ -44,9 +45,6 @@ Javelin.Engine.prototype.reset = function() {
     this.plugins = {};
     this.currentScene = false;
     
-    //other
-    this.dispatcher = new Javelin.Dispatcher();
-        
     //configure the loader
     //TODO: think of better way to do this, possibly require it
     //via the environment
@@ -278,8 +276,8 @@ Javelin.Engine.prototype.run = function() {
     this.environment.run(this.targetFps);
 };
 
-Javelin.Engine.prototype.stop = function() {
-    this.environment.stop();
+Javelin.Engine.prototype.stop = function(callback) {
+    this.environment.stop(callback);
     this.running = false;
 };
 
@@ -400,6 +398,17 @@ Javelin.Engine.prototype.getCurrentScene = function() {
 };
 
 Javelin.Engine.prototype.loadScene = function(name, callback) {
+    //don't load a scene if it's still running - shutdown first
+    if (this.running) {
+        var engine = this;
+        this.stop(function() {
+            engine.unloadScene();
+            engine.loadScene(name, callback);
+        });
+        
+        return;
+    }
+    
     this.reset();
     
     if(!this.initialized) {
@@ -434,6 +443,8 @@ Javelin.Engine.prototype.loadScene = function(name, callback) {
     
     if (callback) {
         callback();
+    } else {
+        this.run();
     }
 };
 
