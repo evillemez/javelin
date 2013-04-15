@@ -19,6 +19,7 @@ Javelin.AUTO_REGISTER_SELF = true;
 
 //used a lot for converting degrees to radians
 Javelin.PI_OVER_180 = Math.PI / 180;
+Javelin._180_OVER_PI = 180 / Math.PI;
 
 //registry for stuff used in the engine, don't manipulate these
 Javelin.__componentHandlers = {};

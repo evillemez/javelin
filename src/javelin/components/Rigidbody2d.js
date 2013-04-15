@@ -119,8 +119,8 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         //create body definition
         bodyDef = new box2d.BodyDef();
         bodyDef.type = (component.static) ? box2d.Body.b2_staticBody : box2d.Body.b2_dynamicBody;
-        bodyDef.position.x = transform.position.x / 100;
-        bodyDef.position.y = transform.position.y / 100;
+        bodyDef.position.x = transform.position.y;
+        bodyDef.position.y = transform.position.y;
         bodyDef.angle = transform.rotation;
         bodyDef.linearDamping = component.damping;
         bodyDef.angularDamping = component.angularDamping;
@@ -207,7 +207,9 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         var pos = body.GetPosition();
         transform.position.x = pos.x;
         transform.position.y = pos.y;
-        transform.rotation = body.GetAngle();
+        if (!component.fixedRotation) {
+            transform.rotation = body.GetAngle();
+        }
     };
     
     component.$on('engine.create', function() {

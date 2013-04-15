@@ -30,6 +30,12 @@ Javelin.Plugin.Audio = function(plugin, config) {
         }
     };
     
+    plugin.$onUnload = function() {
+        for (var id in plugin.active) {
+            plugin.stopSound(id);
+        }
+    };
+    
     //internal use only
     plugin.loadSound = function(path, callback) {
         //use the engine's loader to get the audio arraybuffer
@@ -169,6 +175,8 @@ Javelin.Plugin.Audio = function(plugin, config) {
         if (plugin.callbacks[gameObject.id]) {
             plugin.callbacks[gameObject.id] = null;
         }
+        
+        plugin.stopSound(gameObject.id);
     };
     
     plugin.$onPostUpdateStep = function() {

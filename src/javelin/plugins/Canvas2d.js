@@ -39,9 +39,6 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                 var canvas = document.createElement('canvas');
                 canvas.height = plugin.config.height;
                 canvas.width = plugin.config.width;
-                canvas.style.position = 'absolute';
-                canvas.style.top = top;
-                canvas.style.left = left;
                 canvas.style.zIndex = z;
                 canvas.id = 'javelin-layer-' + layer;
                 
