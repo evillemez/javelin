@@ -144,8 +144,10 @@ Javelin.Plugin.Audio = function(plugin, config) {
                 }
             } else {
                 for (p in plugin.active[id]) {
-                    plugin.active[id][p].source.noteOff(0);
-                    plugin.active[id][p].source.disconnect(0);
+                    if (null !== plugin.active[id][p]) {
+                        plugin.active[id][p].source.noteOff(0);
+                        plugin.active[id][p].source.disconnect(0);
+                    }
                 }
 
                 plugin.active[id] = null;

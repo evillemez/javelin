@@ -44,13 +44,14 @@ Javelin.Engine.prototype.reset = function() {
     this.sceneDefinition = {};
     this.plugins = {};
     this.currentScene = false;
-    
+
     //configure the loader
     //TODO: think of better way to do this, possibly require it
     //via the environment
     if (this.config.loader) {
         this.loader = new Javelin.AssetLoader(this.config.loader.assetUrl || '');
     }
+    
 };
 
 /* Managing Game Objects */

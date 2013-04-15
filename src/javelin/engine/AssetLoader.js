@@ -72,6 +72,7 @@ Javelin.AssetLoader = function(basePath) {
     
     //generic file loader
     var soundLoader = function(loader, relPath, absPath, callback) {
+        console.log(relPath);
         var xhr = new XMLHttpRequest();
         xhr.open("GET", absPath, true);
         xhr.responseType = 'arraybuffer';
