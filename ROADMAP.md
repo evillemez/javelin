@@ -5,19 +5,19 @@ a fairly ambitious long-term roadmap.  How much gets done and by what time will 
 
 This document outlines general directions for the project. It is not about planned features, of which there are many.
 
-For info on planned features and implementation details - see `TODO.md`.
+For info on planned features and implementation details - see the issue queue & list of milestones.
 
 ## Will do ##
 
 These items will get done, hopefully sooner rather than later.
 
 * register with travis-ci
-* implement semver version tagging, once generally stable
-* register with bower and npm
 * document the core
 * implement automated docs build system
 * publish info site w/ docs to github-pages
     * also include example games/demos
+* implement semver version tagging, once generally stable
+* register with bower and npm
 * create yeoman generator for new projects
 
 ## Want to do ##
