@@ -14,6 +14,9 @@ Javelin.Plugin.Box2d = function(plugin, config) {
     var gravityY = config.gravityY || 0.0;
     var lastTimeStepped = Date.now();
     var allowSleep = config.allowSleep || false;
+	
+	plugin.pixelsPerMeter = config.pixelsPerMeter || 50;
+	plugin.metersPerPixel = 1 / plugin.pixelsPerMeter;
     
     if (Box2D) {
         //assign shortcut references to Box2D stuff
@@ -69,7 +72,7 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 } else {
                     angle = Math.atan2(targetPos.y - center.y, targetPos.x - center.x);
                 }
-                body.ApplyForce(new plugin.Vec2(Math.cos(angle) * force, Math.sin(angle) * force), body.GetPosition());
+                body.ApplyImpulse(new plugin.Vec2(Math.cos(angle) * force, Math.sin(angle) * force), body.GetPosition());
 
                 if (callback) {
                     callback(go);

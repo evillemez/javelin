@@ -23,9 +23,9 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     component.trigger = false;
     component.static = false;
     component.bullet = false;
-    component.density = 1.0;
-    component.friction = 0.0;
-    component.restitution = 0.0;
+    component.density = 0.5;
+    component.friction = 0.3;
+    component.restitution = 0.4;
     component.damping = 0.2;
     component.angularDamping = 0.3;
     component.fixedRotation = false;
@@ -34,6 +34,10 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     component.height = null;
     component.width = null;
     
+	component.setPosition = function(x, y) {
+		body.SetPosition(new box2d.Vec2(x * box2d.metersPerPixel, y * box2d.metersPerPixel));
+	};
+	
     component.applyForce = function(degrees, power) {
         body.ApplyForce(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * power, Math.sin(degrees * Javelin.PI_OVER_180) * power), body.GetWorldCenter());
     };
@@ -119,8 +123,8 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         //create body definition
         bodyDef = new box2d.BodyDef();
         bodyDef.type = (component.static) ? box2d.Body.b2_staticBody : box2d.Body.b2_dynamicBody;
-        bodyDef.position.x = transform.position.y;
-        bodyDef.position.y = transform.position.y;
+        bodyDef.position.x = transform.position.y * box2d.metersPerPixel;
+        bodyDef.position.y = transform.position.y * box2d.metersPerPixel;
         bodyDef.angle = transform.rotation;
         bodyDef.linearDamping = component.damping;
         bodyDef.angularDamping = component.angularDamping;
@@ -150,18 +154,18 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     
     //this mostly taken from gritsgame source - thanks!
     component.createFixtureShape = function() {
-        //TODO: take into account scaling
+        //TODO: take into account scaling, or just not allow?
         var shape;
         
         if (component.radius) {
-            shape = new box2d.CircleShape(component.radius);
+            shape = new box2d.CircleShape(component.radius * box2d.metersPerPixel);
             return shape;
         } else if (component.shape) {
             var points = component.shape;
             var vecs = [];
             for (var i = 0; i < points.length; i++) {
               var vec = new box2d.Vec2();
-              vec.Set(points[i].x, points[i].y);
+              vec.Set(points[i].x * box2d.metersPerPixel, points[i].y * box2d.metersPerPixel);
               vecs[i] = vec;
             }
             shape = new box2d.PolygonShape();
@@ -170,13 +174,13 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         } else {
             if (component.height && component.width) {
                 shape = new box2d.PolygonShape();
-                shape.SetAsBox(component.width * 0.5, component.height * 0.5);
+                shape.SetAsBox(component.width * 0.5 * box2d.metersPerPixel, component.height * 0.5 * box2d.metersPerPixel);
                 return shape;
             } else if (gameObject.hasComponent('sprite')) {
                 var img = gameObject.getComponent('sprite').image;
                 if (img) {
                     shape = new box2d.PolygonShape();
-                    shape.SetAsBox(img.width * 0.5, img.height * 0.5);
+                    shape.SetAsBox(img.width * 0.5 * box2d.metersPerPixel, img.height * 0.5 * box2d.metersPerPixel);
                     return shape;
                 } else {
                     throw new Error("Cannot create rigidbody shape.");
@@ -205,8 +209,8 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     
     component.updateLocation = function() {
         var pos = body.GetPosition();
-        transform.position.x = pos.x;
-        transform.position.y = pos.y;
+        transform.position.x = pos.x * box2d.pixelsPerMeter;
+        transform.position.y = pos.y * box2d.pixelsPerMeter;
         if (!component.fixedRotation) {
             transform.rotation = body.GetAngle();
         }
@@ -216,7 +220,7 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         //get references to stuff
         transform = gameObject.getComponent('transform2d');
         box2d = gameObject.engine.getPlugin('box2d');
-        body.SetPosition(new box2d.Vec2(transform.position.x, transform.position.y));
+        body.SetPosition(new box2d.Vec2(transform.position.x * box2d.metersPerPixel, transform.position.y * box2d.metersPerPixel));
         body.SetAngle(transform.rotation);
         body.ResetMassData();
     });
@@ -249,7 +253,7 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
                 context.strokeRect(topLeftX, topLeftY, width, height);
             }
             
-            if (component.radius) {                
+            if (component.radius) {
                 context.beginPath();
                 context.arc(0, 0, component.radius, 0, 2 * Math.PI, true);
                 context.closePath();
