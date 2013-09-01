@@ -10,6 +10,7 @@ module.exports = function(grunt) {
         files: {
             lint: ['Gruntfile.js', 'src/**/*.js', '!src/vendor/**/*.js', 'tests/**/*.js'],
             test: ['tests/**/*.js'],
+            fixtures: ['tests/fixtures/**/*.js'],
             
             //note: src/vendor DOES need to be included in the build, but not until I can make it work
             //and pass the tests properly
@@ -34,39 +35,7 @@ module.exports = function(grunt) {
         },
         jshint: {
             options: {
-                curly: true
-                ,eqeqeq: true
-                ,immed: true
-                ,latedef: true
-                ,newcap: true
-                ,noarg: true
-                ,sub: true
-                ,undef: true
-                ,boss: true
-                ,eqnull: true
-                ,node: true
-                ,es5: true
-                ,strict: true
-                ,browser: true
-                ,laxcomma: true
-                ,loopfunc: true
-                ,globals: {
-                    Javelin: true
-                    ,_: true
-                    ,should: true
-                    ,it: true
-                    ,before: true
-                    ,after: true
-                    ,beforeEach: true
-                    ,afterEach: true
-                    ,define: true
-                    ,require: true
-                    ,describe: true
-                    ,CANNON: true
-                    ,THREE: true
-                    ,self: true
-                    //,window: true
-                }
+                jshintrc: '.jshintrc'
             },
             all: "<%= files.lint %>"
         },

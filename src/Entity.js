@@ -2,9 +2,9 @@
 
 'use strict';
 
-Javelin.GameObject = function () {
-    this.id = -1;                                   //UID assigned by engine
-    this.name = "Anonymous";                        //human-readable name (for eventual editor)
+Javelin.Entity = function (id, name) {
+    this.id = id;                                   //UID assigned by engine
+    this.name = name || "Anonymous";                //human-readable name (for eventual editor)
     this.engine = null;                             //reference to engine
     this.enabled = false;                           //active flag
     this.components = {};                           //component instances
@@ -21,13 +21,13 @@ Javelin.GameObject = function () {
 
 /* Lifecycle */
 
-Javelin.GameObject.prototype.destroy = function() {
+Javelin.Entity.prototype.destroy = function() {
     if (this.engine) {
         this.engine.destroy(this);
     }
 };
 
-Javelin.GameObject.prototype.setId = function(id) {
+Javelin.Entity.prototype.setId = function(id) {
     this.id = id;
     
     for (var alias in this.components) {
@@ -35,7 +35,7 @@ Javelin.GameObject.prototype.setId = function(id) {
     }
 };
 
-Javelin.GameObject.prototype.enable = function() {
+Javelin.Entity.prototype.enable = function() {
     this.enabled = true;
 
     if (this.children) {
@@ -49,7 +49,7 @@ Javelin.GameObject.prototype.enable = function() {
     }
 };
 
-Javelin.GameObject.prototype.disable = function() {
+Javelin.Entity.prototype.disable = function() {
     this.enabled = false;
     
     if (this.children) {
@@ -66,7 +66,7 @@ Javelin.GameObject.prototype.disable = function() {
 /* Component management */
 
 //explicitly set a component instance
-Javelin.GameObject.prototype.setComponent = function(alias, component) {    
+Javelin.Entity.prototype.setComponent = function(alias, component) {    
     component.$alias = alias;
     component.$id = this.id;
     this.components[alias] = component;
@@ -75,7 +75,7 @@ Javelin.GameObject.prototype.setComponent = function(alias, component) {
 };
 
 //micro optimization to set multiple components without having to call setModified() every time
-Javelin.GameObject.prototype.setComponents = function(arr) {
+Javelin.Entity.prototype.setComponents = function(arr) {
     for (var i in arr) {
         var comp = arr[i];
         comp.$id = this.id;
@@ -85,11 +85,11 @@ Javelin.GameObject.prototype.setComponents = function(arr) {
     this.setModified();
 };
 
-Javelin.GameObject.prototype.getComponent = function(name) {
+Javelin.Entity.prototype.getComponent = function(name) {
     return this.components[name] || false;
 };
 
-Javelin.GameObject.prototype.hasComponent = function(name) {
+Javelin.Entity.prototype.hasComponent = function(name) {
     if (this.components[name]) {
         return true;
     }
@@ -97,7 +97,7 @@ Javelin.GameObject.prototype.hasComponent = function(name) {
     return false;
 };
 
-Javelin.GameObject.prototype.getComponentsInChildren = function(name) {
+Javelin.Entity.prototype.getComponentsInChildren = function(name) {
     var components = [];
     
     for (var i = 0; i < this.children.length; i++) {
@@ -123,27 +123,27 @@ Javelin.GameObject.prototype.getComponentsInChildren = function(name) {
 
 /* tag management */
 
-Javelin.GameObject.prototype.hasTag = function(name) {
+Javelin.Entity.prototype.hasTag = function(name) {
     return (-1 !== this.tags.indexOf(name));
 };
 
-Javelin.GameObject.prototype.addTag = function(name) {
+Javelin.Entity.prototype.addTag = function(name) {
     if (!this.hasTag(name)) {
         this.tags.push(name);
     }
 };
 
-Javelin.GameObject.prototype.removeTag = function(name) {
+Javelin.Entity.prototype.removeTag = function(name) {
     if (this.hasTag(name)) {
         this.tags.splice(this.tags.indexOf(name), 1);
     }
 };
 
-Javelin.GameObject.prototype.getTags = function() {
+Javelin.Entity.prototype.getTags = function() {
     return this.tags;
 };
 
-Javelin.GameObject.prototype.getChildrenByTag = function(name, recursive) {
+Javelin.Entity.prototype.getChildrenByTag = function(name, recursive) {
     var children = [];
     for (var i = 0; i < this.children.length; i++) {
         if (this.children[i].hasTag(name)) {
@@ -166,22 +166,22 @@ Javelin.GameObject.prototype.getChildrenByTag = function(name, recursive) {
 
 /* GO Hierarchy management */
 
-Javelin.GameObject.prototype.isRoot = function() {
+Javelin.Entity.prototype.isRoot = function() {
     return (null === this.root);
 };
 
-Javelin.GameObject.prototype.getRoot = function() {
+Javelin.Entity.prototype.getRoot = function() {
     return (this.isRoot()) ? this : this.root;
 };
 
-Javelin.GameObject.prototype.setRoot = function(go) {
+Javelin.Entity.prototype.setRoot = function(go) {
     this.root = go;
     for (var i in this.children) {
         this.children[i].setRoot(go);
     }
 };
 
-Javelin.GameObject.prototype.addChild = function(child) {
+Javelin.Entity.prototype.addChild = function(child) {
     //don't allow an object to be a child of more
     //that one parent
     if (child.parent) {
@@ -195,46 +195,46 @@ Javelin.GameObject.prototype.addChild = function(child) {
     this.children.push(child);
 };
 
-Javelin.GameObject.prototype.setParent = function(parent) {
+Javelin.Entity.prototype.setParent = function(parent) {
     parent.addChild(this);
 };
 
-Javelin.GameObject.prototype.removeChild = function(child) {
+Javelin.Entity.prototype.removeChild = function(child) {
     child.setModified();
     this.setModified();
     child.parent = null;
     this.children.splice(this.children.indexOf(child), 1);
 };
 
-Javelin.GameObject.prototype.leaveParent = function() {
+Javelin.Entity.prototype.leaveParent = function() {
     if (this.parent) {
         this.parent.removeChild(this);
     }
 };
 
-Javelin.GameObject.prototype.abandonChildren = function() {
+Javelin.Entity.prototype.abandonChildren = function() {
     for (var i = 0; i < this.children.length; i++) {
         this.removeChild(this.children[i]);
     }
 };
 
-Javelin.GameObject.prototype.hasChildren = function() {
+Javelin.Entity.prototype.hasChildren = function() {
     return (this.children.length > 0);
 };
 
-Javelin.GameObject.prototype.hasParent = function() {
+Javelin.Entity.prototype.hasParent = function() {
     return this.parent ? true : false;
 };
 
 
 /* Messaging */
 
-Javelin.GameObject.prototype.on = function(name, listener) {
+Javelin.Entity.prototype.on = function(name, listener) {
     this.dispatcher.on(name, listener);
 };
 
 
-Javelin.GameObject.prototype.emit = function(name, data) {
+Javelin.Entity.prototype.emit = function(name, data) {
     if (this.dispatcher.dispatch(name, data)) {
         if (this.parent) {
             this.parent.emit(name, data);
@@ -245,7 +245,7 @@ Javelin.GameObject.prototype.emit = function(name, data) {
     }
 };
 
-Javelin.GameObject.prototype.broadcast = function(name, data) {
+Javelin.Entity.prototype.broadcast = function(name, data) {
     if (this.dispatcher.dispatch(name, data)) {
         if (this.children) {
             for (var i = 0; i < this.children.length; i++) {
@@ -261,7 +261,7 @@ Javelin.GameObject.prototype.broadcast = function(name, data) {
     return false;
 };
 
-Javelin.GameObject.prototype.getCallbacks = function(eventName, recursive) {
+Javelin.Entity.prototype.getCallbacks = function(eventName, recursive) {
     if (this.modified) {
         this.rebuildCallbackCache();
         this.modified = false;
@@ -270,7 +270,7 @@ Javelin.GameObject.prototype.getCallbacks = function(eventName, recursive) {
     return (recursive) ? this.allCallbackCache[eventName] || [] : this.ownCallbackCache[eventName] || [];
 };
 
-Javelin.GameObject.prototype.rebuildCallbackCache = function() {
+Javelin.Entity.prototype.rebuildCallbackCache = function() {
     var key, cb, i, ownCallbacks = {};
     for (var comp in this.components) {
         for (key in this.components[comp].$callbacks) {
@@ -311,7 +311,7 @@ Javelin.GameObject.prototype.rebuildCallbackCache = function() {
     this.allCallbackCache = allCallbacks;
 };
 
-Javelin.GameObject.prototype.setModified = function() {
+Javelin.Entity.prototype.setModified = function() {
     this.modified = true;
     if (this.parent) {
         this.parent.setModified();
@@ -320,7 +320,7 @@ Javelin.GameObject.prototype.setModified = function() {
 
 /* Data Serialization Helpers */
 
-Javelin.GameObject.prototype.export = function() {
+Javelin.Entity.prototype.export = function() {
     var serialized = {
         name: this.name,
         layer: this.layer,

@@ -1,9 +1,9 @@
 "use strict";
 
-Javelin.EnginePlugin = function() {
-    this.$alias = '';
+Javelin.EnginePlugin = function(name, engine) {
+    this.$name = name;
+    this.$engine = engine;
     this.$active = false;
-    this.$engine = null;
 };
 
 Javelin.EnginePlugin.prototype.$onLoad = function() {};
@@ -12,6 +12,8 @@ Javelin.EnginePlugin.prototype.$onUnload = function() {};
 
 //TODO: implement & test this
 Javelin.EnginePlugin.prototype.$onSceneLoaded = function() {};
+
+Javelin.EnginePlugin.prototype.$onFlush = function() {};
 
 /* GameObject Lifecycle */
 Javelin.EnginePlugin.prototype.$onPreUpdateStep = function(deltaTime) {};

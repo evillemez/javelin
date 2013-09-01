@@ -1,9 +1,9 @@
 
     if (typeof module !== 'undefined') {
         // export for node
-        module.exports = Javelin;
+        module.exports = Javelin.getInstance();
     } else {
         // assign to window
-        this.Javelin = Javelin;
+        this.javelin = new Javelin();
     }
 }).apply(this);

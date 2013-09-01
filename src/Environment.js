@@ -8,8 +8,10 @@ manner.
 
 'use strict';
 
-Javelin.Environment = function() {
-    
+Javelin.Environment = function(name, game, loader) {
+    this.name = name;
+    this.game = game;
+    this.loader = loader;
 };
 
 Javelin.Environment.prototype.initialize = function() {};
