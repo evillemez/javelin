@@ -141,10 +141,8 @@ Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
         throw new Error("Unknown component [" + alias + "] requested");
     }
 
-    var comp = new Javelin.GameObjectComponent();
+    var comp = new Component(handler.alias, go);
     comp.$id = go.id;
-    comp.$go = go;
-    comp.$alias = handler.alias;
 
     handler(go, comp);
 

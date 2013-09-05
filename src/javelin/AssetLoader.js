@@ -27,33 +27,6 @@ Javelin.AssetLoader = function(basePath) {
         img.src = absPath;
     };
     
-    //image atlas loader
-    var imageAtlasLoader = function(loader, relPath, absPath, callback) {
-        var json, img, imgPath;
-        var rp = relPath;
-        imgPath = rp.substring(0, rp.lastIndexOf("/"));
-
-        var createAtlas = function() {
-            var atlas = new Javelin.Asset.TexturePackerAtlas(json, img);
-            loader.register(relPath, atlas);
-            callback(atlas);
-        };
-
-        var loadJsonCallback = function(item) {
-            json = item;            
-            var imagePath = imgPath + "/" + json.meta.image;
-            loader.loadAsset(imagePath, loadImageCallback);
-        };
-                
-        var loadImageCallback = function(item) {
-            img = item;
-            createAtlas();
-        };
-        
-        //start by loading the json, will trigger series of callbacks
-        loader.loadAssetAsType(relPath, 'json', loadJsonCallback);
-    };
-    
     var tiledMapLoader = function(loader, relPath, absPath, callback) {
         throw new Error("Tiled map loading not yet implemented.");
     };

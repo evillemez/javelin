@@ -1,7 +1,6 @@
-/*global Javelin:true */
 
 /*
-A GameObjectComponent is a glorified map of callbacks + a public API for other components to use.
+A Component is a glorified map of callbacks + a public API for other components to use.
 Components are processed by user-defined
 functions that compose the objects internally.  Each user function receives a new blank component
 instance.  Callbacks can be regisered on the component to be processed by the Engine plugins.  Properties and
@@ -12,34 +11,31 @@ Callbacks are called directly by whoever processes them - so the exact signature
 callback is determined by the part of the engine that is calling it.
 */
 
-
+//TODO: Document writing a component
+//TODO: Document interacting with a component from another component
+//TODO: Document registering a callback
 'use strict';
 
-Javelin.GameObjectComponent = function() {
+function Component(name, entity) {
     this.$callbacks = {};
-    this.$go = null;
-    this.$id = -1;
-    this.$alias = '';
-    this.$inheritedAliases = [];
-};
+    this.$entity = entity;
+    this.$id = entity.id;
+    this.$name = name;
+}
 
-Javelin.GameObjectComponent.prototype.$on = function(name, callback) {
+Component.prototype.$on = function(name, callback) {
     callback.$id = this.$id;
     this.$callbacks[name] = callback;
-    if (this.$go) {
-        this.$go.setModified();
+    if (this.$entity) {
+        this.$entity.setModified();
     }
 };
 
-Javelin.GameObjectComponent.prototype.$instanceOf = function(alias) {
-    return (-1 !== this.$inheritedAliases.indexOf(alias));
-};
-
-Javelin.GameObjectComponent.prototype.$getCallback = function(name) {
+Component.prototype.$getCallback = function(name) {
     return this.$callbacks[name] || false;
 };
 
-Javelin.GameObjectComponent.prototype.$serialize = function() {
+Component.prototype.$serialize = function() {
     var data = {};
     
     //export non-function component properties, excluding the builtins ($)
@@ -52,7 +48,7 @@ Javelin.GameObjectComponent.prototype.$serialize = function() {
     return data;
 };
 
-Javelin.GameObjectComponent.prototype.$unserialize = function(data) {
+Component.prototype.$unserialize = function(data) {
     for (var key in data) {
         this[key] = data[key];
     }

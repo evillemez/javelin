@@ -1,6 +1,6 @@
 {
     "globals"       : {
-        "Javelin": true,
+        "javelin": true,
         "_": true,
         "should": true,
         "it": true,
