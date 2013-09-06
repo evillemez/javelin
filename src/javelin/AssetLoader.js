@@ -11,64 +11,12 @@
  * functinoality will probably move or be implemented differently.  However, the API for actual
  * games creaters is probably correct, so that should stay as it is.
  */
-Javelin.AssetLoader = function(basePath) {
+Javelin.AssetLoader = function(basePath, loaders) {
     this.assets = {};
     this.baseAssetPath = basePath;
     
-    //generic image loader
-    var imageLoader = function(loader, relPath, absPath, callback) {
-        var img = new Image();
-        img.onabort =
-        img.onerror =
-        img.onload = function() {
-            loader.register(relPath, img);
-            callback(img);
-        };
-        img.src = absPath;
-    };
-    
-    var tiledMapLoader = function(loader, relPath, absPath, callback) {
-        throw new Error("Tiled map loading not yet implemented.");
-    };
-    
-    //generic json file loader
-    var jsonLoader = function(loader, relPath, absPath, callback) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", absPath, true);
-        xhr.onload = function() {
-            var json = JSON.parse(this.responseText);
-            loader.register(relPath, json);
-            callback(json);
-        };
-        xhr.send();
-    };
-    
-    //generic file loader
-    var soundLoader = function(loader, relPath, absPath, callback) {
-        console.log(relPath);
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", absPath, true);
-        xhr.responseType = 'arraybuffer';
-        xhr.onload = function() {
-            loader.register(relPath, xhr.response);
-            callback(xhr.response);
-        };
-        xhr.send();
-    };
-    
-    //map loader functions to types, note more specific extensions
-    //should be declared before more general, otherwise
-    //they will never be matched because they are checked
-    //in the order defined
-    this.loaders = {
-        'png': imageLoader,
-        'jpg': imageLoader,
-        'atlas.json': imageAtlasLoader,
-        'map.json': tiledMapLoader,
-        'json': jsonLoader,
-        'ogg': soundLoader,
-        'mp3': soundLoader
-    };
+    //TODO: implement sortLoaders
+    this.loaders = this.sortLoaders(loaders);
 };
 
 /**

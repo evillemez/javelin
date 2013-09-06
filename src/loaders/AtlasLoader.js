@@ -6,15 +6,15 @@
  * the "json(hash)" format
  */
 
-javelin.loader('.atlas.json', ['browser', 'server'], function(loader, relPath, absPath, callback) {
+javelin.loader('.atlas.json', ['browser', 'server'], function(loader, relPath, absPath, done) {
     var json, img, imgPath;
     var rp = relPath;
     imgPath = rp.substring(0, rp.lastIndexOf("/"));
 
     var createAtlas = function() {
-        var atlas = new Javelin.Asset.TexturePackerAtlas(json, img);
+        var atlas = new TexturePackerAtlas(json, img);
         loader.register(relPath, atlas);
-        callback(atlas);
+        done(atlas);
     };
 
     var loadJsonCallback = function(item) {
@@ -32,8 +32,22 @@ javelin.loader('.atlas.json', ['browser', 'server'], function(loader, relPath, a
     loader.loadAssetAsType(relPath, 'json', loadJsonCallback);
 });
 
+function TexturePackerAtlas(json, image) {
+    this.image = image;
+    this.imageMeta = json.meta;
+    this.images = {};
+    
+    var c = 0;
+    for (var name in json.frames) {
+        var img = new AtlasImage(json.frames[name], this.image);
+        this.images[name] = img;
+        c++;
+    }
+    
+    this.count = c;
+}
 
-Javelin.Asset.AtlasImage = function(data, image) {
+function AtlasImage(data, image) {
     this.image = image;
     this.x = data.frame.x;
     this.y = data.frame.y;
@@ -47,19 +61,4 @@ Javelin.Asset.AtlasImage = function(data, image) {
         this.cx = -this.width * 0.5;
         this.cy = -this.height * 0.5;
     }
-};
-
-Javelin.Asset.TexturePackerAtlas = function(json, image) {
-    this.image = image;
-    this.imageMeta = json.meta;
-    this.images = {};
-    
-    var c = 0;
-    for (var name in json.frames) {
-        var img = new Javelin.Asset.AtlasImage(json.frames[name], this.image);
-        this.images[name] = img;
-        c++;
-    }
-    
-    this.count = c;
-};
+}
