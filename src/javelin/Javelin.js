@@ -3,44 +3,29 @@
 //setup main namespace
 var Javelin = Javelin || {};
 
-//setup sub namespaces for categories of objects
-//included with Javelin
-Javelin.Plugin = {};
-Javelin.Component = {};
-Javelin.Prefab = {};
-Javelin.Scene = {};
-Javelin.Env = {};
-Javelin.Asset = {};
-
 //used a lot for converting degrees to radians
 Javelin.PI_OVER_180 = Math.PI / 180;
 Javelin._180_OVER_PI = 180 / Math.PI;
 
-//registry for stuff used in the engine, don't manipulate these
-Javelin.__componentHandlers = {};
-Javelin.__componentRequirements = {};
-Javelin.__pluginHandlers = {};
-Javelin.__prefabs = {};
-Javelin.__scenes = {};
-
-//mostly for testing and internal use; generally, don't call this from your own code
-Javelin.reset = function() {
-    Javelin.__componentHandlers = {};
-    Javelin.__componentRequirements = {};
-    Javelin.__pluginHandlers = {};
-    Javelin.__prefabs = {};
-    Javelin.__scenes = {};
+Javelin.Registry = function() {
+    this.components = {};
+    this.environments = {};
+    this.plugins = {};
+    this.scenes = {};
+    this.prefabs = {};
+    this.loaders = {};
 };
+
 
 /* utility methods: note that these are for checking LITERALS only, as they are used internally
 quite a bit, and have an expected format, there may be edge cases where these don't give the
 expected result */
 
-Javelin.isString = function(value) {
+Javelin.Registry.prototype.isString = function(value) {
     return typeof value === 'string';
 };
 
-Javelin.isEmpty = function(item) {
+Javelin.Registry.prototype.isEmpty = function(item) {
     for (var key in item) {
         return false;
     }
@@ -48,104 +33,110 @@ Javelin.isEmpty = function(item) {
     return true;
 };
 
-Javelin.isFunction = function(value) {
+Javelin.Registry.prototype.isFunction = function(value) {
     return typeof value === 'function';
 };
 
-Javelin.isObject = function(value) {
-    return value != null && !Javelin.isArray(value) && typeof value === 'object';
+Javelin.Registry.prototype.isObject = function(value) {
+    return value !== null && !Javelin.isArray(value) && typeof value === 'object';
 };
 
-Javelin.isArray = function(value) {
+Javelin.Registry.prototype.isArray = function(value) {
     return Object.prototype.toString.apply(value) === '[object Array]';
 };
 
 /* Registry methods */
 
-//register a GameObject Component handler function
-Javelin.registerComponent = function(handler) {
-    if (!Javelin.isFunction(handler)) {
+//register an entity component
+Javelin.Registry.prototype.component = function(name, handler, requirements) {
+    if (!this.isString(name)) {
+        throw new Error("Components must specify a string name.");
+    }
+
+    if (!this.isFunction(handler)) {
         throw new Error("Components must be functions.");
     }
     
-    if (!handler.alias) {
-        throw new Error("Components must specify their alias.");
+    if (requirements && !this.isArray(requirements)) {
+        throw new Error("Component requirements must be an array in " + name + ".");
     }
     
-    if (handler.requires && !Javelin.isArray(handler.requires)) {
-        throw new Error("Component.requires must be an array in " + handler.alias + ".");
-    }
-    
-    if (handler.inherits && !Javelin.isString(handler.inherits)) {
-        throw new Error("Component.inherits should be a reference to another component alias string in (" + handler.alias + ").");
-    }
-    
-    if (handler.inherits && handler.requires && -1 !== handler.requires.indexOf(handler.inherits)) {
-        throw new Error("Component cannot both require and inherit the same component, must be one or the other.");
-    }
-    
-    Javelin.__componentHandlers[handler.alias] = handler;
+    var definition = {
+        name: name,
+        handler: handler,
+        requirements: requirements,
+        computedRequirements: []
+    };
+
+    this.components[name] = definition;
 };
 
-Javelin.registerPrefab = function(obj) {
-    if (!Javelin.isObject(obj)) {
-        throw new Error("Prefabs must be object literals.");
-    }
-    
-    if (!obj.name || !Javelin.isString(obj.name)) {
+Javelin.Registry.prototype.prefab = function(name, obj) {
+    if (!name || !this.isString(name)) {
         throw new Error("Prefabs must specify a string name property!");
     }
 
-    Javelin.__prefabs[obj.name] = obj;
+    if (!this.isObject(obj)) {
+        throw new Error("Prefabs must be object literals.");
+    }
+
+    this.prefabs[name] = obj;
 };
 
-Javelin.registerScene = function(obj) {
-    if (!Javelin.isObject(obj)) {
+Javelin.Registry.prototype.scene = function(name, obj) {
+    if (!name || !this.isString(name)) {
+        throw new Error("Scenes must specify a string name.");
+    }
+
+    if (!this.isObject(obj)) {
         throw new Error("Scenes must be object literals.");
     }
-    
-    if (!obj.name || !Javelin.isString(obj.name)) {
-        throw new Error("Scenes must specify a string name property!");
-    }
-        
-    Javelin.__scenes[obj.name] = obj;
+
+    this.scenes[name] = obj;
 };
 
-Javelin.registerPlugin = function(handler) {
+Javelin.Registry.prototype.plugin = function(name, handler, defaults) {
     
-    if (!Javelin.isFunction(handler)) {
-        throw new Error("Engine plugins must be functions");
+    if (!name || !this.isString(name)) {
+        throw new Error("Engine plugins must specify a string name.");
     }
-    
-    if (!handler.alias || !Javelin.isString(handler.alias)) {
-        throw new Error("Engine plugins must specify a string alias.");
+
+    if (!this.isFunction(handler)) {
+        throw new Error("Engine plugins must be functions.");
     }
     
-    this.__pluginHandlers[handler.alias] = handler;
+    var definition = {
+        name: name,
+        handler: handler,
+        defaults: defaults
+    };
+
+    this.plugins[name] = definition;
 };
 
-Javelin.getPrefab = function(name) {
-    return Javelin.__prefabs[name] || false;
+Javelin.Registry.prototype.getPrefab = function(name) {
+    return this.prefabs[name] || false;
 };
 
 
-Javelin.getScene = function(name) {
-    return Javelin.__scenes[name] || false;
+Javelin.Registry.prototype.getScene = function(name) {
+    return this.scenes[name] || false;
 };
 
-Javelin.getComponentHandler = function(alias) {
-    return Javelin.__componentHandlers[alias] || false;
+Javelin.Registry.prototype.getComponent = function(name) {
+    return this.components[name] || false;
 };
 
-Javelin.getPluginHandler = function(alias) {
-    return Javelin.__pluginHandlers[alias] || false;
+Javelin.Registry.prototype.getPlugin = function(name) {
+    return this.plugins[name] || false;
 };
 
-Javelin.getComponentRequirements = function(alias) {
-    return Javelin.__componentRequirements[alias] || [];
+Javelin.Registry.prototype.game = function(environemtn, config) {
+    //TODO: return engine instance for environment
 };
 
-Javelin.buildComponentRequirements = function(handler) {
+//TODO: refactor
+Javelin.computeComponentRequirements = function(handler) {
     var reqs = [];
     
     var getRequirements = function(alias) {
@@ -206,22 +197,8 @@ Javelin.unpackPrefabDefinitions = function() {
 };
 
 //figure out all component inheritence and requirements
+//TODO: refactor
 Javelin.initialize = function() {
-    if (Javelin.AUTO_REGISTER_SELF) {
-        var key;
-        for (key in Javelin.Component) {
-            Javelin.registerComponent(Javelin.Component[key]);
-        }
-        for (key in Javelin.Plugin) {
-            Javelin.registerPlugin(Javelin.Plugin[key]);
-        }
-        for (key in Javelin.Prefab) {
-            Javelin.registerPrefab(Javelin.Prefab[key]);
-        }
-        for (key in Javelin.Scene) {
-            Javelin.registerScene(Javelin.Scene[key]);
-        }
-    }
     
     //resolve component hierarchies/dependencies
     for (var alias in Javelin.__componentHandlers) {

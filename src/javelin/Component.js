@@ -5,7 +5,7 @@ Components are processed by user-defined
 functions that compose the objects internally.  Each user function receives a new blank component
 instance.  Callbacks can be regisered on the component to be processed by the Engine plugins.  Properties and
 methods can be added to the component instance in the function as well.  The properties and methods added
-to the instance constitute the public "api" of that component.
+to the instance constitute the public "api" of that Javelin.Component.
 
 Callbacks are called directly by whoever processes them - so the exact signature of a given
 callback is determined by the part of the engine that is calling it.
@@ -16,14 +16,14 @@ callback is determined by the part of the engine that is calling it.
 //TODO: Document registering a callback
 'use strict';
 
-function Component(name, entity) {
+Javelin.Component = function(name, entity) {
     this.$callbacks = {};
     this.$entity = entity;
     this.$id = entity.id;
     this.$name = name;
-}
+};
 
-Component.prototype.$on = function(name, callback) {
+Javelin.Component.prototype.$on = function(name, callback) {
     callback.$id = this.$id;
     this.$callbacks[name] = callback;
     if (this.$entity) {
@@ -31,11 +31,11 @@ Component.prototype.$on = function(name, callback) {
     }
 };
 
-Component.prototype.$getCallback = function(name) {
+Javelin.Component.prototype.$getCallback = function(name) {
     return this.$callbacks[name] || false;
 };
 
-Component.prototype.$serialize = function() {
+Javelin.Component.prototype.$serialize = function() {
     var data = {};
     
     //export non-function component properties, excluding the builtins ($)
@@ -48,7 +48,7 @@ Component.prototype.$serialize = function() {
     return data;
 };
 
-Component.prototype.$unserialize = function(data) {
+Javelin.Component.prototype.$unserialize = function(data) {
     for (var key in data) {
         this[key] = data[key];
     }

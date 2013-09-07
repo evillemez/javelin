@@ -1,14 +1,17 @@
 'use strict';
 
-Javelin.Component.AudioEmitter = function(gameObject, component) {
-    var audio = null, transform = null, outputNode = null;
+javelin.component('audioEmitter', function(entity, game) {
+    var audio = null,
+        transform = null, 
+        outputNode = null;
+        
     var filterNodes = {};
     
     //public config values
-    component.spatial = true; //if true, culling and filters can be applied - if not true, it connects directly to the audio plugins masterVolumeNode
-    component.range = 50;
-    component.volume = 100;
-    component.getAudioNode = function() {};
+    this.spatial = true; //if true, culling and filters can be applied - if not true, it connects directly to the audio plugins masterVolumeNode
+    this.range = 50;
+    this.volume = 100;
+    this.getAudioNode = function() {};
     
     var activeLoops = {};
     
@@ -18,7 +21,7 @@ Javelin.Component.AudioEmitter = function(gameObject, component) {
      * @param {String} path Path to audio file asset
      * @param {Boolean} cull Flag to NOT play the sound if won't actually be heard by the audioListener.  By default is `false` - generally should only be used for short-lived sounds like gunshots or explosions.
      */    
-    component.playLoop = function(path, cull) {
+    this.playLoop = function(path, cull) {
         cull = cull || false;
         
         if (!activeLoops[path]) {
@@ -34,7 +37,7 @@ Javelin.Component.AudioEmitter = function(gameObject, component) {
      * @param {String} path Path to audio file asset
      * @param {Boolean} cull Flag to NOT play the sound if won't actually be heard by the audioListener.  By default is `false` - generally should only be used for short-lived sounds like gunshots or explosions.
      */    
-    component.playOnce = function(path, cull) {
+    this.playOnce = function(path, cull) {
         cull = cull || false;
 
         //play sound once, no loop
@@ -46,9 +49,9 @@ Javelin.Component.AudioEmitter = function(gameObject, component) {
      * 
      * @param {String} path Optional path of sound to stop playing.
      */    
-    component.stopSound = function (path) {
+    this.stopSound = function (path) {
         path = path || false;
-        audio.stopSound(gameObject.id, path);
+        audio.stopSound(entity.id, path);
         
         if (activeLoops[path]) {
             activeLoops[path] = false;
@@ -58,15 +61,13 @@ Javelin.Component.AudioEmitter = function(gameObject, component) {
     };
     
     //store reference to audio plugin and transform component
-    component.$on('engine.create', function() {
-        audio = gameObject.engine.getPlugin('audio');
-        transform = gameObject.getComponent('transform2d');
+    this.$on('engine.create', function() {
+        audio = game.getPlugin('audio');
+        transform = entity.get('transform2d');
     });
 
     //stop all sounds from this emitter
-    component.$on('engine.destroy', function() {
-        audio.clearActive(gameObject.id);
+    this.$on('engine.destroy', function() {
+        audio.clearActive(entity.id);
     });
-};
-Javelin.Component.AudioEmitter.alias = 'audioEmitter';
-Javelin.Component.AudioEmitter.requires = ['transform2d'];
+}, ['transform2d']);

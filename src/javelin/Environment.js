@@ -9,28 +9,28 @@ need to be overridden in some cases.
 
 'use strict';
 
-function Environment(name, game) {
+Javelin.Environment = function(name, game) {
     this.name = name;
     this.game = game;
     this.loader = null;
-}
-
-Environment.prototype.initialize = function() {};
-
-Environment.prototype.validatePlugin = function(plugin) {};
-
-Environment.prototype.run = function(stepsPerSecond) {
-	throw new Error('Environment.run must be implemented.');
 };
 
-Environment.prototype.stop = function(callback) {
-	throw new Error('Environment.stop must be implemented.');
+Javelin.Environment.prototype.initialize = function() {};
+
+Javelin.Environment.prototype.validatePlugin = function(plugin) {};
+
+Javelin.Environment.prototype.run = function(stepsPerSecond) {
+    throw new Error('Javelin.Environment.run must be implemented.');
 };
 
-Environment.prototype.getLoader = function() {
-	return this.loader;
+Javelin.Environment.prototype.stop = function(callback) {
+    throw new Error('Javelin.Environment.stop must be implemented.');
 };
 
-Environment.prototype.setLoader = function(loader) {
-	this.loader = loader;
+Javelin.Environment.prototype.getLoader = function() {
+    return this.loader;
+};
+
+Javelin.Environment.prototype.setLoader = function(loader) {
+    this.loader = loader;
 };

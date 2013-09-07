@@ -1,33 +1,31 @@
-/*global Dispatcher:true */
-
 'use strict';
 
-function Entity(id, name) {
-    this.id = id;                                   //UID assigned by engine
+Javelin.Entity = function (id, name) {
+    this.id = id || -1;                             //UID assigned by engine
     this.name = name || "Anonymous";                //human-readable name (for eventual editor)
     this.engine = null;                             //reference to engine
     this.enabled = false;                           //active flag
     this.components = {};                           //component instances
-    this.children = [];                             //child gameobject instances
-    this.parent = null;                             //parent gameobject instance
-    this.dispatcher = new Dispatcher();             //for emit/broadcast functionality
+    this.children = [];                             //child entity instances
+    this.parent = null;                             //parent entity instance
+    this.dispatcher = new Javelin.Dispatcher();     //for emit/broadcast functionality
     this.root = null;                               //TODO: implement, if in a hierarchy, reference to root object in hierarcy
     this.modified = false;                          //whether or not the hierarchy or components have been modified
     this.ownCallbackCache = {};                     //cached callbacks from own components
     this.allCallbackCache = {};                     //cached callbacks from all children
     this.tags = [];                                 //string tags for categorizing objects
     this.layer = 'default';                         //for assigning groups of objects to specific layers (may be removed)
-}
+};
 
 /* Lifecycle */
 
-Entity.prototype.destroy = function() {
+Javelin.Entity.prototype.destroy = function() {
     if (this.engine) {
         this.engine.destroy(this);
     }
 };
 
-Entity.prototype.setId = function(id) {
+Javelin.Entity.prototype.setId = function(id) {
     this.id = id;
     
     for (var alias in this.components) {
@@ -35,7 +33,7 @@ Entity.prototype.setId = function(id) {
     }
 };
 
-Entity.prototype.enable = function() {
+Javelin.Entity.prototype.enable = function() {
     this.enabled = true;
 
     if (this.children) {
@@ -49,7 +47,7 @@ Entity.prototype.enable = function() {
     }
 };
 
-Entity.prototype.disable = function() {
+Javelin.Entity.prototype.disable = function() {
     this.enabled = false;
     
     if (this.children) {
@@ -66,7 +64,7 @@ Entity.prototype.disable = function() {
 /* Component management */
 
 //explicitly set a component instance
-Entity.prototype.setComponent = function(alias, component) {    
+Javelin.Entity.prototype.setComponent = function(alias, component) {    
     component.$alias = alias;
     component.$id = this.id;
     this.components[alias] = component;
@@ -75,7 +73,7 @@ Entity.prototype.setComponent = function(alias, component) {
 };
 
 //micro optimization to set multiple components without having to call setModified() every time
-Entity.prototype.setComponents = function(arr) {
+Javelin.Entity.prototype.setComponents = function(arr) {
     for (var i in arr) {
         var comp = arr[i];
         comp.$id = this.id;
@@ -85,11 +83,11 @@ Entity.prototype.setComponents = function(arr) {
     this.setModified();
 };
 
-Entity.prototype.getComponent = function(name) {
+Javelin.Entity.prototype.getComponent = function(name) {
     return this.components[name] || false;
 };
 
-Entity.prototype.hasComponent = function(name) {
+Javelin.Entity.prototype.hasComponent = function(name) {
     if (this.components[name]) {
         return true;
     }
@@ -97,7 +95,7 @@ Entity.prototype.hasComponent = function(name) {
     return false;
 };
 
-Entity.prototype.getComponentsInChildren = function(name) {
+Javelin.Entity.prototype.getComponentsInChildren = function(name) {
     var components = [];
     
     for (var i = 0; i < this.children.length; i++) {
@@ -123,27 +121,27 @@ Entity.prototype.getComponentsInChildren = function(name) {
 
 /* tag management */
 
-Entity.prototype.hasTag = function(name) {
+Javelin.Entity.prototype.hasTag = function(name) {
     return (-1 !== this.tags.indexOf(name));
 };
 
-Entity.prototype.addTag = function(name) {
+Javelin.Entity.prototype.addTag = function(name) {
     if (!this.hasTag(name)) {
         this.tags.push(name);
     }
 };
 
-Entity.prototype.removeTag = function(name) {
+Javelin.Entity.prototype.removeTag = function(name) {
     if (this.hasTag(name)) {
         this.tags.splice(this.tags.indexOf(name), 1);
     }
 };
 
-Entity.prototype.getTags = function() {
+Javelin.Entity.prototype.getTags = function() {
     return this.tags;
 };
 
-Entity.prototype.getChildrenByTag = function(name, recursive) {
+Javelin.Entity.prototype.getChildrenByTag = function(name, recursive) {
     var children = [];
     for (var i = 0; i < this.children.length; i++) {
         if (this.children[i].hasTag(name)) {
@@ -166,22 +164,22 @@ Entity.prototype.getChildrenByTag = function(name, recursive) {
 
 /* GO Hierarchy management */
 
-Entity.prototype.isRoot = function() {
+Javelin.Entity.prototype.isRoot = function() {
     return (null === this.root);
 };
 
-Entity.prototype.getRoot = function() {
+Javelin.Entity.prototype.getRoot = function() {
     return (this.isRoot()) ? this : this.root;
 };
 
-Entity.prototype.setRoot = function(go) {
+Javelin.Entity.prototype.setRoot = function(go) {
     this.root = go;
     for (var i in this.children) {
         this.children[i].setRoot(go);
     }
 };
 
-Entity.prototype.addChild = function(child) {
+Javelin.Entity.prototype.addChild = function(child) {
     //don't allow an object to be a child of more
     //that one parent
     if (child.parent) {
@@ -195,46 +193,46 @@ Entity.prototype.addChild = function(child) {
     this.children.push(child);
 };
 
-Entity.prototype.setParent = function(parent) {
+Javelin.Entity.prototype.setParent = function(parent) {
     parent.addChild(this);
 };
 
-Entity.prototype.removeChild = function(child) {
+Javelin.Entity.prototype.removeChild = function(child) {
     child.setModified();
     this.setModified();
     child.parent = null;
     this.children.splice(this.children.indexOf(child), 1);
 };
 
-Entity.prototype.leaveParent = function() {
+Javelin.Entity.prototype.leaveParent = function() {
     if (this.parent) {
         this.parent.removeChild(this);
     }
 };
 
-Entity.prototype.abandonChildren = function() {
+Javelin.Entity.prototype.abandonChildren = function() {
     for (var i = 0; i < this.children.length; i++) {
         this.removeChild(this.children[i]);
     }
 };
 
-Entity.prototype.hasChildren = function() {
+Javelin.Entity.prototype.hasChildren = function() {
     return (this.children.length > 0);
 };
 
-Entity.prototype.hasParent = function() {
+Javelin.Entity.prototype.hasParent = function() {
     return this.parent ? true : false;
 };
 
 
 /* Messaging */
 
-Entity.prototype.on = function(name, listener) {
+Javelin.Entity.prototype.on = function(name, listener) {
     this.dispatcher.on(name, listener);
 };
 
 
-Entity.prototype.emit = function(name, data) {
+Javelin.Entity.prototype.emit = function(name, data) {
     if (this.dispatcher.dispatch(name, data)) {
         if (this.parent) {
             this.parent.emit(name, data);
@@ -245,7 +243,7 @@ Entity.prototype.emit = function(name, data) {
     }
 };
 
-Entity.prototype.broadcast = function(name, data) {
+Javelin.Entity.prototype.broadcast = function(name, data) {
     if (this.dispatcher.dispatch(name, data)) {
         if (this.children) {
             for (var i = 0; i < this.children.length; i++) {
@@ -261,7 +259,7 @@ Entity.prototype.broadcast = function(name, data) {
     return false;
 };
 
-Entity.prototype.getCallbacks = function(eventName, recursive) {
+Javelin.Entity.prototype.getCallbacks = function(eventName, recursive) {
     if (this.modified) {
         this.rebuildCallbackCache();
         this.modified = false;
@@ -270,7 +268,7 @@ Entity.prototype.getCallbacks = function(eventName, recursive) {
     return (recursive) ? this.allCallbackCache[eventName] || [] : this.ownCallbackCache[eventName] || [];
 };
 
-Entity.prototype.rebuildCallbackCache = function() {
+Javelin.Entity.prototype.rebuildCallbackCache = function() {
     var key, i, ownCallbacks = {};
     for (var comp in this.components) {
         for (key in this.components[comp].$callbacks) {
@@ -311,7 +309,7 @@ Entity.prototype.rebuildCallbackCache = function() {
     this.allCallbackCache = allCallbacks;
 };
 
-Entity.prototype.setModified = function() {
+Javelin.Entity.prototype.setModified = function() {
     this.modified = true;
     if (this.parent) {
         this.parent.setModified();
@@ -320,7 +318,7 @@ Entity.prototype.setModified = function() {
 
 /* Data Serialization Helpers */
 
-Entity.prototype.export = function() {
+Javelin.Entity.prototype.export = function() {
     var serialized = {
         name: this.name,
         layer: this.layer,

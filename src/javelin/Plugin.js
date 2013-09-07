@@ -1,29 +1,33 @@
 "use strict";
 
-Javelin.EnginePlugin = function(name, engine) {
+Javelin.Plugin = function(name, engine) {
     this.$name = name;
     this.$engine = engine;
     this.$active = false;
 };
 
-Javelin.EnginePlugin.prototype.$onLoad = function() {};
+Javelin.Plugin.prototype.$onLoad = function() {};
 
-Javelin.EnginePlugin.prototype.$onUnload = function() {};
+Javelin.Plugin.prototype.$onUnload = function() {};
 
 //TODO: implement & test this
-Javelin.EnginePlugin.prototype.$onSceneLoaded = function() {};
+Javelin.Plugin.prototype.$onSceneLoaded = function() {};
 
-Javelin.EnginePlugin.prototype.$onFlush = function() {};
+Javelin.Plugin.prototype.$onRun = function() {};
+
+Javelin.Plugin.prototype.$onStop = function() {};
+
+Javelin.Plugin.prototype.$onFlush = function() {};
 
 /* GameObject Lifecycle */
-Javelin.EnginePlugin.prototype.$onPreUpdateStep = function(deltaTime) {};
+Javelin.Plugin.prototype.$onPreUpdateStep = function(deltaTime) {};
 
-Javelin.EnginePlugin.prototype.$onPostUpdateStep = function(deltaTime) {};
+Javelin.Plugin.prototype.$onPostUpdateStep = function(deltaTime) {};
 
-Javelin.EnginePlugin.prototype.$onGameObjectDestroy = function(gameObject) {};
+Javelin.Plugin.prototype.$onEntityDestroy = function(entity) {};
 
-Javelin.EnginePlugin.prototype.$onGameObjectCreate = function(gameObject) {};
+Javelin.Plugin.prototype.$onEntityCreate = function(entity) {};
 
-Javelin.EnginePlugin.prototype.$onPrefabCreate = function(gameObject) {};
+Javelin.Plugin.prototype.$onPrefabCreate = function(entity) {};
 
-Javelin.EnginePlugin.prototype.$onPrefabDestroy = function(gameObject) {};
+Javelin.Plugin.prototype.$onPrefabDestroy = function(entity) {};
