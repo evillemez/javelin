@@ -5,24 +5,26 @@
  * for adjusting those values.  For example, during an update frame, to easily move an object forward, relative
  * to its rotation, you could get this component and call `transformForward`: 
  * 
- *  gameOjbect.getComponent('transform2d').transformForward(50 * deltaTime);
+ *  entity.get('transform2d').transformForward(50 * deltaTime);
  * 
- * @class Javelin.Component.Transform2d
+ * @class Javelin.this.Transform2d
  * @javelinComponent transform2d
  * @author Evan Villemez
  */
-Javelin.Component.Transform2d = function(gameObject, component) {
+javelin.component('transform2d', function(entity, game) {
+    var self = this;
+
     //private reference to parent transform
     var parentTransform;
     
     /**
      * An object containing the position x and y values.  It can be set directly:
      * 
-     *  gameObject.getComponent('transform2d').position = {x: 50, y: 50};
+     *  entity.get('transform2d').position = {x: 50, y: 50};
      * 
      * @property {Object} X and Y coordinate position values
      */    
-    component.position =  {
+    this.position =  {
         x: 0.0,
         y: 0.0
     };
@@ -30,19 +32,19 @@ Javelin.Component.Transform2d = function(gameObject, component) {
     /**
      * @property {Number} Rotation value in degrees.
      */    
-    component.rotation = 0.0;
+    this.rotation = 0.0;
     
     //absolute world coordinates
-    component.getWorldX = function() {
-        return (parentTransform) ? parentTransform.position.x + component.position.x : component.position.x;
+    this.getWorldX = function() {
+        return (parentTransform) ? parentTransform.position.x + self.position.x : self.position.x;
     };
     
-    component.getWorldY = function() {
-        return (parentTransform) ? parentTransform.position.y + component.position.y : component.position.y;
+    this.getWorldY = function() {
+        return (parentTransform) ? parentTransform.position.y + self.position.y : self.position.y;
     };
     
-    component.getWorldRotation = function() {
-        return (parentTransform) ? parentTransform.rotation + component.rotation : component.rotation;
+    this.getWorldRotation = function() {
+        return (parentTransform) ? parentTransform.rotation + self.rotation : self.rotation;
     };
 
     /**
@@ -51,12 +53,12 @@ Javelin.Component.Transform2d = function(gameObject, component) {
      * @param {Number} X The amount to increment or decrement the position.x value
      * @param {Number} Y The amount to increment or decrement the position.y value
      */    
-    component.translate = function(x, y) {
+    this.translate = function(x, y) {
         x = x || 0.0;
         y = y || 0.0;
         
-        component.position.x += x;
-        component.position.y += y;
+        self.position.x += x;
+        self.position.y += y;
     };
     
     /**
@@ -64,10 +66,10 @@ Javelin.Component.Transform2d = function(gameObject, component) {
      *
      * @param {Number} degrees The number of degrees to rotate the object
      */    
-    component.rotate = function(degrees) {
+    this.rotate = function(degrees) {
         degrees = degrees || 0.0;
         
-        component.rotation = component.rotation + degrees % 360;
+        self.rotation = self.rotation + degrees % 360;
     };
 
     /**
@@ -75,11 +77,11 @@ Javelin.Component.Transform2d = function(gameObject, component) {
      * 
      * @param {Number} amount The amount to move the gameObject
      */    
-    component.translateForward = function(amount) {
-        var radians = component.rotation * Javelin.PI_OVER_180;
+    this.translateForward = function(amount) {
+        var radians = self.rotation * Javelin.PI_OVER_180;
         var x = Math.cos(radians) * amount;
         var y = Math.sin(radians) * amount;
-        component.translate(x, y);
+        self.translate(x, y);
     };
     
     /**
@@ -87,18 +89,18 @@ Javelin.Component.Transform2d = function(gameObject, component) {
      * 
      * @param {Number} amount The amount to move the gameObject
      */    
-    component.translateBackward = function(amount) {
-        var radians = component.rotation * Javelin.PI_OVER_180;
+    this.translateBackward = function(amount) {
+        var radians = self.rotation * Javelin.PI_OVER_180;
         var x = -Math.cos(radians) * amount;
         var y = -Math.sin(radians) * amount;
-        component.translate(x, y);
+        self.translate(x, y);
     };
     
-    component.translateRight = function(amount) {
+    this.translateRight = function(amount) {
         //TODO
     };
     
-    component.translateLeft = function(amount) {
+    this.translateLeft = function(amount) {
         //TODO
     };
     
@@ -107,15 +109,14 @@ Javelin.Component.Transform2d = function(gameObject, component) {
      *
      * @param {Number} degrees The number of degrees to rotate the object
      */    
-    component.rotate = function(degrees) {
+    this.rotate = function(degrees) {
         degrees = degrees || 0.0;
         
-        component.rotation = component.rotation + degrees % 360;
+        self.rotation = self.rotation + degrees % 360;
     };
     
-    component.$on('engine.create', function() {
+    this.$on('engine.create', function() {
         //if there's a parent, cache it's transform
-        parentTransform = (gameObject.parent) ? gameObject.parent.getComponent('transform2d') : false;
+        parentTransform = (entity.parent) ? entity.parent.getComponent('transform2d') : false;
     });
-};
-Javelin.Component.Transform2d.alias = 'transform2d';
+});

@@ -17,7 +17,7 @@
  * @class Javelin.Plugin.Input
  * @author Evan Villemez
  */
-Javelin.Plugin.Input = function (plugin, config) {
+javelin.plugin('input', function (plugin, config) {
 	plugin.config = config;
     plugin.handlers = {};
     plugin.callbacks = {};
@@ -190,8 +190,9 @@ Javelin.Plugin.Input = function (plugin, config) {
     plugin.setAxis = function(name, val) {
         this.input[name] = val;
     };
-};
-Javelin.Plugin.Input.alias = 'input';
+});
+
+
 
 //declare subnamespce for specific input implementations
 Javelin.Plugin.Input.Handler = Javelin.Plugin.Input.Handler || {};

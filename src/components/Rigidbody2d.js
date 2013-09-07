@@ -7,11 +7,12 @@
  * 
  * @author Evan Villemez
  */
-Javelin.Component.Rigidbody2d = function(gameObject, component) {
-    var box2d = gameObject.engine.getPlugin('box2d');
+javelin.component('rigidbody2d', function(entity, game) {
+    var self = this;
+    var box2d = game.getPlugin('box2d');
     //the gameObject's transform
-    var transform = gameObject.getComponent('transform2d');
-    var debug = gameObject.engine.debug;
+    var transform = entity.get('transform2d');
+    var debug = game.debug;
     
     //box2d stuff used internally
     var bodyDef = null;
@@ -20,164 +21,164 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
     var fixture = null;    
     
     //these values are applied to the box2d fixture definition
-    component.trigger = false;
-    component.static = false;
-    component.bullet = false;
-    component.density = 0.5;
-    component.friction = 0.3;
-    component.restitution = 0.4;
-    component.damping = 0.2;
-    component.angularDamping = 0.3;
-    component.fixedRotation = false;
-    component.radius = null;
-    component.shape = null; //array of custom shape points
-    component.height = null;
-    component.width = null;
+    this.trigger = false;
+    this.static = false;
+    this.bullet = false;
+    this.density = 0.5;
+    this.friction = 0.3;
+    this.restitution = 0.4;
+    this.damping = 0.2;
+    this.angularDamping = 0.3;
+    this.fixedRotation = false;
+    this.radius = null;
+    this.shape = null; //array of custom shape points
+    this.height = null;
+    this.width = null;
     
-	component.setPosition = function(x, y) {
+	this.setPosition = function(x, y) {
 		body.SetPosition(new box2d.Vec2(x * box2d.metersPerPixel, y * box2d.metersPerPixel));
 	};
 	
-    component.applyForce = function(degrees, power) {
+    this.applyForce = function(degrees, power) {
         body.ApplyForce(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * power, Math.sin(degrees * Javelin.PI_OVER_180) * power), body.GetWorldCenter());
     };
 
-    component.applyForceForward = function(amount) {
-        component.applyForce(transform.rotation, amount);
+    this.applyForceForward = function(amount) {
+        self.applyForce(transform.rotation, amount);
     };
 
-    component.applyForceBackward = function(amount) {
-        component.applyForce((transform.rotation + 180 % 360), amount);
+    this.applyForceBackward = function(amount) {
+        self.applyForce((transform.rotation + 180 % 360), amount);
     };
 
-    component.applyForceLeft = function(amount) {
-        component.applyForce((transform.rotation - 90 % 360), amount);
+    this.applyForceLeft = function(amount) {
+        self.applyForce((transform.rotation - 90 % 360), amount);
     };
 
-    component.applyForceRight = function(amount) {
-        component.applyForce((transform.rotation + 90 % 360), amount);
+    this.applyForceRight = function(amount) {
+        self.applyForce((transform.rotation + 90 % 360), amount);
     };
 
-    component.applyImpulse = function(degrees, power) {
+    this.applyImpulse = function(degrees, power) {
         body.ApplyImpulse(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * power, Math.sin(degrees * Javelin.PI_OVER_180) * power), body.GetWorldCenter());
     };
 
-    component.applyImpulseForward = function(amount) {
-        component.applyImpulse(transform.rotation, amount);
+    this.applyImpulseForward = function(amount) {
+        self.applyImpulse(transform.rotation, amount);
     };
 
-    component.applyImpulseBackward = function(amount) {
-        component.applyImpulse((transform.rotation + 180 % 360), amount);
+    this.applyImpulseBackward = function(amount) {
+        self.applyImpulse((transform.rotation + 180 % 360), amount);
     };
 
-    component.applyImpulseLeft = function(amount) {
-        component.applyImpulse((transform.rotation - 90 % 360), amount);
+    this.applyImpulseLeft = function(amount) {
+        self.applyImpulse((transform.rotation - 90 % 360), amount);
     };
 
-    component.applyImpulseRight = function(amount) {
-        component.applyImpulse((transform.rotation + 90 % 360), amount);
+    this.applyImpulseRight = function(amount) {
+        self.applyImpulse((transform.rotation + 90 % 360), amount);
     };
     
-    component.applyRotationForce = function(force) {
+    this.applyRotationForce = function(force) {
         body.ApplyTorque(force);
     };
     
-    component.applyRotationImpulse = function(force) {
+    this.applyRotationImpulse = function(force) {
         //TODO - is this available?
     };
 
-    component.setVelocity = function(degrees, amount) {
+    this.setVelocity = function(degrees, amount) {
         body.SetLinearVelocity(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * amount, Math.sin(degrees * Javelin.PI_OVER_180) * amount));
     };
     
-    component.setVelocityForward = function(amount) {
-        component.setVelocity(transform.rotation, amount);
+    this.setVelocityForward = function(amount) {
+        self.setVelocity(transform.rotation, amount);
     };
-    component.setVelocityBackward = function(amount) {
-        component.setVelocity((transform.rotation + 180 % 360), amount);
+    this.setVelocityBackward = function(amount) {
+        self.setVelocity((transform.rotation + 180 % 360), amount);
     };
-    component.setVelocityLeft = function(amount) {
-        component.setVelocity((transform.rotation - 90 % 360), amount);
+    this.setVelocityLeft = function(amount) {
+        self.setVelocity((transform.rotation - 90 % 360), amount);
     };
-    component.setVelocityRight = function(amount) {
-        component.setVelocity((transform.rotation + 90 % 360), amount);
+    this.setVelocityRight = function(amount) {
+        self.setVelocity((transform.rotation + 90 % 360), amount);
     };
     
-    component.getVelocity = function() {
+    this.getVelocity = function() {
         return body.GetLinearVelocity();
     };
 
     //TODO: fill in API
-    component.setAngularVelocity = function() {};
-    component.getAngularVelocity = function() {};
-    component.getInertia = function() {};
-    component.teleport = function() {};
+    this.setAngularVelocity = function() {};
+    this.getAngularVelocity = function() {};
+    this.getInertia = function() {};
+    this.teleport = function() {};
     
-    component.reset = function() {
+    this.reset = function() {
         //take into account potentially modified
         //component values - meaning change the fixture/body
         //reset mass data etc...
     };
     
-    component.createBodyDefinition = function() {
+    this.createBodyDefinition = function() {
         //create body definition
         bodyDef = new box2d.BodyDef();
-        bodyDef.type = (component.static) ? box2d.Body.b2_staticBody : box2d.Body.b2_dynamicBody;
+        bodyDef.type = (self.static) ? box2d.Body.b2_staticBody : box2d.Body.b2_dynamicBody;
         bodyDef.position.x = transform.position.y * box2d.metersPerPixel;
         bodyDef.position.y = transform.position.y * box2d.metersPerPixel;
         bodyDef.angle = transform.rotation;
-        bodyDef.linearDamping = component.damping;
-        bodyDef.angularDamping = component.angularDamping;
-        bodyDef.fixedRotation = component.fixedRotation;
-        bodyDef.bullet = component.bullet;
+        bodyDef.linearDamping = self.damping;
+        bodyDef.angularDamping = self.angularDamping;
+        bodyDef.fixedRotation = self.fixedRotation;
+        bodyDef.bullet = self.bullet;
         bodyDef.userData = gameObject;
         
         return bodyDef;
     };
     
-    component.createFixtureDefinition = function() {
+    this.createFixtureDefinition = function() {
         //create fixture definition
         fixtureDef = new box2d.FixtureDef();
-        fixtureDef.density = component.density;
-        fixtureDef.restitution = component.restitution;
-        fixtureDef.friction = component.friction;
-        if (component.trigger) {
+        fixtureDef.density = self.density;
+        fixtureDef.restitution = self.restitution;
+        fixtureDef.friction = self.friction;
+        if (self.trigger) {
             fixtureDef.isSensor = true;
         }
-//        fixtureDef.mass = component.mass;
+//        fixtureDef.mass = this.mass;
 
         //set the fixture's shape - oooh boy.
-        fixtureDef.shape = component.createFixtureShape();
+        fixtureDef.shape = self.createFixtureShape();
         
         return fixtureDef;
     };
     
     //this mostly taken from gritsgame source - thanks!
-    component.createFixtureShape = function() {
+    this.createFixtureShape = function() {
         //TODO: take into account scaling, or just not allow?
         var shape;
         
-        if (component.radius) {
-            shape = new box2d.CircleShape(component.radius * box2d.metersPerPixel);
+        if (self.radius) {
+            shape = new box2d.CircleShape(self.radius * box2d.metersPerPixel);
             return shape;
-        } else if (component.shape) {
-            var points = component.shape;
+        } else if (self.shape) {
+            var points = self.shape;
             var vecs = [];
             for (var i = 0; i < points.length; i++) {
-              var vec = new box2d.Vec2();
-              vec.Set(points[i].x * box2d.metersPerPixel, points[i].y * box2d.metersPerPixel);
-              vecs[i] = vec;
+                var vec = new box2d.Vec2();
+                vec.Set(points[i].x * box2d.metersPerPixel, points[i].y * box2d.metersPerPixel);
+                vecs[i] = vec;
             }
             shape = new box2d.PolygonShape();
             shape.SetAsArray(vecs, vecs.length);
             return shape;
         } else {
-            if (component.height && component.width) {
+            if (self.height && self.width) {
                 shape = new box2d.PolygonShape();
-                shape.SetAsBox(component.width * 0.5 * box2d.metersPerPixel, component.height * 0.5 * box2d.metersPerPixel);
+                shape.SetAsBox(self.width * 0.5 * box2d.metersPerPixel, self.height * 0.5 * box2d.metersPerPixel);
                 return shape;
-            } else if (gameObject.hasComponent('sprite')) {
-                var img = gameObject.getComponent('sprite').image;
+            } else if (entity.hasComponent('sprite')) {
+                var img = entity.getComponent('sprite').image;
                 if (img) {
                     shape = new box2d.PolygonShape();
                     shape.SetAsBox(img.width * 0.5 * box2d.metersPerPixel, img.height * 0.5 * box2d.metersPerPixel);
@@ -191,50 +192,50 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         }
     };
     
-    component.setBody = function(newBody) {
+    this.setBody = function(newBody) {
         body = newBody;
     };
     
-    component.getBody = function() {
+    this.getBody = function() {
         return body;
     };
     
-    component.setFixture = function(newFixture) {
+    this.setFixture = function(newFixture) {
         fixture = newFixture;
     };
     
-    component.getFixture = function() {
+    this.getFixture = function() {
         return fixture;
     };
     
-    component.updateLocation = function() {
+    this.updateLocation = function() {
         var pos = body.GetPosition();
         transform.position.x = pos.x * box2d.pixelsPerMeter;
         transform.position.y = pos.y * box2d.pixelsPerMeter;
-        if (!component.fixedRotation) {
+        if (!self.fixedRotation) {
             transform.rotation = body.GetAngle();
         }
     };
     
-    component.$on('engine.create', function() {
+    this.$on('engine.create', function() {
         //get references to stuff
-        transform = gameObject.getComponent('transform2d');
-        box2d = gameObject.engine.getPlugin('box2d');
+        transform = entity.getComponent('transform2d');
+        box2d = game.getPlugin('box2d');
         body.SetPosition(new box2d.Vec2(transform.position.x * box2d.metersPerPixel, transform.position.y * box2d.metersPerPixel));
         body.SetAngle(transform.rotation);
         body.ResetMassData();
     });
     
-    component.$on('box2d.lateUpdate', function(deltaTime) {
-        component.updateLocation();
+    this.$on('box2d.lateUpdate', function(deltaTime) {
+        self.updateLocation();
     });
     
     if (debug) {
-        component.$on('canvas2d.draw', function(context, camera) {
+        this.$on('canvas2d.draw', function(context, camera) {
             context.save();
             context.translate(transform.position.x, transform.position.y);
             context.rotate(transform.rotation * Javelin.PI_OVER_180);
-            context.strokeStyle = component.trigger ? '#FF0' : '#0F0';
+            context.strokeStyle = self.trigger ? '#FF0' : '#0F0';
 
             //draw center of transform
             context.beginPath();
@@ -243,8 +244,8 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
             context.stroke();
 
             //draw sprite image bounding box
-            if (component.image) {
-                var img = component.image;
+            if (self.image) {
+                var img = self.image;
                 var topLeftX = 0 - (img.width * 0.5);
                 var topLeftY = 0 - (img.height * 0.5);
                 var height = img.height;
@@ -253,19 +254,19 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
                 context.strokeRect(topLeftX, topLeftY, width, height);
             }
             
-            if (component.radius) {
+            if (self.radius) {
                 context.beginPath();
-                context.arc(0, 0, component.radius, 0, 2 * Math.PI, true);
+                context.arc(0, 0, self.radius, 0, 2 * Math.PI, true);
                 context.closePath();
                 context.stroke();
-            } else if (component.height && component.width) {
+            } else if (self.height && self.width) {
                 context.strokeRect(
-                    -component.width * 0.5,
-                    -component.height * 0.5,
-                    component.width,
-                    component.height
+                    -self.width * 0.5,
+                    -self.height * 0.5,
+                    self.width,
+                    self.height
                 );
-            } else if (component.shape) {
+            } else if (self.shape) {
                 //TODO
             }
             
@@ -273,6 +274,4 @@ Javelin.Component.Rigidbody2d = function(gameObject, component) {
         });
     }
     
-};
-Javelin.Component.Rigidbody2d.alias = 'rigidbody2d';
-Javelin.Component.Rigidbody2d.requires = ['transform2d'];
+}, ['transform2d']);

@@ -8,13 +8,19 @@ module.exports = function(grunt) {
         
         //this is for convenience, used in other configs
         files: {
-            lint: ['Gruntfile.js', 'src/**/*.js', '!src/vendor/**/*.js', 'tests/**/*.js'],
+            lint: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js'],
             test: ['tests/**/*.js'],
             fixtures: ['tests/fixtures/**/*.js'],
             
-            //note: src/vendor DOES need to be included in the build, but not until I can make it work
-            //and pass the tests properly
-            build: ['util/build_intro.js', "src/javelin/**/*.js", 'util/build_outro.js']
+            build: [
+                'util/build_intro.js',
+                'src/javelin/**/*.js',
+                'util/build_outro.js',
+                'src/components/**/*.js',
+                'src/environments/**/*.js',
+                'src/loaders/**/*.js',
+                'src/plugins/**/*.js'
+            ]
         },
         watch: {
             all: {

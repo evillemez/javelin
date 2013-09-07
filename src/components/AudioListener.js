@@ -1,11 +1,10 @@
 'use strict';
 
-Javelin.Component.AudioListener = function(gameObject, component) {
-    component.range = 100;
-    component.dropoff = 50;
+javelin.component('audioListener', function(entity, game) {
+    this.range = 100;
+    this.dropoff = 50;
     
-    component.getAudioNode = function() {};
+    this.getAudioNode = function() {};
     //TODO: filters
-};
-Javelin.Component.AudioListener.alias = 'audioListener';
-Javelin.Component.AudioListener.requires = ['transform2d'];
+    
+}, ['transform2d']);

@@ -1,24 +1,25 @@
 'use strict';
 
 /**
- * The `sprite` component will let you associate an image asset with a gameObject.  The `image` property can be
+ * The `sprite` component will let you associate an image asset with a entity.  The `image` property can be
  * either an `Image` instance, or an instance of `Javelin.Asset.AtlasImage`.  Images can also specify a scale.
  *
- * @class Javelin.Component.Sprite
+ * @class Javelin.this.Sprite
  * @javelinComponent sprite
  * @author Evan Villemez
  */
-Javelin.Component.Sprite = function(gameObject, component) {
-    
-    component.imagePath = null;
-    component.atlasPath = null;
+javelin.component('sprite2d', function(entity, game) {
+    var self = this;
+
+    this.imagePath = null;
+    this.atlasPath = null;
     
     //can be Image or Javelin.Asset.AtlasImage
-    component.image = null;
-    component.visible = true;
+    this.image = null;
+    this.visible = true;
 
     //how much to scale the image in x and y directions
-    component.scale = {
+    this.scale = {
         x: 1.0,
         y: 1.0
     };
@@ -26,25 +27,25 @@ Javelin.Component.Sprite = function(gameObject, component) {
     var debug = false;
     var transform = null;
     
-    component.$on('engine.create', function() {
-        if (gameObject.engine && gameObject.engine.debug) {
+    this.$on('engine.create', function() {
+        if (game && game.debug) {
             debug = true;
         }
         
-        transform = gameObject.getComponent('transform2d');
+        transform = entity.get('transform2d');
         
         //load image if specified
-        if (component.imagePath) {
-            gameObject.disable();
-            if (component.atlasPath) {
-                gameObject.engine.loadAsset(component.atlasPath, function(atlas) {
-                    component.image = atlas.images[component.imagePath];
-                    gameObject.enable();
+        if (self.imagePath) {
+            entity.disable();
+            if (self.atlasPath) {
+                game.loadAsset(self.atlasPath, function(atlas) {
+                    self.image = atlas.images[self.imagePath];
+                    entity.enable();
                 });
             } else {
-                gameObject.engine.loadAsset(component.imagePath, function(image) {
-                    component.image = image;
-                    gameObject.enable();
+                game.loadAsset(self.imagePath, function(image) {
+                    self.image = image;
+                    entity.enable();
                 });
             }
         }
@@ -52,8 +53,8 @@ Javelin.Component.Sprite = function(gameObject, component) {
     
     //actually draw the designated image on the canvas - the image could either be a regular image, or
     //an instance of Javelin.Asset.AtlasImage
-    component.$on('canvas2d.draw', function(context, camera) {
-        if (component.image) {
+    this.$on('canvas2d.draw', function(context, camera) {
+        if (self.image) {
             var pos = transform.position;
             var rot = transform.getWorldRotation();
         
@@ -69,10 +70,10 @@ Javelin.Component.Sprite = function(gameObject, component) {
             //convert degrees to radians and rotate the canvas
             context.rotate(rot * Javelin.PI_OVER_180);
 
-            var scale = component.scale;
+            var scale = self.scale;
 
-            if (component.image instanceof Javelin.Asset.AtlasImage) {
-                var spr = component.image;
+            if (self.image instanceof Javelin.Asset.AtlasImage) {
+                var spr = self.image;
 
                 //draw the image fo' reals
                 context.drawImage(
@@ -92,15 +93,15 @@ Javelin.Component.Sprite = function(gameObject, component) {
                 //TODO: would be good to do this
                 //once when it loads - or when set
                 //in the sprite component
-                cx = component.image.height * 0.5;
-                cy = component.image.width * 0.5;
+                cx = self.image.height * 0.5;
+                cy = self.image.width * 0.5;
                 
-                var h = component.image.height * component.scale.y;
-                var w = component.image.width * component.scale.x;
+                var h = self.image.height * self.scale.y;
+                var w = self.image.width * self.scale.x;
                 context.drawImage(
-                    component.image,
-                    -cx * component.scale.x,
-                    -cy * component.scale.y,
+                    self.image,
+                    -cx * self.scale.x,
+                    -cy * self.scale.y,
                     w,
                     h
                 );
@@ -117,8 +118,8 @@ Javelin.Component.Sprite = function(gameObject, component) {
                 context.stroke();
     
                 //draw sprite image bounding box
-                if (component.image) {
-                    var img = component.image;
+                if (self.image) {
+                    var img = self.image;
                     var topLeftX = 0 - (img.width * 0.5) * scale.x;
                     var topLeftY = 0 - (img.height * 0.5) * scale.y;
                     var height = img.height * scale.x;
@@ -132,6 +133,4 @@ Javelin.Component.Sprite = function(gameObject, component) {
         }
     });
     
-};
-Javelin.Component.Sprite.alias = "sprite";
-Javelin.Component.Sprite.requires = ['transform2d'];
+}, ['transform2d']);

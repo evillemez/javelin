@@ -2,7 +2,8 @@
 
 'use strict';
 
-Javelin.Plugin.Box2d = function(plugin, config) {
+javelin.plugin('box2d', function(config, game) {
+    var self = this;
     //internal config w/ defaults
     var velocityIterations = config.velocityIterations || 10;
     var positionIterations = config.positionIterations || 10;
@@ -14,37 +15,37 @@ Javelin.Plugin.Box2d = function(plugin, config) {
     var gravityY = config.gravityY || 0.0;
     var lastTimeStepped = Date.now();
     var allowSleep = config.allowSleep || false;
-	
-	plugin.pixelsPerMeter = config.pixelsPerMeter || 50;
-	plugin.metersPerPixel = 1 / plugin.pixelsPerMeter;
+    
+    this.pixelsPerMeter = config.pixelsPerMeter || 50;
+    this.metersPerPixel = 1 / this.pixelsPerMeter;
     
     if (Box2D) {
         //assign shortcut references to Box2D stuff
-        plugin.Vec2 = Box2D.Common.Math.b2Vec2;
-        plugin.BodyDef =  Box2D.Dynamics.b2BodyDef;
-        plugin.Body =  Box2D.Dynamics.b2Body;
-        plugin.FixtureDef =  Box2D.Dynamics.b2FixtureDef;
-        plugin.Fixture =  Box2D.Dynamics.b2Fixture;
-        plugin.World =  Box2D.Dynamics.b2World;
-        plugin.MassData = Box2D.Collision.Shapes.b2MassData;
-        plugin.PolygonShape =  Box2D.Collision.Shapes.b2PolygonShape;
-        plugin.CircleShape = Box2D.Collision.Shapes.b2CircleShape;
-        plugin.DebugDraw =  Box2D.Dynamics.b2DebugDraw;
-        plugin.RevoluteJointDef =  Box2D.Dynamics.Joints.b2RevoluteJointDef;
+        this.Vec2 = Box2D.Common.Math.b2Vec2;
+        this.BodyDef =  Box2D.Dynamics.b2BodyDef;
+        this.Body =  Box2D.Dynamics.b2Body;
+        this.FixtureDef =  Box2D.Dynamics.b2FixtureDef;
+        this.Fixture =  Box2D.Dynamics.b2Fixture;
+        this.World =  Box2D.Dynamics.b2World;
+        this.MassData = Box2D.Collision.Shapes.b2MassData;
+        this.PolygonShape =  Box2D.Collision.Shapes.b2PolygonShape;
+        this.CircleShape = Box2D.Collision.Shapes.b2CircleShape;
+        this.DebugDraw =  Box2D.Dynamics.b2DebugDraw;
+        this.RevoluteJointDef =  Box2D.Dynamics.Joints.b2RevoluteJointDef;
 
-        plugin.worldInstance = null;
-        plugin.bodies = {};
+        this.worldInstance = null;
+        this.bodies = {};
 
         //TODO: explosion/implosion forces
-        plugin.applyRadialForce = function(x, y, impulse, radius, implode, callback) {
-            var center = new plugin.Vec2(x, y);
-            var aa = new plugin.Vec2(x - radius, y - radius);
-            var bb = new plugin.Vec2(x + radius, y + radius);
+        this.applyRadialForce = function(x, y, impulse, radius, implode, callback) {
+            var center = new this.Vec2(x, y);
+            var aa = new this.Vec2(x - radius, y - radius);
+            var bb = new this.Vec2(x + radius, y + radius);
             var aabb = new Box2D.Collision.b2AABB();
             aabb.upperBound = bb;
             aabb.lowerBound = aa;
             
-            plugin.worldInstance.QueryAABB(function(fixture) {
+            self.worldInstance.QueryAABB(function(fixture) {
                 var body = fixture.GetBody();
                 var go = body.GetUserData();
                 var targetPos = body.GetPosition();
@@ -72,7 +73,7 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 } else {
                     angle = Math.atan2(targetPos.y - center.y, targetPos.x - center.x);
                 }
-                body.ApplyImpulse(new plugin.Vec2(Math.cos(angle) * force, Math.sin(angle) * force), body.GetPosition());
+                body.ApplyImpulse(new this.Vec2(Math.cos(angle) * force, Math.sin(angle) * force), body.GetPosition());
 
                 if (callback) {
                     callback(go);
@@ -83,14 +84,14 @@ Javelin.Plugin.Box2d = function(plugin, config) {
             }, aabb);
         };
 
-        plugin.raycast = function() {
+        this.raycast = function() {
             
         };
 
-        plugin.$onLoad = function() {
+        this.$onLoad = function() {
             //setup world
-            plugin.worldInstance = null;
-            plugin.worldInstance = new plugin.World(new plugin.Vec2(gravityX, gravityY), allowSleep);
+            self.worldInstance = null;
+            self.worldInstance = new self.World(new self.Vec2(gravityX, gravityY), allowSleep);
             
             
             //setup contact listener
@@ -103,8 +104,8 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 var goB = contact.GetFixtureB().GetBody().GetUserData();
                 var isTrigger = (goA.getComponent('rigidbody2d').trigger || goB.getComponent('rigidbody2d').trigger);
                 var event = (isTrigger) ? 'box2d.trigger.enter' : 'box2d.collision.enter';
-                plugin.callGoCallbacks(event, goA, goB, contact);
-                plugin.callGoCallbacks(event, goB, goA, contact);
+                self.callGoCallbacks(event, goA, goB, contact);
+                self.callGoCallbacks(event, goB, goA, contact);
             };
 
             contactListener.EndContact = function(contact) {
@@ -112,23 +113,23 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 var goB = contact.GetFixtureB().GetBody().GetUserData();
                 var isTrigger = (goA.getComponent('rigidbody2d').trigger || goB.getComponent('rigidbody2d').trigger);
                 var event = (isTrigger) ? 'box2d.trigger.exit' : 'box2d.collision.exit';
-                plugin.callGoCallbacks(event, goA, goB, contact);
-                plugin.callGoCallbacks(event, goB, goA, contact);
+                self.callGoCallbacks(event, goA, goB, contact);
+                self.callGoCallbacks(event, goB, goA, contact);
             };
 
             contactListener.PostSolve = function(contact, manifold) {
                 //do anything?
             };
             
-            plugin.worldInstance.SetContactListener(contactListener);
+            self.worldInstance.SetContactListener(contactListener);
             
-            if (plugin.$engine && plugin.$engine.debug) {
+            if (self.$engine && self.$engine.debug) {
                 var debugDraw = new Box2D.Dynamics.b2DebugDraw();
-                debugDraw.SetSprite(plugin.$engine.getPlugin('canvas2d').context);
+                debugDraw.SetSprite(self.$engine.getPlugin('canvas2d').context);
             }
         };
         
-        plugin.callGoCallbacks = function(name, goA, goB, contact) {
+        this.callGoCallbacks = function(name, goA, goB, contact) {
             var cbs = goA.getCallbacks(name);
             if (cbs.length) {
                 for (var i in cbs) {
@@ -137,9 +138,9 @@ Javelin.Plugin.Box2d = function(plugin, config) {
             }
         };
         
-        plugin.$onPostUpdateStep = function(deltaTime) {
+        this.$onPostUpdateStep = function(deltaTime) {
             var i, j, cbs;
-            var gos = plugin.$engine.gos;
+            var gos = self.$engine.gos;
             for (i in gos) {
                 if (gos[i].enabled) {
                     cbs = gos[i].getCallbacks('box2d.update');
@@ -151,11 +152,11 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 }
             }
             
-            if (plugin.$engine.time - lastTimeStepped >= stepsPerSecond) {
-                plugin.worldInstance.Step(stepHZ, velocityIterations, positionIterations);
+            if (self.$engine.time - lastTimeStepped >= stepsPerSecond) {
+                self.worldInstance.Step(stepHZ, velocityIterations, positionIterations);
                 
                 if (clearForces) {
-                    plugin.worldInstance.ClearForces();
+                    self.worldInstance.ClearForces();
                 }
                 
                 lastTimeStepped = Date.now();
@@ -173,11 +174,11 @@ Javelin.Plugin.Box2d = function(plugin, config) {
             }
         };
         
-        plugin.$onGameObjectCreate = function(gameObject) {
+        this.$onGameObjectCreate = function(gameObject) {
             var rigidbody = gameObject.getComponent('rigidbody2d');
             if (rigidbody) {
                 var bodyDef = rigidbody.createBodyDefinition();
-                var body = plugin.worldInstance.CreateBody(bodyDef);
+                var body = self.worldInstance.CreateBody(bodyDef);
                 var fixtureDef = rigidbody.createFixtureDefinition();
 
                 //TODO: set collision layer stuff on the fixtureDef.filter                
@@ -187,19 +188,18 @@ Javelin.Plugin.Box2d = function(plugin, config) {
                 rigidbody.setBody(body);
                                 
                 //storing references to all bodies (for now)
-                plugin.bodies[gameObject.id] = body;
+                self.bodies[gameObject.id] = body;
             }
         };
         
-        plugin.$onGameObjectDestroy = function(gameObject) {
+        this.$onGameObjectDestroy = function(gameObject) {
             var rigidbody = gameObject.getComponent('rigidbody2d');
             if (rigidbody) {
-                plugin.worldInstance.DestroyBody(rigidbody.getBody());
+                self.worldInstance.DestroyBody(rigidbody.getBody());
             }
             
             //remove reference to body
-            plugin.bodies[gameObject.id] = null;
+            self.bodies[gameObject.id] = null;
         };
     }
-};
-Javelin.Plugin.Box2d.alias = 'box2d';
+});

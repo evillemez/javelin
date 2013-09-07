@@ -1,25 +1,25 @@
-/*global Javelin:true */
-
 'use strict';
 
 /**
  * Canvas2d draws sprite components for 2d scenes.
  */
-Javelin.Plugin.Canvas2d = function(plugin, config) {
-    plugin.config = config;
+javelin.plugin('canvas2d', function(config, engine) {
+    var self = this;
+
+    this.config = config;
     
-    plugin.renderTarget = null;
-    plugin.cameras = {};
-    plugin.contexts = {};
-    plugin.canvases = {};
+    this.renderTarget = null;
+    this.cameras = {};
+    this.contexts = {};
+    this.canvases = {};
     
-    plugin.$onLoad = function() {
+    this.$onLoad = function() {
         if (document) {
             
-            plugin.fps = plugin.config.framesPerSecond || plugin.$engine.stepsPerSecond;
-            plugin.lastTimeRendered = 0.0;        
-            var target = document.getElementById(plugin.config.renderTargetId);
-            plugin.renderTarget = target;
+            self.fps = self.config.framesPerSecond || engine.stepsPerSecond;
+            self.lastTimeRendered = 0.0;        
+            var target = document.getElementById(self.config.renderTargetId);
+            self.renderTarget = target;
             var top = target.offsetTop;
             var left = target.offsetLeft;
             
@@ -27,24 +27,24 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                 throw new Error("No render target defined!");
             }
             
-            if (!plugin.config.layers) {
-                plugin.config.layers = ['default'];
+            if (!self.config.layers) {
+                self.config.layers = ['default'];
             }
             
             //create and stack canvas layers
             var z = 0;
-            for (var i in plugin.config.layers) {
+            for (var i in self.config.layers) {
                 z++;
-                var layer = plugin.config.layers[i];
+                var layer = self.config.layers[i];
                 var canvas = document.createElement('canvas');
-                canvas.height = plugin.config.height;
-                canvas.width = plugin.config.width;
+                canvas.height = self.config.height;
+                canvas.width = self.config.width;
                 canvas.style.zIndex = z;
                 canvas.id = 'javelin-layer-' + layer;
                 
-                plugin.canvases[layer] = canvas;
-                plugin.contexts[layer] = canvas.getContext('2d');
-                plugin.cameras[layer] = {
+                self.canvases[layer] = canvas;
+                self.contexts[layer] = canvas.getContext('2d');
+                self.cameras[layer] = {
                     x: 0,
                     y: 0,
                     height: 0,
@@ -54,34 +54,34 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                 target.appendChild(canvas);
             }
         } else {
-            plugin.$active = false;
+            self.$active = false;
         }
     };
     
-    plugin.$onUnload = function() {
-        for (var i in plugin.canvases) {
-            plugin.renderTarget.removeChild(plugin.canvases[i]);
+    this.$onUnload = function() {
+        for (var i in self.canvases) {
+            self.renderTarget.removeChild(self.canvases[i]);
         }
     };
     
-    plugin.$onPostUpdateStep = function(deltaTime) {
-        if (plugin.$engine.time - plugin.lastTimeRendered >= plugin.fps && !plugin.$engine.isRunningSlowly) {
+    this.$onPostUpdateStep = function(deltaTime) {
+        if (engine.time - self.lastTimeRendered >= self.fps && !engine.isRunningSlowly) {
             var i, j, ctx, canvas, camera;
             
             //clear all canvases
-            for (i in plugin.canvases) {
-                plugin.contexts[i].clearRect(0, 0, plugin.canvases[i].width, plugin.canvases[i].height);
+            for (i in self.canvases) {
+                self.contexts[i].clearRect(0, 0, self.canvases[i].width, self.canvases[i].height);
             }
 
             //execute `canvas2d.draw` callbacks on all root game objects (by layer)
             //NOTE: right now, the layer of the root game object filters to children
-            var gos = plugin.$engine.gos;
+            var gos = engine.gos;
             var l = gos.length;
             for (i = 0; i < l; i++) {
                 if (gos[i].enabled && gos[i].isRoot()) {
                     //get layer
-                    ctx = plugin.contexts[gos[i].layer];
-                    camera = plugin.cameras[gos[i].layer];
+                    ctx = self.contexts[gos[i].layer];
+                    camera = self.cameras[gos[i].layer];
                     //check for a draw callbacks to run
                     var cbs = gos[i].getCallbacks('canvas2d.draw', true);
                     for (j in cbs) {
@@ -90,8 +90,7 @@ Javelin.Plugin.Canvas2d = function(plugin, config) {
                 }
             }
             
-            plugin.lastTimeRendered = plugin.$engine.time;
+            self.lastTimeRendered = engine.time;
         }
     };
-};
-Javelin.Plugin.Canvas2d.alias = "canvas2d";
+});
