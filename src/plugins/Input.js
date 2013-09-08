@@ -28,7 +28,7 @@ javelin.plugin('input', function (plugin, config) {
         
 		//setup keyboard controls
         if (plugin.config.keyboard) {
-            var kb = plugin.handlers['keyboard'] = new Javelin.Plugin.Input.Handler.Keyboard(plugin, plugin.config.keyboard);
+            var kb = plugin.handlers['keyboard'] = new Javelin.KeyboardInput(plugin, plugin.config.keyboard);
             if ('undefined' !== typeof window) {
                 kb.registerListeners();
             }

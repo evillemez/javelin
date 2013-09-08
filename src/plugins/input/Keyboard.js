@@ -6,7 +6,7 @@
  * 
  * @author Evan Villemez
  */
-Javelin.Plugin.Input.Handler.Keyboard = function(plugin, config) {
+Javelin.KeyboardInput = function(plugin, config) {
     this.raw = {};
     this.plugin = plugin;
     this.MAP = {
@@ -66,17 +66,17 @@ Javelin.Plugin.Input.Handler.Keyboard = function(plugin, config) {
         
 };
 
-Javelin.Plugin.Input.Handler.Keyboard.prototype.registerListeners = function() {
+Javelin.KeyboardInput.prototype.registerListeners = function() {
     window.addEventListener('keyup', this.keyUpListener);
     window.addEventListener('keydown', this.keyDownListener);    
 };
 
-Javelin.Plugin.Input.Handler.Keyboard.prototype.unregisterListeners = function() {
+Javelin.KeyboardInput.prototype.unregisterListeners = function() {
     window.removeEventListener('keyup', this.keyUpListener);
     window.removeEventListener('keydown', this.keyDownListener);
 };
 
-Javelin.Plugin.Input.Handler.Keyboard.prototype.processInputEvents = function(currTime, lastTime, deltaTime) {
+Javelin.KeyboardInput.prototype.processInputEvents = function(currTime, lastTime, deltaTime) {
 
     for (var code in this.raw) {
         var raw = this.raw[code];
@@ -103,7 +103,7 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.processInputEvents = function(cu
 };
 
 
-Javelin.Plugin.Input.Handler.Keyboard.prototype.processConfig = function(config) {
+Javelin.KeyboardInput.prototype.processConfig = function(config) {
     this.config = config;
     this.raw = {};
     
@@ -137,7 +137,7 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.processConfig = function(config)
     }
 };
 
-Javelin.Plugin.Input.Handler.Keyboard.prototype.getKeyId = function(event) {
+Javelin.KeyboardInput.prototype.getKeyId = function(event) {
     var codes = [];
     if (event.keyCode) {
         codes.push(event.keyCode);
@@ -158,7 +158,7 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.getKeyId = function(event) {
     return codes;
 };
 
-Javelin.Plugin.Input.Handler.Keyboard.prototype.handleKeyDown = function(event) {
+Javelin.KeyboardInput.prototype.handleKeyDown = function(event) {
     var codes = this.getKeyId(event);
     for (var i in codes) {
         if (this.raw[codes[i]]) {
@@ -172,7 +172,7 @@ Javelin.Plugin.Input.Handler.Keyboard.prototype.handleKeyDown = function(event) 
     }
 };
 
-Javelin.Plugin.Input.Handler.Keyboard.prototype.handleKeyUp = function(event) {
+Javelin.KeyboardInput.prototype.handleKeyUp = function(event) {
     var codes = this.getKeyId(event);
     for (var i in codes) {
         if (this.raw[codes[i]]) {

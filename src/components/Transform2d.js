@@ -7,8 +7,7 @@
  * 
  *  entity.get('transform2d').transformForward(50 * deltaTime);
  * 
- * @class Javelin.this.Transform2d
- * @javelinComponent transform2d
+ * @javelin-component transform2d
  * @author Evan Villemez
  */
 javelin.component('transform2d', function(entity, game) {
