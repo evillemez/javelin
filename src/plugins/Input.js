@@ -12,23 +12,24 @@
 /**
  * This plugin processes and stores user input.  It uses separate handlers to listen for 
  * and process the raw input values.  These handlers are loaded and unloaded automatically
- * based on the configuration passed to the plugin.
+ * based on the configuration passed to the this.
  * 
- * @class Javelin.Plugin.Input
+ * @class Javelin.this.Input
  * @author Evan Villemez
  */
-javelin.plugin('input', function (plugin, config) {
-	plugin.config = config;
-    plugin.handlers = {};
-    plugin.callbacks = {};
-    plugin.input = {};
+javelin.plugin('input', function (config, game) {
+    var self = this;
+	this.config = config;
+    this.handlers = {};
+    this.callbacks = {};
+    this.input = {};
 	
     //process config and setup relevant listeners
-	plugin.$onLoad = function() {
+	this.$onLoad = function() {
         
 		//setup keyboard controls
-        if (plugin.config.keyboard) {
-            var kb = plugin.handlers['keyboard'] = new Javelin.KeyboardInput(plugin, plugin.config.keyboard);
+        if (self.config.keyboard) {
+            var kb = self.handlers.keyboard = new Javelin.KeyboardInput(plugin, self.config.keyboard);
             if ('undefined' !== typeof window) {
                 kb.registerListeners();
             }
@@ -39,58 +40,58 @@ javelin.plugin('input', function (plugin, config) {
         //TODO: setup touch controls
 	};
     
-    plugin.$onUnload = function() {
-        if (plugin.handlers['keyboard']) {
-            plugin.handlers['keyboard'].unregisterListeners();
+    this.$onUnload = function() {
+        if (self.handlers['keyboard']) {
+            self.handlers['keyboard'].unregisterListeners();
         }
     };
 	
-	plugin.$onPreUpdateStep = function(deltaTime) {
+	this.$onPreUpdateStep = function(deltaTime) {
         var i, j, currTime, lastTime;
         
-        currTime = plugin.$engine.time;
-        lastTime = plugin.$engine.prevTime;
+        currTime = self.$engine.time;
+        lastTime = self.$engine.prevTime;
         
 		//all configured handlers process their own input
-        for (i in plugin.handlers) {
-            plugin.handlers[i].processInputEvents(currTime, lastTime, deltaTime);
+        for (i in self.handlers) {
+            self.handlers[i].processInputEvents(currTime, lastTime, deltaTime);
         }
         
         //call any registered `input.resolve` callbacks
-        for (i in plugin.callbacks) {
-            if (plugin.callbacks[i]) {
-                for (j in plugin.callbacks[i]) {
-                    plugin.callbacks[i][j](plugin);
+        for (i in self.callbacks) {
+            if (self.callbacks[i]) {
+                for (j in self.callbacks[i]) {
+                    self.callbacks[i][j](plugin);
                 }
             }
-        }
+        }self
 	};
     
-    plugin.$onPostUpdateStep = function(deltaTime) {
+    this.$onPostUpdateStep = function(deltaTime) {
         //TODO: clear anything?
     };
     
-    plugin.$onGameObjectCreate = function(gameObject) {
+    this.$onGameObjectCreate = function(gameObject) {
         var cbs = gameObject.getCallbacks('input.resolve');
         if (cbs.length) {
-            plugin.callbacks[gameObject.id] = cbs;
+            self.callbacks[gameObject.id] = cbs;
         }
     };
     
-    plugin.$onGameObjectDestroy = function(gameObject) {
-        if (plugin.callbacks[gameObject.id]) {
-            plugin.callbacks[gameObject.id] = null;
+    this.$onGameObjectDestroy = function(gameObject) {
+        if (self.callbacks[gameObject.id]) {
+            self.callbacks[gameObject.id] = null;
         }
     };
 
     //generic GET by name - will internally decide which input to call, so you need
     //to already know what type of value will be returned
-    plugin.getInput = function (name) {
-        if (!this.input[name]) {
+    this.getInput = function (name) {
+        if (!self.input[name]) {
             throw new Error("Requested input [" + name + "] is not defined.");
         }
 
-        return this.input[name] || false;
+        return self.input[name] || false;
     };
     
     /**
@@ -99,12 +100,12 @@ javelin.plugin('input', function (plugin, config) {
      * @param {String} name The name of the control to get
      * @returns {Number} A number in the range of 0 to 1
      */    
-	plugin.getButton = function(name) {
-        if (!this.input[name]) {
+	this.getButton = function(name) {
+        if (!self.input[name]) {
             throw new Error("Requested input [" + name + "] is not defined.");
         }
 
-        return this.input[name].val || 0;
+        return self.input[name].val || 0;
 	};
 	
     /**
@@ -113,12 +114,12 @@ javelin.plugin('input', function (plugin, config) {
      * @param {String} name The name of the control to get
      * @returns {Boolean}
      */    
-	plugin.getButtonDown = function(name) {
-        if (!this.input[name]) {
+	this.getButtonDown = function(name) {
+        if (!self.input[name]) {
             throw new Error("Requested input [" + name + "] is not defined.");
         }
 
-        return this.input[name].down || false;
+        return self.input[name].down || false;
 	};
 	
     /**
@@ -127,12 +128,12 @@ javelin.plugin('input', function (plugin, config) {
      * @param {String} name The name of the control to get
      * @returns {Boolean}
      */    
-	plugin.getButtonUp = function(name) {
-        if (!this.input[name]) {
+	this.getButtonUp = function(name) {
+        if (!self.input[name]) {
             throw new Error("Requested input [" + name + "] is not defined.");
         }
 
-        return this.input[name].up || false;
+        return self.input[name].up || false;
 	};
 	
     /**
@@ -141,61 +142,56 @@ javelin.plugin('input', function (plugin, config) {
      * @param {String} name The name of the control to get
      * @returns {Number} A number in the range of -1 to 1
      */    
-	plugin.getAxis = function(name) {
-        if (!this.input[name]) {
+	this.getAxis = function(name) {
+        if (!self.input[name]) {
             throw new Error("Requested input [" + name + "] is not defined.");
         }
 
-        return this.input[name] || 0;
+        return self.input[name] || 0;
 	};
 	
-    plugin.getMousePosition = function() {
+    this.getMousePosition = function() {
         //if not present will return null values
     };
     
-    plugin.getMouseButton = function(index) {};
+    this.getMouseButton = function(index) {};
     
-    plugin.getMouseButtonUp = function(index) {};
+    this.getMouseButtonUp = function(index) {};
     
-    plugin.getMouseButtonDown = function(index) {};
+    this.getMouseButtonDown = function(index) {};
     
-    plugin.getTouch = function (index) {};
-    plugin.getTouches = function () {};
-    //plugin.getGesture(); abstract common gestures or something?
+    this.getTouch = function (index) {};
+    this.getTouches = function () {};
+    //this.getGesture(); abstract common gestures or something?
     
-    plugin.getHandler = function(key) {
-        return this.handlers[key] || false;
+    this.getHandler = function(key) {
+        return self.handlers[key] || false;
     };
     
-    plugin.defineButton = function(name) {
-        this.input[name] = {
+    this.defineButton = function(name) {
+        self.input[name] = {
             up: false,
             down: false,
             val: 0
         };
     };
     
-    plugin.setButton = function(name, val) {
-        this.input[name].val = val;
+    this.setButton = function(name, val) {
+        self.input[name].val = val;
     };
     
-    plugin.setButtonUp = function(name, val) {
-        this.input[name].up = val;
+    this.setButtonUp = function(name, val) {
+        self.input[name].up = val;
     };
     
-    plugin.setButtonDown = function(name, val) {
-        this.input[name].down = val;
+    this.setButtonDown = function(name, val) {
+        self.input[name].down = val;
     };
     
-    plugin.setAxis = function(name, val) {
-        this.input[name] = val;
+    this.setAxis = function(name, val) {
+        self.input[name] = val;
     };
 });
-
-
-
-//declare subnamespce for specific input implementations
-Javelin.Plugin.Input.Handler = Javelin.Plugin.Input.Handler || {};
 
 /* 
 
