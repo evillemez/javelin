@@ -1,6 +1,7 @@
 'use strict';
 
-javelin.component('audioEmitter', function(entity, game) {
+Javelin.Components.AudioEmitter2d = function(entity, game) {
+    var self = this;
     var audio = null,
         transform = null, 
         outputNode = null;
@@ -27,7 +28,7 @@ javelin.component('audioEmitter', function(entity, game) {
         if (!activeLoops[path]) {
             activeLoops[path] = true;
             //start playing a sound and loop it
-            audio.playSound(path, component, transform, true, cull);
+            audio.playSound(path, self, transform, true, cull);
         }
     };
     
@@ -41,7 +42,7 @@ javelin.component('audioEmitter', function(entity, game) {
         cull = cull || false;
 
         //play sound once, no loop
-        audio.playSound(path, component, transform, false, cull);
+        audio.playSound(path, self, transform, false, cull);
     };
     
     /**
@@ -70,4 +71,4 @@ javelin.component('audioEmitter', function(entity, game) {
     this.$on('engine.destroy', function() {
         audio.clearActive(entity.id);
     });
-}, ['transform2d']);
+};

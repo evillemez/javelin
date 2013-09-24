@@ -6,7 +6,7 @@
  * the "json(hash)" format
  */
 
-javelin.loader('.atlas.json', ['browser', 'server'], function(loader, relPath, absPath, done) {
+Javelin.Loaders.BrowserAtlasLoader = function(loader, relPath, absPath, done) {
     var json, img, imgPath;
     var rp = relPath;
     imgPath = rp.substring(0, rp.lastIndexOf("/"));
@@ -30,7 +30,10 @@ javelin.loader('.atlas.json', ['browser', 'server'], function(loader, relPath, a
 
     //start by loading the json, will trigger series of callbacks
     loader.loadAssetAsType(relPath, 'json', loadJsonCallback);
-});
+};
+
+
+//TODO: these should maybe be moved elsewhere - perhaps a new /src/assets directory
 
 function TexturePackerAtlas(json, image) {
     this.image = image;

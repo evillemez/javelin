@@ -8,7 +8,7 @@
  * @javelinComponent sprite
  * @author Evan Villemez
  */
-javelin.component('sprite2d', function(entity, game) {
+Javelin.Components.Sprite2d = function(entity, game) {
     var self = this;
 
     this.imagePath = null;
@@ -133,4 +133,4 @@ javelin.component('sprite2d', function(entity, game) {
         }
     });
     
-}, ['transform2d']);
+};

@@ -318,7 +318,7 @@ Javelin.Entity.prototype.setModified = function() {
 
 /* Data Serialization Helpers */
 
-Javelin.Entity.prototype.export = function() {
+Javelin.Entity.prototype.serialize = function() {
     var serialized = {
         name: this.name,
         layer: this.layer,
@@ -333,7 +333,7 @@ Javelin.Entity.prototype.export = function() {
     if (this.children.length > 0) {
         serialized.children = [];
         for (var index in this.children) {
-            serialized.children.push(this.children[index].export());
+            serialized.children.push(this.children[index].serialize());
         }
     }
     

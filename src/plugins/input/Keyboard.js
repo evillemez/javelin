@@ -98,6 +98,7 @@ Javelin.KeyboardInput.prototype.processInputEvents = function(currTime, lastTime
             
         } else {
             //TODO: process axis
+            Javelin.noop();
         }
     }
 };
@@ -129,10 +130,11 @@ Javelin.KeyboardInput.prototype.processConfig = function(config) {
         }
     }
     
-    //axes
+    //axes 
     if (config.axes) {
         for (control in config.axes) {
             //TODO:
+            Javelin.noop();
         }
     }
 };

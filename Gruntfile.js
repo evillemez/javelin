@@ -9,17 +9,23 @@ module.exports = function(grunt) {
         //this is for convenience, used in other configs
         files: {
             lint: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js'],
-            test: ['tests/**/*.js'],
-            fixtures: ['tests/fixtures/**/*.js'],
-            
+            test: ['tests/**/*.js'],            
             build: [
-                'util/build_intro.js',
-                'src/javelin/**/*.js',
-                'util/build_outro.js',
+                'util/javelin.prefix',
+                'src/javelin/Javelin.js',
+                'src/javelin/Registry.js',
+                'src/javelin/Engine.js',
+                'src/javelin/Plugin.js',
+                'src/javelin/AssetLoader.js',
+                'src/javelin/Dispatcher.js',
+                'src/javelin/Environment.js',
+                'src/javelin/Component.js',
+                'src/javelin/Entity.js',
                 'src/components/**/*.js',
                 'src/environments/**/*.js',
                 'src/loaders/**/*.js',
-                'src/plugins/**/*.js'
+                'src/plugins/**/*.js',
+                'util/javelin.suffix'
             ]
         },
         watch: {
@@ -31,14 +37,6 @@ module.exports = function(grunt) {
                 }
             }
         },
-        jsdoc : {
-            dist : {
-                src: ['src/**/*.js'], 
-                options: {
-                    destination: 'doc'
-                }
-            }
-        },
         jshint: {
             options: {
                 jshintrc: '.jshintrc'
@@ -47,7 +45,6 @@ module.exports = function(grunt) {
         },
         simplemocha: {
             options: {
-                globals: ['_', 'should', 'it', 'define','require','describe','Javelin', 'THREE', 'window', 'self', 'before','after','beforeEach','afterEach'],
                 timeout: 3000,
                 ignoreLeaks: false,
                 ui: 'bdd',
@@ -67,14 +64,18 @@ module.exports = function(grunt) {
             }
         },
         uglify: {
-            //not entirely sure whether or not I can use mangle... will have to experiment
             options: {
-                mangle: false
+                mangle: true
             },
             my_target: {
                 files: {
                     'build/javelin.min.js': ['build/javelin.js']
                 }
+            }
+        },
+        javelindocs: {
+            options: {
+                target: 'build/docs/'
             }
         }
     });
@@ -85,9 +86,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-simple-mocha');
-    grunt.loadNpmTasks('grunt-jsdoc');
     
     // Default task
     grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'simplemocha']);
     grunt.registerTask('build', ['jshint', 'concat', 'uglify']);
+    grunt.registerTask('docs', ['default']);
 };

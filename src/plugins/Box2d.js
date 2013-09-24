@@ -2,7 +2,7 @@
 
 'use strict';
 
-javelin.plugin('box2d', function(config, game) {
+Javelin.Plugins.Box2d = function(config, game) {
     var self = this;
     //internal config w/ defaults
     var velocityIterations = config.velocityIterations || 10;
@@ -202,4 +202,4 @@ javelin.plugin('box2d', function(config, game) {
             self.bodies[gameObject.id] = null;
         };
     }
-});
+};

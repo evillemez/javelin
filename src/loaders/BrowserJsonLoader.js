@@ -1,6 +1,6 @@
 'use strict';
 
-javelin.loader('.json', ['browser'], function(loader, relPath, absPath, done) {
+Javelin.Loaders.BrowserJsonLoader = function(loader, relPath, absPath, done) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", absPath, true);
     xhr.onload = function() {
@@ -9,4 +9,4 @@ javelin.loader('.json', ['browser'], function(loader, relPath, absPath, done) {
         done(json);
     };
     xhr.send();
-});
+};

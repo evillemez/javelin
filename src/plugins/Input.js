@@ -17,19 +17,19 @@
  * @class Javelin.this.Input
  * @author Evan Villemez
  */
-javelin.plugin('input', function (config, game) {
+Javelin.Plugins.Input = function (config, game) {
     var self = this;
-	this.config = config;
+    this.config = config;
     this.handlers = {};
     this.callbacks = {};
     this.input = {};
-	
+    
     //process config and setup relevant listeners
-	this.$onLoad = function() {
+    this.$onLoad = function() {
         
-		//setup keyboard controls
+        //setup keyboard controls
         if (self.config.keyboard) {
-            var kb = self.handlers.keyboard = new Javelin.KeyboardInput(plugin, self.config.keyboard);
+            var kb = self.handlers.keyboard = new Javelin.KeyboardInput(self, self.config.keyboard);
             if ('undefined' !== typeof window) {
                 kb.registerListeners();
             }
@@ -38,21 +38,21 @@ javelin.plugin('input', function (config, game) {
         //TODO: setup mouse controls
         //TODO: setup gamepad controls        
         //TODO: setup touch controls
-	};
+    };
     
     this.$onUnload = function() {
-        if (self.handlers['keyboard']) {
-            self.handlers['keyboard'].unregisterListeners();
+        if (self.handlers.keyboard) {
+            self.handlers.keyboard.unregisterListeners();
         }
     };
-	
-	this.$onPreUpdateStep = function(deltaTime) {
+    
+    this.$onPreUpdateStep = function(deltaTime) {
         var i, j, currTime, lastTime;
         
         currTime = self.$engine.time;
         lastTime = self.$engine.prevTime;
         
-		//all configured handlers process their own input
+        //all configured handlers process their own input
         for (i in self.handlers) {
             self.handlers[i].processInputEvents(currTime, lastTime, deltaTime);
         }
@@ -61,11 +61,11 @@ javelin.plugin('input', function (config, game) {
         for (i in self.callbacks) {
             if (self.callbacks[i]) {
                 for (j in self.callbacks[i]) {
-                    self.callbacks[i][j](plugin);
+                    self.callbacks[i][j](self);
                 }
             }
-        }self
-	};
+        }
+    };
     
     this.$onPostUpdateStep = function(deltaTime) {
         //TODO: clear anything?
@@ -100,56 +100,56 @@ javelin.plugin('input', function (config, game) {
      * @param {String} name The name of the control to get
      * @returns {Number} A number in the range of 0 to 1
      */    
-	this.getButton = function(name) {
+    this.getButton = function(name) {
         if (!self.input[name]) {
             throw new Error("Requested input [" + name + "] is not defined.");
         }
 
         return self.input[name].val || 0;
-	};
-	
+    };
+    
     /**
      * Get whether or not a button was pressed down during the last frame.
      * 
      * @param {String} name The name of the control to get
      * @returns {Boolean}
      */    
-	this.getButtonDown = function(name) {
+    this.getButtonDown = function(name) {
         if (!self.input[name]) {
             throw new Error("Requested input [" + name + "] is not defined.");
         }
 
         return self.input[name].down || false;
-	};
-	
+    };
+    
     /**
      * Get whether or not a button was released during the last frame.
      * 
      * @param {String} name The name of the control to get
      * @returns {Boolean}
      */    
-	this.getButtonUp = function(name) {
+    this.getButtonUp = function(name) {
         if (!self.input[name]) {
             throw new Error("Requested input [" + name + "] is not defined.");
         }
 
         return self.input[name].up || false;
-	};
-	
+    };
+    
     /**
      * Get the value for an axis control, will be between -1 and 1
      * 
      * @param {String} name The name of the control to get
      * @returns {Number} A number in the range of -1 to 1
      */    
-	this.getAxis = function(name) {
+    this.getAxis = function(name) {
         if (!self.input[name]) {
             throw new Error("Requested input [" + name + "] is not defined.");
         }
 
         return self.input[name] || 0;
-	};
-	
+    };
+    
     this.getMousePosition = function() {
         //if not present will return null values
     };
@@ -191,7 +191,7 @@ javelin.plugin('input', function (config, game) {
     this.setAxis = function(name, val) {
         self.input[name] = val;
     };
-});
+};
 
 /* 
 
@@ -199,14 +199,14 @@ javelin.plugin('input', function (config, game) {
 
 var config = {
     //joystick, same as gamepad?
-	joystick: {},
+    joystick: {},
     //how best to map 'input' to hammer.js gestures?
     touch: {
         input: {
             'move left': 'swipe left'
         }
     },
-	mouse: {
+    mouse: {
         captureTarget: 'game',
         requireCapture: true,   //will request mouse-lock on browsers that support it
         buttons: {
@@ -214,33 +214,33 @@ var config = {
             'alt-fire': 1
         }
     },
-	keyboard: {
-		buttons: {
-			'fire': 'space'
-		},
-		axes: {
-			'move-horiz': {
-				positive: 'd',
-				negative: 'a',
-				snap: true,
-				ramp: 2
-			},
-			'move-vert': {
-				positive: 'w',
-				negative: 's',
-				snap: true,
-				ramp: 2
-			}
-		}
-	},
-	gamepad: {
-		buttons: {
-			'fire': 'A'
-		},
-		axes: {
-			'move-horiz': {},
-			'move-vert': {}
-		}
-	},
+    keyboard: {
+        buttons: {
+            'fire': 'space'
+        },
+        axes: {
+            'move-horiz': {
+                positive: 'd',
+                negative: 'a',
+                snap: true,
+                ramp: 2
+            },
+            'move-vert': {
+                positive: 'w',
+                negative: 's',
+                snap: true,
+                ramp: 2
+            }
+        }
+    },
+    gamepad: {
+        buttons: {
+            'fire': 'A'
+        },
+        axes: {
+            'move-horiz': {},
+            'move-vert': {}
+        }
+    },
 };
 */

@@ -3,7 +3,7 @@
 /**
  * Canvas2d draws sprite components for 2d scenes.
  */
-javelin.plugin('canvas2d', function(config, engine) {
+Javelin.Plugins.Canvas2d = function(config, engine) {
     var self = this;
 
     this.config = config;
@@ -93,4 +93,4 @@ javelin.plugin('canvas2d', function(config, engine) {
             self.lastTimeRendered = engine.time;
         }
     };
-});
+};

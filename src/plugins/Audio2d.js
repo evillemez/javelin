@@ -3,7 +3,7 @@
 'use strict';
 
 //TODO: spatial audio w/ filters and what not is not implemented
-javelin.plugin('audio', function(config, game) {
+Javelin.Plugins.Audio2d = function(config, game) {
     var self = this;
 
     var loader = game.loader;
@@ -191,8 +191,8 @@ javelin.plugin('audio', function(config, game) {
             //calculate some node values for each active sound
             for (var id in self.active) {
                 for (var path in self.active[id]) {
-                    //calculate volumes and set
-                    
+                    //TODO: calculate volumes and set
+                    Javelin.noop();
                 }
             }
             
@@ -200,4 +200,4 @@ javelin.plugin('audio', function(config, game) {
             //`audio.resolve` callbacks from components
         }
     };
-});
+};

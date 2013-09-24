@@ -1,9 +1,12 @@
 
     if (typeof module !== 'undefined') {
         // export for node
-        module.exports = Javelin.getRegistryInstance();
+        module.exports = Javelin;
     } else {
         // assign to window
-        this.javelin = new Javelin.Registry();
+        this.Javelin = Javelin;
+
+        //create singleton instance
+        this.javelin = Javelin.getInstance();
     }
 }).apply(this);

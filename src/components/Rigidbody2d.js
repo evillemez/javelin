@@ -7,10 +7,10 @@
  * 
  * @author Evan Villemez
  */
-javelin.component('rigidbody2d', function(entity, game) {
+Javelin.Components.Rigidbody2d = function(entity, game) {
     var self = this;
     var box2d = game.getPlugin('box2d');
-    //the gameObject's transform
+    //the entity's transform
     var transform = entity.get('transform2d');
     var debug = game.debug;
     
@@ -22,7 +22,7 @@ javelin.component('rigidbody2d', function(entity, game) {
     
     //these values are applied to the box2d fixture definition
     this.trigger = false;
-    this.static = false;
+    this.dynamic = true;
     this.bullet = false;
     this.density = 0.5;
     this.friction = 0.3;
@@ -40,7 +40,7 @@ javelin.component('rigidbody2d', function(entity, game) {
 	};
 	
     this.applyForce = function(degrees, power) {
-        body.ApplyForce(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * power, Math.sin(degrees * Javelin.PI_OVER_180) * power), body.GetWorldCenter());
+        body.ApplyForce(new box2d.Vec2(Math.cos(degrees * Javelin.$PI_OVER_180) * power, Math.sin(degrees * Javelin.$PI_OVER_180) * power), body.GetWorldCenter());
     };
 
     this.applyForceForward = function(amount) {
@@ -60,7 +60,7 @@ javelin.component('rigidbody2d', function(entity, game) {
     };
 
     this.applyImpulse = function(degrees, power) {
-        body.ApplyImpulse(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * power, Math.sin(degrees * Javelin.PI_OVER_180) * power), body.GetWorldCenter());
+        body.ApplyImpulse(new box2d.Vec2(Math.cos(degrees * Javelin.$PI_OVER_180) * power, Math.sin(degrees * Javelin.$PI_OVER_180) * power), body.GetWorldCenter());
     };
 
     this.applyImpulseForward = function(amount) {
@@ -88,7 +88,7 @@ javelin.component('rigidbody2d', function(entity, game) {
     };
 
     this.setVelocity = function(degrees, amount) {
-        body.SetLinearVelocity(new box2d.Vec2(Math.cos(degrees * Javelin.PI_OVER_180) * amount, Math.sin(degrees * Javelin.PI_OVER_180) * amount));
+        body.SetLinearVelocity(new box2d.Vec2(Math.cos(degrees * Javelin.$PI_OVER_180) * amount, Math.sin(degrees * Javelin.$PI_OVER_180) * amount));
     };
     
     this.setVelocityForward = function(amount) {
@@ -123,7 +123,7 @@ javelin.component('rigidbody2d', function(entity, game) {
     this.createBodyDefinition = function() {
         //create body definition
         bodyDef = new box2d.BodyDef();
-        bodyDef.type = (self.static) ? box2d.Body.b2_staticBody : box2d.Body.b2_dynamicBody;
+        bodyDef.type = (self.dynamic) ? box2d.Body.b2_dynamicBody : box2d.Body.b2_staticBody;
         bodyDef.position.x = transform.position.y * box2d.metersPerPixel;
         bodyDef.position.y = transform.position.y * box2d.metersPerPixel;
         bodyDef.angle = transform.rotation;
@@ -131,7 +131,7 @@ javelin.component('rigidbody2d', function(entity, game) {
         bodyDef.angularDamping = self.angularDamping;
         bodyDef.fixedRotation = self.fixedRotation;
         bodyDef.bullet = self.bullet;
-        bodyDef.userData = gameObject;
+        bodyDef.userData = entity;
         
         return bodyDef;
     };
@@ -234,7 +234,7 @@ javelin.component('rigidbody2d', function(entity, game) {
         this.$on('canvas2d.draw', function(context, camera) {
             context.save();
             context.translate(transform.position.x, transform.position.y);
-            context.rotate(transform.rotation * Javelin.PI_OVER_180);
+            context.rotate(transform.rotation * Javelin.$PI_OVER_180);
             context.strokeStyle = self.trigger ? '#FF0' : '#0F0';
 
             //draw center of transform
@@ -268,10 +268,11 @@ javelin.component('rigidbody2d', function(entity, game) {
                 );
             } else if (self.shape) {
                 //TODO
+                Javelin.noop();
             }
             
             context.restore();
         });
     }
     
-}, ['transform2d']);
+};

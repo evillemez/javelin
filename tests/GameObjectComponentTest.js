@@ -1,5 +1,5 @@
 'use strict';
-
+/*
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
@@ -114,3 +114,4 @@ describe("GameObjectComponent", function() {
     });
     
 });
+*/

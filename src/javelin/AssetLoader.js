@@ -3,13 +3,6 @@
 /**
  * The AssetLoader returns objects based on string filepaths.  The object is loaded
  * by a function mapped to the file extension.
- *
- * Note: This implementation is likely to drastically change - it kinda sucks as it is, and is going
- * to get increasingly messy.
- * 
- * Ultimately, how an asset is loaded should be determined by the "environment".  So, a lot of this
- * functinoality will probably move or be implemented differently.  However, the API for actual
- * games creaters is probably correct, so that should stay as it is.
  */
 Javelin.AssetLoader = function(basePath, loaders) {
     this.assets = {};

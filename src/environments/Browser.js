@@ -6,7 +6,7 @@ manner.
 
 'use strict';
 
-javelin.environment('browser', function(config, engine) {
+Javelin.Environments.Browser = function(config, engine) {
     var self = this;
     this.intervalId = null;
 
@@ -30,6 +30,4 @@ javelin.environment('browser', function(config, engine) {
         setTimeout(callback, 1);
     };
 
-}, {
-    //default config
-});
+};

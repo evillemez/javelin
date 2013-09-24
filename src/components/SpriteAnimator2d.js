@@ -7,7 +7,7 @@
  *
  * @author Evan Villemez
  */
-javelin.component('spriteAnimator', function(entity, game) {
+Javelin.Components.SpriteAnimator2d = function(entity, game) {
     var self = this;
 
     this.animations = null;
@@ -145,4 +145,4 @@ javelin.component('spriteAnimator', function(entity, game) {
             }
         }
     });
-}, ['sprite2d']);
+};

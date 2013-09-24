@@ -1,6 +1,5 @@
 {
     "globals"       : {
-        "javelin": true,
         "Javelin": true,
         "should": true,
         "it": true,
@@ -34,11 +33,8 @@
     "plusplus"      : false,
     "quotmark"      : false,
                             
-                            
-                            
-                            
     "undef"         : true, 
-    "unused"        : true, 
+    "unused"        : false, 
     "strict"        : true, 
     "trailing"      : false,
     "maxparams"     : false,
@@ -62,7 +58,7 @@
     "lastsemic"     : false,
     "laxbreak"      : false,
     "laxcomma"      : true,
-    "loopfunc"      : false,
+    "loopfunc"      : true,
     "multistr"      : false,
     "proto"         : false,
     "scripturl"     : false,

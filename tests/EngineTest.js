@@ -1,6 +1,6 @@
 
 'use strict';
-
+/*
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
@@ -382,3 +382,4 @@ describe("Javelin Engine", function() {
         assert.isFalse(data.foo);
     });
 });
+*/
