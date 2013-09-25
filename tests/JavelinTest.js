@@ -52,7 +52,7 @@ describe("Javelin", function () {
         assert.isTrue(Javelin.isObject({}));
     });
 
-    it("should instantiate the singleton registry properly", function() {
+    it("should instantiate a singleton registry", function() {
         var javelin = Javelin.createNewInstance();
 
         assert.isTrue(javelin instanceof Javelin.Registry);
