@@ -114,7 +114,7 @@ Javelin.Registry.prototype.loader = function(formats, environments, handler) {
     for (var env in environments) {
         var e = environments[env];
         if (!Javelin.isObject(this.loaders[e])) {
-            //this.loaders[e] = {};
+            this.loaders[e] = {};
         }
 
         for (var i in formats) {
@@ -144,7 +144,7 @@ Javelin.Registry.prototype.getEnvironment = function(name) {
     return this.environments[name] || false;
 };
 
-Javelin.Registry.prototype.getLoader = function(environment, format) {
+Javelin.Registry.prototype.getLoader = function(format, environment) {
     return this.loaders[environment][format] || false;
 };
 
