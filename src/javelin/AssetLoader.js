@@ -7,9 +7,12 @@
 Javelin.AssetLoader = function(basePath, loaders) {
     this.assets = {};
     this.baseAssetPath = basePath;
-    
-    //TODO: implement sortLoaders
     this.loaders = this.sortLoaders(loaders);
+};
+
+Javelin.AssetLoader.prototype.sortLoaders = function(loaders) {
+    //TODO: implement for real
+    return loaders;
 };
 
 /**

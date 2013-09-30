@@ -9,10 +9,9 @@ need to be overridden in some cases.
 
 'use strict';
 
-Javelin.Environment = function(name, game) {
+Javelin.Environment = function(name, loader) {
     this.name = name;
-    this.game = game;
-    this.loader = null;
+    this.loader = loader;
 };
 
 Javelin.Environment.prototype.initialize = function() {};
@@ -33,4 +32,12 @@ Javelin.Environment.prototype.getLoader = function() {
 
 Javelin.Environment.prototype.setLoader = function(loader) {
     this.loader = loader;
+};
+
+Javelin.Environment.prototype.loadAsset = function(path, callback) {
+    return this.loader.loadAsset(path, callback);
+};
+
+Javelin.Environment.prototype.loadAssets = function(paths, callback) {
+    return this.loader.loadAsset(paths, callback);
 };

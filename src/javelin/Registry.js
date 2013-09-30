@@ -42,6 +42,7 @@ Javelin.Registry.prototype.prefab = function(name, obj) {
         throw new Error("Prefabs must be object literals.");
     }
 
+    obj.prefab = name;
     this.prefabs[name] = obj;
 };
 
@@ -124,85 +125,121 @@ Javelin.Registry.prototype.loader = function(formats, environments, handler) {
 };
 
 Javelin.Registry.prototype.getPrefab = function(name) {
-    return this.prefabs[name] || false;
+    if (!this.prefabs[name]) {
+        throw new Error("Unknown prefab ["+name+"] requested.");
+    }
+
+    return this.prefabs[name];
 };
 
 
 Javelin.Registry.prototype.getScene = function(name) {
-    return this.scenes[name] || false;
+    if (!this.scenes[name]) {
+        throw new Error("Unkown scene ["+name+"] requested.");
+    }
+
+    return this.scenes[name];
 };
 
 Javelin.Registry.prototype.getComponent = function(name) {
-    return this.components[name] || false;
+    if (!this.components[name]) {
+        throw new Error("Unknown component ["+name+"] requested.");
+    }
+
+    return this.components[name];
 };
 
 Javelin.Registry.prototype.getPlugin = function(name) {
-    return this.plugins[name] || false;
+    if (!this.plugins[name]) {
+        throw new Error("Unknown plugin ["+name+"] requested.");
+    }
+
+    return this.plugins[name];
 };
 
 Javelin.Registry.prototype.getEnvironment = function(name) {
-    return this.environments[name] || false;
+    if (!this.environments[name]) {
+        throw new Error("Unknown environment ["+name+"] requested.");
+    }
+
+    return this.environments[name];
 };
 
 Javelin.Registry.prototype.getLoader = function(format, environment) {
-    return this.loaders[environment][format] || false;
+    if (!this.loaders[environment][format]) {
+        throw new Error("Unknown asset loader ["+format+"] requested for environment ["+environment+"].");
+    }
+
+    return this.loaders[environment][format];
 };
 
 Javelin.Registry.prototype.getLoaders = function(environment) {
     if (environment) {
+        if (!this.environments[environment] && !this.loaders[environment]) {
+            throw new Error("Asset loaders requested for unknown environment ["+environment+"].");
+        }
+        
         return this.loaders[environment] || {};
     }
 
     return this.loaders;
 };
 
-Javelin.Registry.prototype.instantiateLoader = function(environment) {
-    // body...
+Javelin.Registry.prototype.createLoader = function(environment) {
+    return new Javelin.AssetLoader(environment, this.getLoaders(environment));
 };
 
-Javelin.Registry.prototype.instantiateEnvironment = function(environment) {
-    // body...
+Javelin.Registry.prototype.createEnvironment = function(environment, configuration) {
+    var def = this.getEnvironment(environment);
+    var env = new Javelin.Environment(environment, this.createLoader(environment));
+    var config = configuration || def.defaults;
+
+    def.handler.call(env, config);
+
+    return env;
 };
 
-Javelin.Registry.prototype.game = function(environment, config) {
-    //TODO: return engine instance for environment
+Javelin.Registry.prototype.createGame = function(environment, config) {
+    var envConfig = (config.environments && config.environments[environment]) ? config.environments[environment] : null;
+
+    return new Javelin.Engine(this, this.createEnvironment(environment, envConfig), config);
 };
 
-//TODO: refactor
-Javelin.Registry.prototype.computeComponentRequirements = function(handler) {
-    var reqs = [];
-    
-    var getRequirements = function(alias) {
-        var handler = Javelin.getComponentHandler(alias);
-        if (!handler) {
-            throw new Error("Missing component for requirement ["+alias+"]!");
-        }
-        if (handler.requires) {
-            for (var i = 0; i < handler.requires.length; i++) {
-                var exists = false;
-                for (var j = 0; j < reqs.length; j++) {
-                    if (reqs[j].alias === handler.requires[i]) {
-                        exists = true;
-                    }
-                }
+Javelin.Registry.prototype.computeComponentRequirements = function() {
+    var self = this;
 
-                if (!exists) {
-                    getRequirements(handler.requires[i]);
-                    reqs.push(Javelin.getComponentHandler(handler.requires[i]));
+    //internal function recursively computes requirements
+    var computeRequirements = function(name, requirements) {
+        var reqs = requirements || [];
+
+        var def = self.getComponent(name);
+
+        if (def.requirements.length) {
+            for (var i = 0; i < def.requirements.length; i++) {
+                if (-1 === reqs.indexOf(def.requirements[i])) {
+                    computeRequirements(def.requirements[i], reqs);
+                    reqs.push(def.requirements[i]);
                 }
             }
         }
+
+        return reqs;
     };
     
-    getRequirements(handler.alias);
-    
-    this.__componentRequirements[handler.alias] = reqs;
+    //assign computed requirements for every registered component
+    for (var name in this.components) {
+        var def = this.components[name];
+        def.computedRequirements = computeRequirements(name);
+    }
+
 };
 
 //converts string references inside prefab definitions to
 //in-memory objects, so no extra logic is required during
 //actual instantiation
-Javelin.Registry.prototype.unpackPrefabDefinitions = function() {
+Javelin.Registry.prototype.unpackPrefabs = function() {
+    var self = this;
+
     var unpackPrefab = function(prefab) {
         if (prefab.children) {
             var unpackedChildren = [];
@@ -210,8 +247,8 @@ Javelin.Registry.prototype.unpackPrefabDefinitions = function() {
                 var child = prefab.children[i];
 
                 if (Javelin.isString(child)) {
-                    unpackPrefab(Javelin.getPrefab(child));
-                    unpackedChildren.push(Javelin.getPrefab(child));
+                    unpackPrefab(self.getPrefab(child));
+                    unpackedChildren.push(self.getPrefab(child));
                 } else {
                     unpackPrefab(child);
                     unpackedChildren.push(child);
@@ -219,25 +256,16 @@ Javelin.Registry.prototype.unpackPrefabDefinitions = function() {
             }
 
             prefab.children = unpackedChildren;
-            Javelin.registerPrefab(prefab);
         }
     };
     
-    for (var alias in Javelin.__prefabs) {
-        unpackPrefab(Javelin.getPrefab(alias));
+    for (var name in this.prefabs) {
+        unpackPrefab(this.getPrefab(name));
     }
 };
 
 //unpacks prefabs, and resolves component requirements
 Javelin.Registry.prototype.optimize = function() {
-    
-    //resolve component hierarchies/dependencies
-    for (var alias in this.components) {
-                
-        //build requirements
-        Javelin.buildComponentRequirements(Javelin.__componentHandlers[alias]);
-    }
-    
-    //expand all prefab definitions for quick instantiation
-    Javelin.unpackPrefabDefinitions();
+    this.computeComponentRequirements();
+    this.unpackPrefabs();
 };

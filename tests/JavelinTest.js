@@ -60,7 +60,4 @@ describe("Javelin", function () {
         assert.isFalse(javelin === Javelin.createNewInstance());
     });
 
-    it.skip("should automatically register included components", function() {
-
-    });
 });

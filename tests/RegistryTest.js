@@ -147,12 +147,93 @@ describe("Javelin Registry", function() {
         assert.isFunction(loader);
     });
 
-    it("should instantiate asset loaders");
+    it("should instantiate asset loaders", function() {
+        javelin.loader(['.mp3'], ['browser'], function() { return 'loaded a file'; });
+        var loader = javelin.createLoader('browser');
+        assert.isTrue (loader instanceof Javelin.AssetLoader);
+        loader.loadAsset('foo.mp3', function(result) {
+            assert.strictEqual(result, 'loaded a file');
+        });
+    });
 
-    it("should instantiate environments");
+    it("should instantiate environments", function() {
+        javelin.environment('browser', function(config) {
+            this.foo = config.foo;
+            this.bar = config.bar;
+        }, {
+            foo: 'foo',
+            bar: 'bar'
+        });
 
-    it("should instantiate game instances");
+        var env = javelin.createEnvironment('browser');
+        assert.isTrue(env instanceof Javelin.Environment);
+        assert.strictEqual(env.foo, 'foo');
+        assert.strictEqual(env.bar, 'bar');
+        assert.isTrue(env.loader instanceof Javelin.AssetLoader);
+    });
+
+    it("should instantiate game instances", function() {
+        javelin.environment('browser', function(config) {
+            this.foo = config.foo || false;
+            this.bar = config.bar || false;
+        });
+
+        var gameConfig = {
+            environments: {
+                browser: {
+                    foo: 'foo',
+                    bar: 'bar'                
+                }
+            }
+        };
+
+        var game = javelin.createGame('browser', gameConfig);
+
+        assert.isTrue(game instanceof Javelin.Engine);
+        assert.isTrue(game.loader instanceof Javelin.AssetLoader);
+        assert.isTrue(game.environment instanceof Javelin.Environment);
+        assert.strictEqual(game.environment.foo, 'foo');
+        assert.strictEqual(game.config, gameConfig);
+    });
     
-    it("should properly assemble component requirements on optimize()");
-    it("should properly unpack prefab definitions upon optimize()");
+    it("should properly compute component requirements on optimize()", function() {
+        javelin.component('foo', function() {}, []);
+        javelin.component('bar', function() {}, ['foo']);
+        javelin.component('baz', function() {}, ['bar']);
+        javelin.component('qux', function() {}, []);
+        javelin.component('quux', function() {}, ['bar','qux']);
+        javelin.component('quuxx', function() {}, ['quux','bar','foo','bar']);
+
+        var names = ['foo','bar','baz','qux','quux','quuxx'];
+        for (var name in names) {
+            assert.deepEqual(javelin.getComponent(names[name]).computedRequirements, [], 'computed requirements should be empty pre-optimize');
+        }
+
+        javelin.optimize();
+
+        assert.deepEqual(javelin.getComponent('foo').computedRequirements, []);
+        assert.deepEqual(javelin.getComponent('bar').computedRequirements, ['foo']);
+        assert.deepEqual(javelin.getComponent('baz').computedRequirements, ['foo','bar']);
+        assert.deepEqual(javelin.getComponent('qux').computedRequirements, []);
+        assert.deepEqual(javelin.getComponent('quux').computedRequirements, ['foo','bar','qux']);
+        assert.deepEqual(javelin.getComponent('quuxx').computedRequirements, ['foo','bar','qux','quux']);
+    });
+
+    it("should properly unpack prefab definitions upon optimize()", function() {
+        javelin.prefab('foo', {});
+        javelin.prefab('bar', {
+            children: [
+                'foo',
+                'foo'
+            ]
+        });
+
+        assert.isString(javelin.getPrefab('bar').children[0]);
+        assert.isString(javelin.getPrefab('bar').children[1]);
+
+        javelin.optimize();
+
+        assert.isObject(javelin.getPrefab('bar').children[0]);
+        assert.isObject(javelin.getPrefab('bar').children[1]);
+    });
 });

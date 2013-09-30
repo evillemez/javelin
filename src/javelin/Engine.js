@@ -2,15 +2,15 @@
 
 'use strict';
 
-Javelin.Engine = function(environment, config) {
+Javelin.Engine = function(registry, environment, config) {
     //this should persist
+    this.environment = environment;
+    this.loader = environment.getLoader();
     this.config = config;
     this.debug = config.debug || false;
     this.targetFps = config.stepsPerSecond || 1000/30;
-    this.environment = environment;
-    this.environment.engine = this;
-    this.initialized = false;
     this.dispatcher = new Javelin.Dispatcher();
+    this.initialized = false;
     
     //everything else can be reset
     this.reset();
