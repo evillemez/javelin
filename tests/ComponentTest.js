@@ -1,25 +1,29 @@
 'use strict';
-/*
+
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
+var Javelin = require('../build/javelin.js');
 
-describe("GameObjectComponent", function() {
-    
-    var j;
-    
-    beforeEach(function() {
-        j = require('../build/javelin.js');
-        j.reset();
+describe("Component", function() {
+
+    var createComponent = function(name) {
+        return new Javelin.Component(name || 'foo', new Javelin.Entity());
+    };
+
+    it("should have reference to its name and entity", function() {
+        var c = createComponent('foo');
+        assert.strictEqual(c.$name, 'foo');
+        assert.isTrue(c.$entity instanceof Javelin.Entity);
     });
     
     it("should return false if requested callback does not exist", function() {
-        var c = new j.GameObjectComponent();
+        var c = createComponent();
         assert.isFalse(c.$getCallback("engine.update"));
     });
     
     it("should return registered callback function if exists", function() {
-        var c = new j.GameObjectComponent();
+        var c = createComponent();
 
         c.$on('engine.update', function() {
             return "foo";
@@ -30,7 +34,7 @@ describe("GameObjectComponent", function() {
     });
     
     it("should overwrite previously registered callback", function() {
-        var c = new j.GameObjectComponent();
+        var c = createComponent();
 
         c.$on('engine.update', function() {
             return "foo";
@@ -45,7 +49,7 @@ describe("GameObjectComponent", function() {
     });
     
     it("should serialize only non-function properties added to object", function() {
-        var c = new j.GameObjectComponent();
+        var c = createComponent();
         c.foo = "bar";
         c.bar = 23;
         c.baz = function() { return "foo"; };
@@ -59,7 +63,7 @@ describe("GameObjectComponent", function() {
     });
     
     it("should set properties when data is unserialized", function() {
-        var c = new j.GameObjectComponent();
+        var c = createComponent();
         
         var data = {
             foo: "bar",
@@ -80,38 +84,39 @@ describe("GameObjectComponent", function() {
     it("should be scriptable from handler function and not conflict with multiple instances", function() {
         
         //an example component construction function
-        var Namespace = Namespace || {};
-        Namespace.FooComponent = function(comp, testWord) {            
-            var foo = testWord;
+        var FooComponentHandler = function(entity, game) {
+            //private stuff
+            var self = this;
+            var foo = "hello";
             
-            //all components
-            comp.x = 5.0;
-            
-            //callback to return something "private"
-            comp.$on("engine.update", function() {
-                return foo;
+            //public stuff
+            this.x = 5.0;
+            this.y = 5.0;
+
+            //callbacks
+            this.$on("engine.update", function() {
+                return [foo, self.x];
             });
         };
-        Namespace.FooComponent.alias = "namespace.foo";
         
         //create and "setup" components
-        assert.equal("namespace.foo", Namespace.FooComponent.alias);
-        var c1 = new j.GameObjectComponent();
-        var c2 = new j.GameObjectComponent();
-        Namespace.FooComponent(c1, 'bar');
-        Namespace.FooComponent(c2, 'baz');
+        var c1 = createComponent('foo');
+        FooComponentHandler.call(c1);
+        c1.$unserialize({x: 1});
+        var c2 = createComponent('foo');
+        FooComponentHandler.call(c2);
+        c2.$unserialize({x: 10});
+
         var cb1 = c1.$getCallback("engine.update");
         var cb2 = c2.$getCallback("engine.update");
         
         //generally the two instances should be equal, but their
         //callbacks should return different values
-        assert.strictEqual(5.0, c1.x);
-        assert.strictEqual(5.0, c2.x);
+        assert.strictEqual(5.0, c1.y);
+        assert.strictEqual(5.0, c2.y);
         assert.isUndefined(c1.foo);
         assert.isUndefined(c2.foo);
-        assert.strictEqual('bar', cb1());
-        assert.strictEqual('baz', cb2());
+        assert.deepEqual(cb1(), ["hello", 1]);
+        assert.deepEqual(cb2(), ["hello", 10]);
     });
-    
 });
-*/
