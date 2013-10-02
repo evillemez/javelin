@@ -8,13 +8,12 @@ var Javelin = require('../build/javelin.js');
 describe("Component", function() {
 
     var createComponent = function(name) {
-        return new Javelin.Component(name || 'foo', new Javelin.Entity());
+        return new Javelin.Component(name || 'foo');
     };
 
-    it("should have reference to its name and entity", function() {
+    it("should have reference to its name", function() {
         var c = createComponent('foo');
         assert.strictEqual(c.$name, 'foo');
-        assert.isTrue(c.$entity instanceof Javelin.Entity);
     });
     
     it("should return false if requested callback does not exist", function() {

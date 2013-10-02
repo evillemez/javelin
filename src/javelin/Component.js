@@ -16,19 +16,14 @@ callback is determined by the part of the engine that is calling it.
 //TODO: Document registering a callback
 'use strict';
 
-Javelin.Component = function(name, entity) {
-    this.$callbacks = {};
-    this.$entity = entity;
-    this.$id = entity.id;
+Javelin.Component = function(name) {
     this.$name = name;
+    this.$callbacks = {};
 };
 
 Javelin.Component.prototype.$on = function(name, callback) {
     callback.$id = this.$id;
     this.$callbacks[name] = callback;
-    if (this.$entity) {
-        this.$entity.setModified();
-    }
 };
 
 Javelin.Component.prototype.$getCallback = function(name) {
