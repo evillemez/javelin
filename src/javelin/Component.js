@@ -19,6 +19,7 @@ callback is determined by the part of the engine that is calling it.
 Javelin.Component = function(name) {
     this.$name = name;
     this.$callbacks = {};
+    this.$id = null;
 };
 
 Javelin.Component.prototype.$on = function(name, callback) {

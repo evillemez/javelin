@@ -1,57 +1,60 @@
 'use strict';
-/*
+
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
+var Javelin = require('../build/javelin.js');
 
-describe("GameObject", function() {
+describe("Entity", function() {
     
-    var j, f;
+    var javelin;
     
     beforeEach(function() {
-        j = require('../build/javelin.js');
-        f = require('./fixtures/fixtures.js');
-        j.reset();
+        javelin = Javelin.createNewInstance();
     });
+
+    function createEntity(name) {
+        return new Javelin.Entity(name || 'Anonymous');
+    }
     
     it("should instantiate properly", function() {
-        var go = new j.GameObject();
-        assert.isTrue(go instanceof j.GameObject);
+        var ent = createEntity('foo');
+        assert.isTrue(ent instanceof Javelin.Entity);
     });
     
     it("should allow setting component instances", function() {
-        var go = new j.GameObject();
-        var c = new j.GameObjectComponent();
-        assert.isFalse(go.hasComponent('foo'));
-        assert.isFalse(go.getComponent('foo'));
+        var ent = new Javelin.Entity();
+        var c = new Javelin.Component();
+        assert.isFalse(ent.hasComponent('foo'));
+        assert.isFalse(ent.getComponent('foo'));
         
-        go.setComponent('foo', c);
-        assert.isTrue(go.hasComponent('foo'));
-        assert.isObject(go.getComponent('foo'));
+        ent.setComponent('foo', c);
+        assert.isTrue(ent.hasComponent('foo'));
+        assert.isObject(ent.getComponent('foo'));
         
-        go = new j.GameObject();
-        var c1 = new j.GameObjectComponent();
+        ent = new Javelin.Entity();
+        var c1 = new Javelin.Component();
         c1.$alias = 'foo';
-        var c2 = new j.GameObjectComponent();
+        var c2 = new Javelin.Component();
         c2.$alias = 'bar';
-        assert.isFalse(go.hasComponent('foo'));
-        assert.isFalse(go.hasComponent('bar'));
-        go.setComponents([c1, c2]);
-        assert.isTrue(go.hasComponent('foo'));
-        assert.isTrue(go.hasComponent('bar'));
-        assert.isTrue(go.modified);
+        assert.isFalse(ent.hasComponent('foo'));
+        assert.isFalse(ent.hasComponent('bar'));
+        ent.setComponents([c1, c2]);
+        assert.isTrue(ent.hasComponent('foo'));
+        assert.isTrue(ent.hasComponent('bar'));
+        assert.isTrue(ent.modified);
     });
     
     it("should be modified if a component is added", function() {
-        var go = new j.GameObject();
-        assert.isFalse(go.modified);
-        go.setComponent('foo', new j.GameObjectComponent());
-        assert.isTrue(go.modified);
+        var ent = new Javelin.Entity();
+        assert.isFalse(ent.modified);
+        ent.setComponent('foo', new Javelin.Component());
+        assert.isTrue(ent.modified);
     });
     
     it("should accept and remove child game objects", function() {
-        var parent = new j.GameObject();
-        var child = new j.GameObject();
+        var parent = new Javelin.Entity();
+        var child = new Javelin.Entity();
         assert.isFalse(parent.hasChildren());
         assert.isFalse(parent.hasParent());
         assert.isFalse(child.hasChildren());
@@ -94,43 +97,41 @@ describe("GameObject", function() {
         assert.isFalse(child.hasParent());
     });
 
-    it("should set and cascade gameObject id to components", function() {
-        var go, c1, c2;
+    it("should set and cascade id to components", function() {
+        var ent, c1, c2;
         
-        go = new j.GameObject();
-        c1 = new j.GameObjectComponent();
-        c2 = new j.GameObjectComponent();
-        go.setComponent('foo', c1);
-        go.setComponent('bar', c2);
+        ent = new Javelin.Entity();
+        c1 = new Javelin.Component();
+        c2 = new Javelin.Component();
+        ent.setComponent('foo', c1);
+        ent.setComponent('bar', c2);
         
-        assert.strictEqual(-1, go.id);
+        assert.strictEqual(-1, ent.id);
         assert.strictEqual(-1, c1.$id);
         assert.strictEqual(-1, c2.$id);
         
         //set id and cascade down to already existing components
-        go.setId(3);
-        assert.strictEqual(3, go.id);
+        ent.setId(3);
+        assert.strictEqual(3, ent.id);
         assert.strictEqual(3, c1.$id);
         assert.strictEqual(3, c2.$id);
         
         //set id before adding new components
-        go = new j.GameObject();
-        c1 = new j.GameObjectComponent();
-        c2 = new j.GameObjectComponent();
-        assert.strictEqual(-1, go.id);
-        assert.strictEqual(-1, c1.$id);
-        assert.strictEqual(-1, c2.$id);
-        go.setId(3);
-        go.setComponent('foo', c1);
-        go.setComponent('bar', c2);
-        assert.strictEqual(3, go.id);
+        ent = new Javelin.Entity();
+        c1 = new Javelin.Component();
+        c2 = new Javelin.Component();
+        assert.strictEqual(-1, ent.id);
+        ent.setId(3);
+        ent.setComponent('foo', c1);
+        ent.setComponent('bar', c2);
+        assert.strictEqual(3, ent.id);
         assert.strictEqual(3, c1.$id);
         assert.strictEqual(3, c2.$id);
     });
     
     it("should set and filter up modified", function() {
-        var parent = new j.GameObject();
-        var child = new j.GameObject();
+        var parent = new Javelin.Entity();
+        var child = new Javelin.Entity();
         assert.isFalse(parent.modified);
         assert.isFalse(child.modified);
         
@@ -150,7 +151,7 @@ describe("GameObject", function() {
         child.modified = false;
         
         //adding a new child should modify the parent, but not existing children
-        var child2 = new j.GameObject();
+        var child2 = new Javelin.Entity();
         parent.addChild(child2);
         assert.isTrue(parent.modified);
         assert.isTrue(child2.modified);
@@ -158,9 +159,9 @@ describe("GameObject", function() {
     });
     
     it("should set and cascade enabled", function() {
-        var parent = new j.GameObject();
-        var child1 = new j.GameObject();
-        var child2 = new j.GameObject();
+        var parent = new Javelin.Entity();
+        var child1 = new Javelin.Entity();
+        var child2 = new Javelin.Entity();
         
         assert.isFalse(parent.enabled);
         assert.isFalse(child1.enabled);
@@ -183,14 +184,14 @@ describe("GameObject", function() {
     });
     
     it("should assemble callback cache properly", function() {
-        var c1 = new j.GameObjectComponent();
+        var c1 = new Javelin.Component();
         c1.$on('engine.update', function() {});
-        var c2 = new j.GameObjectComponent();
+        var c2 = new Javelin.Component();
         c2.$on('engine.update', function() {});
         
-        var parent = new j.GameObject();
-        var child1 = new j.GameObject();
-        var child2 = new j.GameObject();
+        var parent = new Javelin.Entity();
+        var child1 = new Javelin.Entity();
+        var child2 = new Javelin.Entity();
         
         parent.setComponent('foo', c1);
         parent.setComponent('bar', c2);
@@ -239,17 +240,17 @@ describe("GameObject", function() {
         assert.strictEqual(0, cbs.length);
     });
 
-    it("should export prefab structure of self", function () {
-        var parent = new j.GameObject();
-        var child1 = new j.GameObject();
-        var child2 = new j.GameObject();
+    it("should serialize to prefab structure", function () {
+        var parent = new Javelin.Entity();
+        var child1 = new Javelin.Entity();
+        var child2 = new Javelin.Entity();
         parent.name = 'parent';
         child1.name = 'child1';
         child2.name = 'child2';
         
-        var c1 = new j.GameObjectComponent();
+        var c1 = new Javelin.Component();
         c1.foo = 'bar';
-        var c2 = new j.GameObjectComponent();
+        var c2 = new Javelin.Component();
         c2.foo = 'baz';
         
         child1.setComponent('bar', c1);
@@ -288,29 +289,29 @@ describe("GameObject", function() {
         };
         
         //finally serialize
-        assert.deepEqual(expected, parent.export());
+        assert.deepEqual(expected, parent.serialize());
     });
 
     it("should get all components in children by type", function() {
-        var p = new j.GameObject();
-        var c1 = new j.GameObject();
-        var c2 = new j.GameObject();
-        var c3 = new j.GameObject();
+        var p = new Javelin.Entity();
+        var c1 = new Javelin.Entity();
+        var c2 = new Javelin.Entity();
+        var c3 = new Javelin.Entity();
         p.addChild(c1);
         p.addChild(c2);
         c2.addChild(c3);
-        c1.setComponent('foo', new j.GameObjectComponent());
-        c3.setComponent('foo', new j.GameObjectComponent());
+        c1.setComponent('foo', new Javelin.Component());
+        c3.setComponent('foo', new Javelin.Component());
         
         assert.deepEqual(p.getComponentsInChildren('bar'), []);
         assert.strictEqual(p.getComponentsInChildren('foo').length, 2);
     });
 
     it("should properly mark the root object in a parent/child hierarchy", function() {
-        var p = new j.GameObject();
-        var c1 = new j.GameObject();
-        var c2 = new j.GameObject();
-        var c3 = new j.GameObject();
+        var p = new Javelin.Entity();
+        var c1 = new Javelin.Entity();
+        var c2 = new Javelin.Entity();
+        var c3 = new Javelin.Entity();
         p.id = 1;
         c1.id = 2;
         c2.id = 3;
@@ -335,31 +336,31 @@ describe("GameObject", function() {
     });
 
     it("should manage tags", function() {
-        var go = new j.GameObject();
+        var ent = new Javelin.Entity();
         
-        assert.isFalse(go.hasTag('foo'));
-        assert.isFalse(go.hasTag('bar'));
-        go.addTag('foo');
-        assert.isTrue(go.hasTag('foo'));
-        assert.isFalse(go.hasTag('bar'));
-        go.addTag('bar');
-        assert.isTrue(go.hasTag('foo'));
-        assert.isTrue(go.hasTag('bar'));
-        assert.deepEqual(go.getTags(), ['foo','bar']);
-        go.removeTag('foo');
-        assert.isFalse(go.hasTag('foo'));
-        assert.isTrue(go.hasTag('bar'));
-        go.removeTag('bar');
-        assert.isFalse(go.hasTag('foo'));
-        assert.isFalse(go.hasTag('bar'));
+        assert.isFalse(ent.hasTag('foo'));
+        assert.isFalse(ent.hasTag('bar'));
+        ent.addTag('foo');
+        assert.isTrue(ent.hasTag('foo'));
+        assert.isFalse(ent.hasTag('bar'));
+        ent.addTag('bar');
+        assert.isTrue(ent.hasTag('foo'));
+        assert.isTrue(ent.hasTag('bar'));
+        assert.deepEqual(ent.getTags(), ['foo','bar']);
+        ent.removeTag('foo');
+        assert.isFalse(ent.hasTag('foo'));
+        assert.isTrue(ent.hasTag('bar'));
+        ent.removeTag('bar');
+        assert.isFalse(ent.hasTag('foo'));
+        assert.isFalse(ent.hasTag('bar'));
     });
     
     it("should allow retrieving children by tag", function() {
-        var parent = new j.GameObject();
-        var c1 = new j.GameObject();
-        var c2 = new j.GameObject();
-        var c3 = new j.GameObject();
-        var c4 = new j.GameObject();
+        var parent = new Javelin.Entity();
+        var c1 = new Javelin.Entity();
+        var c2 = new Javelin.Entity();
+        var c3 = new Javelin.Entity();
+        var c4 = new Javelin.Entity();
         
         parent.addChild(c1);
         parent.addChild(c2);
@@ -376,9 +377,9 @@ describe("GameObject", function() {
     });
 
     it("should broadcast events to children", function() {
-        var parent = new j.GameObject();
-        var child = new j.GameObject();
-        var child2 = new j.GameObject();
+        var parent = new Javelin.Entity();
+        var child = new Javelin.Entity();
+        var child2 = new Javelin.Entity();
         parent.addChild(child);
         
         var parentCalled = false;
@@ -407,8 +408,8 @@ describe("GameObject", function() {
     });
     
     it("should emit events to parents", function() {
-        var parent = new j.GameObject();
-        var child = new j.GameObject();
+        var parent = new Javelin.Entity();
+        var child = new Javelin.Entity();
         parent.addChild(child);
         
         var parentCalled = false;
@@ -431,4 +432,3 @@ describe("GameObject", function() {
     });
 
 });
-*/
