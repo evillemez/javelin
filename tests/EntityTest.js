@@ -7,19 +7,11 @@ var Javelin = require('../build/javelin.js');
 
 describe("Entity", function() {
     
-    var javelin;
-    
-    beforeEach(function() {
-        javelin = Javelin.createNewInstance();
-    });
-
-    function createEntity(name) {
-        return new Javelin.Entity(name || 'Anonymous');
-    }
-    
     it("should instantiate properly", function() {
-        var ent = createEntity('foo');
+        var ent = new Javelin.Entity();
         assert.isTrue(ent instanceof Javelin.Entity);
+        assert.strictEqual(ent.name, 'Anonymous');
+        assert.strictEqual(ent.id, -1);
     });
     
     it("should allow setting component instances", function() {

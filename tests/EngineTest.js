@@ -1,18 +1,17 @@
-
-'use strict';
 /*
+'use strict';
+
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
+var Javelin = require('../build/javelin.js');
 
 describe("Javelin Engine", function() {
     
-    var j, f;
+    var javelin;
     
     beforeEach(function() {
-        j = require('../build/javelin.js');
-        f = require('./fixtures/fixtures.js');
-        j.reset();
+        javelin = Javelin.createNewInstance();
     });
 
     //for convenience
