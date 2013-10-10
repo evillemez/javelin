@@ -15,6 +15,14 @@ Javelin.AssetLoader.prototype.sortLoaders = function(loaders) {
     return loaders;
 };
 
+Javelin.AssetLoader.prototype.getLoader = function(extension) {
+    return this.loaders[extension] || false;
+};
+
+Javelin.AssetLoader.prototype.setLoader = function(extension, loader) {
+    this.loaders[extension] = loader;
+};
+
 /**
  * Load an individual asset by path.  Your call back will be called with the loaded
  * object once completed.
