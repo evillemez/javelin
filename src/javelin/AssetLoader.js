@@ -34,6 +34,7 @@ Javelin.AssetLoader.prototype.loadAsset = function(path, callback) {
     var cached = this.assets[path] || false;
     if (cached) {
         callback(cached);
+        return;
     }
     
     this.getLoaderForPath(path)(this, path, this.baseAssetPath + path, callback);

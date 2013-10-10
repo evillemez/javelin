@@ -20,7 +20,7 @@ describe("AssetLoader", function() {
             var asset = new TestAsset(relpath);
             loader.register(relpath, asset);
             callback(asset);
-        }, 20);
+        }, 10);
     }
 
     var createLoader = function() {
@@ -44,12 +44,12 @@ describe("AssetLoader", function() {
         }
     }
 
-	it("should instantiate properly", function() {
+    it("should instantiate properly", function() {
         var l = new Javelin.AssetLoader('/path', {});
         assert.isTrue(l instanceof Javelin.AssetLoader);
     });
 
-	it("should allow setting/retrieving loaders", function() {
+    it("should allow setting/retrieving loaders", function() {
         var l = createLoader();
 
         assert.isFunction(l.getLoader('.mp3'));
@@ -66,7 +66,7 @@ describe("AssetLoader", function() {
         }, /loader for path/);
     });
 
-	it("should load an asset", function(done) {
+    it("should load an asset", function(done) {
         var l = createLoader();
         var spy = createLoaderSpy(l);
         expect(spy).to.not.have.been.called();
@@ -86,7 +86,13 @@ describe("AssetLoader", function() {
         var spy = createLoaderSpy(l);
         expect(spy).to.not.have.been.called();
 
-        var finalTest = function() {
+        l.loadAsset('foo.mp3', function(asset) {
+            asyncAssertions(done, function() {
+                expect(spy).to.have.been.called.exactly(1);
+                assert.isTrue(asset instanceof TestAsset);
+                assert.strictEqual(asset.path, 'foo.mp3');
+            });
+
             l.loadAsset('foo.mp3', function(asset) {
                 asyncAssertions(done, function() {
                     expect(spy).to.have.been.called.exactly(1);
@@ -95,27 +101,18 @@ describe("AssetLoader", function() {
                 });
                 done();
             });
-        };
-
-        l.loadAsset('foo.mp3', function(asset) {
-            asyncAssertions(done, function() {
-                expect(spy).to.have.been.called.exactly(1);
-                assert.isTrue(asset instanceof TestAsset);
-                assert.strictEqual(asset.path, 'foo.mp3');
-            });
-            finalTest();
         });
     });
 
-	it.skip("should load multiple assets", function() {
+    it.skip("should load multiple assets", function() {
         var l = createLoader();
 
     });
 
-	it("should call most specific loader first");
+    it("should call most specific loader first");
 
-	it("should prevent multiple loads of the same asset");
+    it("should prevent multiple loads of the same asset");
 
-	it("should properly report progress of multiple loads");
+    it("should properly report progress of multiple loads");
 
 });
