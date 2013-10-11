@@ -9,40 +9,53 @@ var chai = require('chai')
 chai.use(spies);
 chai.Assertion.includeStack = true;
 
+function TestSoundAsset(path) {
+    this.path = path;
+}
+
+function TestImageAsset(path) {
+    this.path = path;
+}
+
+function testSoundLoader(loader, relpath, abspath, callback) {
+    setTimeout(function() {
+        var asset = new TestSoundAsset(relpath);
+        loader.register(relpath, asset);
+        callback(asset);
+    }, 10);
+}
+
+function testImageLoader(loader, relpath, abspath, callback) {
+    setTimeout(function() {
+        var asset = new TestImageAsset(relpath);
+        loader.register(relpath, asset);
+        callback(asset);
+    }, 10);
+}
+
+var createLoader = function() {
+    return new Javelin.AssetLoader('/path', {
+        '.mp3': testSoundLoader,
+        '.png': testImageLoader
+    });
+};
+
+function createLoaderSpy(format, assetLoader) {
+    var loader = assetLoader.getLoader(format);
+    var spy = chai.spy(loader);
+    assetLoader.setLoader(format, spy);
+    return spy;
+}
+
+function tryAssertions(done, assertions) {
+    try {
+        assertions();
+    } catch (e) {
+        done(e);
+    }
+}
+
 describe("AssetLoader", function() {
-
-    function TestAsset(path) {
-        this.path = path;
-    }
-
-    function testLoader(loader, relpath, abspath, callback) {
-        setTimeout(function() {
-            var asset = new TestAsset(relpath);
-            loader.register(relpath, asset);
-            callback(asset);
-        }, 10);
-    }
-
-    var createLoader = function() {
-        return new Javelin.AssetLoader('/path', {
-            '.mp3': testLoader
-        });
-    };
-
-    function createLoaderSpy(assetLoader) {
-        var loader = assetLoader.getLoader('.mp3');
-        var spy = chai.spy(loader);
-        assetLoader.setLoader('.mp3', spy);
-        return spy;
-    }
-
-    function asyncAssertions(done, assertions) {
-        try {
-            assertions();
-        } catch (e) {
-            done(e);
-        }
-    }
 
     it("should instantiate properly", function() {
         var l = new Javelin.AssetLoader('/path', {});
@@ -68,48 +81,84 @@ describe("AssetLoader", function() {
 
     it("should load an asset", function(done) {
         var l = createLoader();
-        var spy = createLoaderSpy(l);
+        var spy = createLoaderSpy('.mp3', l);
         expect(spy).to.not.have.been.called();
 
         l.loadAsset('foo.mp3', function(asset) {
-            asyncAssertions(done, function() {
+            tryAssertions(done, function() {
                 expect(spy).to.have.been.called.exactly(1);
-                assert.isTrue(asset instanceof TestAsset);
+                assert.isTrue(asset instanceof TestSoundAsset);
                 assert.strictEqual(asset.path, 'foo.mp3');
             });
             done();
         });
     });
 
-    it("should only call a loader on the first request to a specific asset", function(done) {
+    it("should only call a loader on the first request to a specific asset 1", function(done) {
         var l = createLoader();
-        var spy = createLoaderSpy(l);
+        var spy = createLoaderSpy('.mp3', l);
         expect(spy).to.not.have.been.called();
 
         l.loadAsset('foo.mp3', function(asset) {
-            asyncAssertions(done, function() {
+            tryAssertions(done, function() {
                 expect(spy).to.have.been.called.exactly(1);
-                assert.isTrue(asset instanceof TestAsset);
+                assert.isTrue(asset instanceof TestSoundAsset);
                 assert.strictEqual(asset.path, 'foo.mp3');
             });
 
             l.loadAsset('foo.mp3', function(asset) {
-                asyncAssertions(done, function() {
+                tryAssertions(done, function() {
                     expect(spy).to.have.been.called.exactly(1);
-                    assert.isTrue(asset instanceof TestAsset);
+                    assert.isTrue(asset instanceof TestSoundAsset);
                     assert.strictEqual(asset.path, 'foo.mp3');
+                    done();
                 });
+            });
+        });
+    });
+
+    it.skip("should only call a loader on the first request to a specific asset 2", function() {
+        //TODO: call 1 immediately after the other, ensure spy only called once
+    });
+
+    it("should load multiple assets", function(done) {
+        var l = createLoader();
+        var soundSpy = createLoaderSpy('.mp3', l);
+        var imageSpy = createLoaderSpy('.png', l);
+        expect(soundSpy).to.not.have.been.called();
+        expect(imageSpy).to.not.have.been.called();
+
+        l.loadAssets(['foo.mp3', 'foo.png'], function(assets) {
+            var a = assets;
+            tryAssertions(done, function() {
+                assert.isArray(a);
+                assert.isTrue(assets[0] instanceof TestSoundAsset);
+                assert.isTrue(assets[1] instanceof TestImageAsset);
+                expect(soundSpy).to.have.been.called.exactly(1);
+                expect(imageSpy).to.have.been.called.exactly(1);
                 done();
             });
         });
     });
 
-    it.skip("should load multiple assets", function() {
+    it("should call most specific loader first", function(done) {
         var l = createLoader();
+        l.setLoader('.atlas.mp3', testImageLoader);
+        l.setLoader('.tx', testImageLoader);
+        var soundSpy = createLoaderSpy('.mp3', l);
+        var atlasSpy = createLoaderSpy('.atlas.mp3', l);
+        expect(soundSpy).to.not.have.been.called();
+        expect(atlasSpy).to.not.have.been.called();
 
+        l.loadAsset('foo.atlas.mp3', function(asset) {
+            tryAssertions(done, function() {
+                expect(soundSpy).to.not.have.been.called();
+                expect(atlasSpy).to.have.been.called.exactly(1);
+                assert.isTrue(asset instanceof TestImageAsset);
+                done();
+            });
+        });
     });
-
-    it("should call most specific loader first");
 
     it("should prevent multiple loads of the same asset");
 

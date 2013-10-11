@@ -6,13 +6,20 @@
  */
 Javelin.AssetLoader = function(basePath, loaders) {
     this.assets = {};
-    this.baseAssetPath = basePath;
-    this.loaders = this.sortLoaders(loaders);
+    this.baseAssetPath = basePath || '';
+    this.loaders = loaders || {};
+    this.sortedLoaderExtensions = [];
+    this.sortLoaders();
 };
 
-Javelin.AssetLoader.prototype.sortLoaders = function(loaders) {
-    //TODO: implement for real
-    return loaders;
+Javelin.AssetLoader.prototype.sortLoaders = function() {
+    this.sortedLoaderExtensions = [];
+    for (var extension in this.loaders) {
+        this.sortedLoaderExtensions.push(extension);
+    }
+    this.sortedLoaderExtensions.sort(function(a, b) {
+        return b.length - a.length;
+    });
 };
 
 Javelin.AssetLoader.prototype.getLoader = function(extension) {
@@ -21,6 +28,7 @@ Javelin.AssetLoader.prototype.getLoader = function(extension) {
 
 Javelin.AssetLoader.prototype.setLoader = function(extension, loader) {
     this.loaders[extension] = loader;
+    this.sortLoaders();
 };
 
 /**
@@ -61,27 +69,32 @@ Javelin.AssetLoader.prototype.loadAssetAsType = function(path, type, callback) {
  * of loaded assets in the same order as the requested paths.
  * 
  * @param {array} arr Array of string paths (relative)
- * @param {function} callback Callback function to call with the array of loaded assets
+ * @param {function} doneCallback Callback function to call with the array of loaded assets
+ * @param {function} progressCallback Callback function to call every time an asset is loaded.  This can be used to track loading progress.
  */
-Javelin.AssetLoader.prototype.loadAssets = function(arr, callback) {
+Javelin.AssetLoader.prototype.loadAssets = function(arr, doneCallback, progressCallback) {
     var assets = this.assets;
     var expected = arr.length;
     var loaded = 0;
+    progressCallback = progressCallback || Javelin.noop;
+    doneCallback = doneCallback || Javelin.noop;
     
     //register function keeps loaded assets in the order
     //they were requested
     var register = function(relPath, obj) {
         loaded++;
         assets[arr.indexOf(relPath)] = obj;
+        progressCallback(expected, loaded);
         
         //if everything has loaded, call the user's callback
-        if (loaded === expected && callback) {
+        if (loaded === expected) {
             var sorted = [];
             for (var i in arr) {
                 sorted.push(assets[arr[i]]);
             }
             
-            callback(sorted);
+            doneCallback(sorted);
+            return;
         }
     };
     
@@ -124,9 +137,11 @@ Javelin.AssetLoader.prototype.unload = function(relPath) {
  * @type Function
  */
 Javelin.AssetLoader.prototype.getLoaderForPath = function(path) {
-    for (var key in this.loaders) {
-        if (path.substring(path.length - key.length) === key) {
-            return this.loaders[key];
+    var exts = this.sortedLoaderExtensions;
+    var l = exts.length;
+    for (var i=0; i < l; i++) {
+        if (path.substring(path.length - exts[i].length) === exts[i]) {
+            return this.loaders[exts[i]];
         }
     }
 
