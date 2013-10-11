@@ -160,6 +160,10 @@ describe("AssetLoader", function() {
         });
     });
 
+    it("should throw exception in getAsset() if not loaded");
+
+    it("should return an asset from getAsset()");
+
     it("should prevent multiple loads of the same asset");
 
     it("should properly report progress of multiple loads");

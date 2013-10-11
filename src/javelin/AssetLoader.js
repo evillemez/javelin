@@ -31,6 +31,14 @@ Javelin.AssetLoader.prototype.setLoader = function(extension, loader) {
     this.sortLoaders();
 };
 
+Javelin.AssetLoader.prototype.getAsset = function(path) {
+    if (!this.assets[path]) {
+        throw new Error("["+path+"] was requested, but was not loaded.");
+    }
+
+    return this.assets[path];
+};
+
 /**
  * Load an individual asset by path.  Your call back will be called with the loaded
  * object once completed.
