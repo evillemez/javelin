@@ -89,8 +89,8 @@ describe("AssetLoader", function() {
                 expect(spy).to.have.been.called.exactly(1);
                 assert.isTrue(asset instanceof TestSoundAsset);
                 assert.strictEqual(asset.path, 'foo.mp3');
+                done();
             });
-            done();
         });
     });
 

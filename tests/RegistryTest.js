@@ -5,7 +5,7 @@ var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
 
-describe("Javelin Registry", function() {
+describe("Registry", function() {
     
     var javelin;
     
