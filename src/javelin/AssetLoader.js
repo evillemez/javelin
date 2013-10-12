@@ -10,6 +10,7 @@ Javelin.AssetLoader = function(basePath, loaders) {
     this.loaders = loaders || {};
     this.sortedLoaderExtensions = [];
     this.sortLoaders();
+    this.loading = {};
 };
 
 Javelin.AssetLoader.prototype.sortLoaders = function() {
@@ -33,7 +34,7 @@ Javelin.AssetLoader.prototype.setLoader = function(extension, loader) {
 
 Javelin.AssetLoader.prototype.getAsset = function(path) {
     if (!this.assets[path]) {
-        throw new Error("["+path+"] was requested, but was not loaded.");
+        throw new Error("["+path+"] was requested, but has not been loaded yet.");
     }
 
     return this.assets[path];
@@ -47,13 +48,34 @@ Javelin.AssetLoader.prototype.getAsset = function(path) {
  * @param {function} callback Callback function to call with the requested asset object
  */
 Javelin.AssetLoader.prototype.loadAsset = function(path, callback) {
+
+    //check for cached asset first
     var cached = this.assets[path] || false;
     if (cached) {
         callback(cached);
         return;
     }
-    
-    this.getLoaderForPath(path)(this, path, this.baseAssetPath + path, callback);
+
+    //if already being loaded, store callback
+    if (this.loading[path]) {
+        this.loading[path].push(callback);
+        return;
+    }
+
+    //otherwise it's the first load, call the applicable loader
+    //and call stored callbacks once loaded
+    this.loading[path] = [callback];
+    var self = this;
+    var finishedCallback = function(asset) {
+        var cbs = self.loading[path];
+        var l = cbs.length;
+        for (var i=0; i < l; i++) {
+            cbs[i](asset);
+        }
+        self.loading[path] = false;
+    };
+
+    this.getLoaderForPath(path)(this, path, this.baseAssetPath + path, finishedCallback);
 };
 
 /**

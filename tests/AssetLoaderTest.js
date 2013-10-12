@@ -94,31 +94,40 @@ describe("AssetLoader", function() {
         });
     });
 
-    it("should only call a loader on the first request to a specific asset 1", function(done) {
+    it("should only call a loader on the first request to a specific asset", function(done) {
         var l = createLoader();
         var spy = createLoaderSpy('.mp3', l);
         expect(spy).to.not.have.been.called();
 
+        var called = 0;
+
+        //load once
         l.loadAsset('foo.mp3', function(asset) {
             tryAssertions(done, function() {
+                called++;
                 expect(spy).to.have.been.called.exactly(1);
                 assert.isTrue(asset instanceof TestSoundAsset);
                 assert.strictEqual(asset.path, 'foo.mp3');
-            });
 
-            l.loadAsset('foo.mp3', function(asset) {
-                tryAssertions(done, function() {
-                    expect(spy).to.have.been.called.exactly(1);
-                    assert.isTrue(asset instanceof TestSoundAsset);
-                    assert.strictEqual(asset.path, 'foo.mp3');
+                if (called >= 2) {
                     done();
-                });
+                }
             });
         });
-    });
 
-    it.skip("should only call a loader on the first request to a specific asset 2", function() {
-        //TODO: call 1 immediately after the other, ensure spy only called once
+        //immediately load same path again
+        l.loadAsset('foo.mp3', function(asset) {
+            tryAssertions(done, function() {
+                called++;
+                expect(spy).to.have.been.called.exactly(1);
+                assert.isTrue(asset instanceof TestSoundAsset);
+                assert.strictEqual(asset.path, 'foo.mp3');
+
+                if (called >= 2) {
+                    done();
+                }
+            });
+        });
     });
 
     it("should load multiple assets", function(done) {
@@ -160,12 +169,52 @@ describe("AssetLoader", function() {
         });
     });
 
-    it("should throw exception in getAsset() if not loaded");
+    it("should throw exception in getAsset() if not loaded", function() {
+        var l = createLoader();
+        assert.throws(function() {
+            var asset = l.getAsset('foo.mp3');
+        }, /has not been loaded/);
+    });
 
-    it("should return an asset from getAsset()");
+    it("should return an asset from getAsset()", function(done) {
+        var l = createLoader();
+        l.loadAsset('foo.mp3', function(asset) {
+            tryAssertions(done, function() {
+                assert.isTrue(asset instanceof TestSoundAsset);
+                var a = l.getAsset('foo.mp3');
+                assert.deepEqual(a, asset);
+                done();
+            });
+        });
+    });
 
-    it("should prevent multiple loads of the same asset");
+    it("should properly report progress of multiple loads", function(done) {
+        var l = createLoader();
+        var spyCalls = [];
+        var progressSpy = chai.spy(function(total, current) {
+            spyCalls.push([total, current]);
+        });
+        var expectedProgressCalls = [
+            [3,1],
+            [3,2],
+            [3,3]
+        ];
+        var assetsToLoad = [
+            'foo.mp3',
+            'bar.mp3',
+            'foo.png'
+        ];
 
-    it("should properly report progress of multiple loads");
-
+        l.loadAssets(assetsToLoad, function(assets) {
+            tryAssertions(done, function() {
+                assert.strictEqual(assets.length, 3);
+                assert.isTrue(assets[0] instanceof TestSoundAsset);
+                assert.isTrue(assets[1] instanceof TestSoundAsset);
+                assert.isTrue(assets[2] instanceof TestImageAsset);
+                expect(progressSpy).to.have.been.called.exactly(3);
+                assert.deepEqual(spyCalls, expectedProgressCalls);
+                done();
+            });
+        }, progressSpy);
+    });
 });
