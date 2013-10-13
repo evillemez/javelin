@@ -1,7 +1,3 @@
-/*global Javelin:true */
-
-'use strict';
-
 Javelin.Engine = function(registry, environment, config) {
     //this should persist
     this.environment = environment;

@@ -14,8 +14,6 @@ callback is determined by the part of the engine that is calling it.
 //TODO: Document writing a component
 //TODO: Document interacting with a component from another component
 //TODO: Document registering a callback
-'use strict';
-
 Javelin.Component = function(name) {
     this.$name = name;
     this.$callbacks = {};

@@ -1,4 +1,4 @@
-
+//TODO: REFACTOR TO USE FIXTURES PROPERLY
 'use strict';
 
 var chai = require('chai')
@@ -12,23 +12,17 @@ chai.Assertion.includeStack = true;
 
 describe("Engine", function() {
     
-    var javelin, spies;
-    
+    var javelin, spies, fixtures;
+
+    //before each test create an empty javelin
+    //repository and register the test fixtures
     beforeEach(function() {
+        //TODO: don't allow fixtures to be cached
+        fixtures = require('../build/fixtures.js');
         javelin = Javelin.createNewInstance();
         spies = {};
 
-        //test components
-        javelin.component('foo', function(entity, game) {
-            this.foo = 'foo';
-        });
-        javelin.component('bar', function(entity, game) {
-            this.bar = 'bar';
-        }, ['foo']);
-        javelin.component('baz', function(entity, game) {
-            this.baz = 'baz';
-        }, ['bar']);
-
+        javelin.component('foo', fixtures.FooComponent);
         //test plugins
         
         //test prefabs
@@ -40,15 +34,6 @@ describe("Engine", function() {
         //test environment
     });
 
-    var testGameConfig = {
-        plugins: {
-            'testPlugin': {
-                foo: 'bar',
-                bar: 'baz'
-            }
-        }
-    };
-    
     it("should step with no components and or objects");
     
     it("should properly load and unload plugins");

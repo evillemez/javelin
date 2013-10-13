@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * The AssetLoader returns objects based on string filepaths.  The object is loaded
  * by a function mapped to the file extension.

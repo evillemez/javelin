@@ -1,5 +1,3 @@
-'use strict';
-
 Javelin.Registry = function() {
     this.components = {};
     this.environments = {};

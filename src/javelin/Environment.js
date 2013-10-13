@@ -7,8 +7,6 @@ need to be overridden in some cases.
 */
 
 
-'use strict';
-
 Javelin.Environment = function(name, loader) {
     this.name = name;
     this.loader = loader;

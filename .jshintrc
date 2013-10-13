@@ -1,6 +1,7 @@
 {
     "globals"       : {
         "Javelin": true,
+        "Fixtures": true,
         "should": true,
         "it": true,
         "before": true,
@@ -35,7 +36,7 @@
                             
     "undef"         : true, 
     "unused"        : false, 
-    "strict"        : true, 
+    "strict"        : false,
     "trailing"      : false,
     "maxparams"     : false,
     "maxdepth"      : false,
@@ -53,7 +54,7 @@
     "evil"          : false,
     "expr"          : false,
     "funcscope"     : false,
-    "globalstrict"  : false,
+    "globalstrict"  : true,
     "iterator"      : false,
     "lastsemic"     : false,
     "laxbreak"      : false,

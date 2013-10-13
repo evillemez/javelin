@@ -1,5 +1,3 @@
-'use strict';
-
 Javelin.Dispatcher = function() {
     this.listeners = {};
 };

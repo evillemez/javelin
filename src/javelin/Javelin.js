@@ -1,5 +1,3 @@
-'use strict';
-
 //setup main namespaces
 var Javelin = Javelin || {
     Components: {},

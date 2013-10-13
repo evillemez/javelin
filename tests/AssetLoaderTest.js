@@ -1,3 +1,4 @@
+//TODO: REFACTOR TO USE FIXTURES PROPERLY
 'use strict';
 
 var chai = require('chai')
@@ -5,38 +6,15 @@ var chai = require('chai')
     , assert = chai.assert
     , expect = chai.expect
     , Javelin = require('../build/javelin.js')
+    , Fixtures = require('../build/fixtures.js')
 ;
 chai.use(spies);
 chai.Assertion.includeStack = true;
 
-function TestSoundAsset(path) {
-    this.path = path;
-}
-
-function TestImageAsset(path) {
-    this.path = path;
-}
-
-function testSoundLoader(loader, relpath, abspath, callback) {
-    setTimeout(function() {
-        var asset = new TestSoundAsset(relpath);
-        loader.register(relpath, asset);
-        callback(asset);
-    }, 10);
-}
-
-function testImageLoader(loader, relpath, abspath, callback) {
-    setTimeout(function() {
-        var asset = new TestImageAsset(relpath);
-        loader.register(relpath, asset);
-        callback(asset);
-    }, 10);
-}
-
 var createLoader = function() {
     return new Javelin.AssetLoader('/path', {
-        '.mp3': testSoundLoader,
-        '.png': testImageLoader
+        '.mp3': Fixtures.SoundLoader,
+        '.png': Fixtures.ImageLoader
     });
 };
 
@@ -87,7 +65,7 @@ describe("AssetLoader", function() {
         l.loadAsset('foo.mp3', function(asset) {
             tryAssertions(done, function() {
                 expect(spy).to.have.been.called.exactly(1);
-                assert.isTrue(asset instanceof TestSoundAsset);
+                assert.isTrue(asset instanceof Fixtures.TestSoundAsset);
                 assert.strictEqual(asset.path, 'foo.mp3');
                 done();
             });
@@ -106,7 +84,7 @@ describe("AssetLoader", function() {
             tryAssertions(done, function() {
                 called++;
                 expect(spy).to.have.been.called.exactly(1);
-                assert.isTrue(asset instanceof TestSoundAsset);
+                assert.isTrue(asset instanceof Fixtures.TestSoundAsset);
                 assert.strictEqual(asset.path, 'foo.mp3');
 
                 if (called >= 2) {
@@ -120,7 +98,7 @@ describe("AssetLoader", function() {
             tryAssertions(done, function() {
                 called++;
                 expect(spy).to.have.been.called.exactly(1);
-                assert.isTrue(asset instanceof TestSoundAsset);
+                assert.isTrue(asset instanceof Fixtures.TestSoundAsset);
                 assert.strictEqual(asset.path, 'foo.mp3');
 
                 if (called >= 2) {
@@ -141,8 +119,8 @@ describe("AssetLoader", function() {
             var a = assets;
             tryAssertions(done, function() {
                 assert.isArray(a);
-                assert.isTrue(assets[0] instanceof TestSoundAsset);
-                assert.isTrue(assets[1] instanceof TestImageAsset);
+                assert.isTrue(assets[0] instanceof Fixtures.TestSoundAsset);
+                assert.isTrue(assets[1] instanceof Fixtures.TestImageAsset);
                 expect(soundSpy).to.have.been.called.exactly(1);
                 expect(imageSpy).to.have.been.called.exactly(1);
                 done();
@@ -152,8 +130,8 @@ describe("AssetLoader", function() {
 
     it("should call most specific loader first", function(done) {
         var l = createLoader();
-        l.setLoader('.atlas.mp3', testImageLoader);
-        l.setLoader('.tx', testImageLoader);
+        l.setLoader('.atlas.mp3', Fixtures.ImageLoader);
+        l.setLoader('.tx', Fixtures.ImageLoader);
         var soundSpy = createLoaderSpy('.mp3', l);
         var atlasSpy = createLoaderSpy('.atlas.mp3', l);
         expect(soundSpy).to.not.have.been.called();
@@ -163,7 +141,7 @@ describe("AssetLoader", function() {
             tryAssertions(done, function() {
                 expect(soundSpy).to.not.have.been.called();
                 expect(atlasSpy).to.have.been.called.exactly(1);
-                assert.isTrue(asset instanceof TestImageAsset);
+                assert.isTrue(asset instanceof Fixtures.TestImageAsset);
                 done();
             });
         });
@@ -180,7 +158,7 @@ describe("AssetLoader", function() {
         var l = createLoader();
         l.loadAsset('foo.mp3', function(asset) {
             tryAssertions(done, function() {
-                assert.isTrue(asset instanceof TestSoundAsset);
+                assert.isTrue(asset instanceof Fixtures.TestSoundAsset);
                 var a = l.getAsset('foo.mp3');
                 assert.deepEqual(a, asset);
                 done();
@@ -208,9 +186,9 @@ describe("AssetLoader", function() {
         l.loadAssets(assetsToLoad, function(assets) {
             tryAssertions(done, function() {
                 assert.strictEqual(assets.length, 3);
-                assert.isTrue(assets[0] instanceof TestSoundAsset);
-                assert.isTrue(assets[1] instanceof TestSoundAsset);
-                assert.isTrue(assets[2] instanceof TestImageAsset);
+                assert.isTrue(assets[0] instanceof Fixtures.TestSoundAsset);
+                assert.isTrue(assets[1] instanceof Fixtures.TestSoundAsset);
+                assert.isTrue(assets[2] instanceof Fixtures.TestImageAsset);
                 expect(progressSpy).to.have.been.called.exactly(3);
                 assert.deepEqual(spyCalls, expectedProgressCalls);
                 done();

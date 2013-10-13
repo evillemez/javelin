@@ -1,5 +1,7 @@
 'use strict';
 
+//TODO: configure fixtures lint/build/etc...
+
 module.exports = function(grunt) {
 
   // Project configuration.
@@ -7,10 +9,23 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         
         //this is for convenience, used in other configs
-        files: {
-            lint: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js'],
-            test: ['tests/**/*.js'],            
-            build: [
+        fileCollections: {
+            lint: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', 'fixtures/**/*.js'],
+            test: ['tests/**/*.js'],
+            javelinCore: [
+                'util/javelin.prefix',
+                'src/javelin/Javelin.js',
+                'src/javelin/Registry.js',
+                'src/javelin/Engine.js',
+                'src/javelin/Plugin.js',
+                'src/javelin/AssetLoader.js',
+                'src/javelin/Dispatcher.js',
+                'src/javelin/Environment.js',
+                'src/javelin/Component.js',
+                'src/javelin/Entity.js',
+                'util/javelin.suffix'
+            ],
+            javelinFull: [
                 'util/javelin.prefix',
                 'src/javelin/Javelin.js',
                 'src/javelin/Registry.js',
@@ -26,22 +41,18 @@ module.exports = function(grunt) {
                 'src/loaders/**/*.js',
                 'src/plugins/**/*.js',
                 'util/javelin.suffix'
+            ],
+            fixtures: [
+                'util/fixtures.prefix',
+                'fixtures/**/*.js',
+                'util/fixtures.suffix'
             ]
-        },
-        watch: {
-            all: {
-                files: "<%= files.lint %>",
-                tasks: ["default"],
-                options: {
-                    interrupt: true
-                }
-            }
         },
         jshint: {
             options: {
                 jshintrc: '.jshintrc'
             },
-            all: "<%= files.lint %>"
+            all: "<%= fileCollections.lint %>"
         },
         simplemocha: {
             options: {
@@ -51,25 +62,47 @@ module.exports = function(grunt) {
                 reporter: 'spec'
             },
             all: {
-                src: '<%= files.test %>'
+                src: '<%= fileCollections.test %>'
             }
         },
         concat: {
             options: {
-                separator: ";"
+                separator: "\n\n"
             },
-            dist: {
-                src: "<%= files.build %>",
+            full: {
+                src: "<%= fileCollections.javelinFull %>",
                 dest: 'build/javelin.js'
+            },
+            core: {
+                src: "<%= fileCollections.javelinCore %>",
+                dest: 'build/javelin.core.js'
+            },
+            fixtures: {
+                src: "<%= fileCollections.fixtures %>",
+                dest: 'build/fixtures.js'
             }
         },
         uglify: {
             options: {
                 mangle: true
             },
-            my_target: {
+            full: {
                 files: {
                     'build/javelin.min.js': ['build/javelin.js']
+                }
+            },
+            core: {
+                files: {
+                    'build/javelin.core.min.js': ['build/javelin.core.js']
+                }
+            }
+        },
+        watch: {
+            all: {
+                files: "<%= fileCollections.lint %>",
+                tasks: ["default"],
+                options: {
+                    interrupt: true
                 }
             }
         },
@@ -90,5 +123,5 @@ module.exports = function(grunt) {
     // Default task
     grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'simplemocha']);
     grunt.registerTask('build', ['jshint', 'concat', 'uglify']);
-    grunt.registerTask('docs', ['default']);
+    grunt.registerTask('docs', function() { throw new Error("Not yet implemented."); });
 };

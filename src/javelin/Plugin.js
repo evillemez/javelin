@@ -1,5 +1,3 @@
-"use strict";
-
 Javelin.Plugin = function(name, engine) {
     this.$name = name;
     this.$engine = engine;

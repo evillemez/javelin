@@ -1,2 +1,4 @@
 (function() {
     'use strict';
+
+    var Fixtures = {};

@@ -1,5 +1,3 @@
-'use strict';
-
 Javelin.Entity = function (name, id) {
     this.id = id || -1;                             //UID assigned by engine
     this.name = name || "Anonymous";                //human-readable name (for eventual editor)
