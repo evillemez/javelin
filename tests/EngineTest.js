@@ -12,31 +12,81 @@ chai.Assertion.includeStack = true;
 
 describe("Engine", function() {
     
-    var javelin, spies, fixtures;
+    var javelin, spies, Fixtures;
 
     //before each test create an empty javelin
     //repository and register the test fixtures
     beforeEach(function() {
         //TODO: don't allow fixtures to be cached
-        fixtures = require('../build/fixtures.js');
+        Fixtures = require('../build/fixtures.js');
         javelin = Javelin.createNewInstance();
         spies = {};
 
-        javelin.component('foo', fixtures.FooComponent);
+        //components
+        javelin.component('foo', Fixtures.FooComponent);
+
         //test plugins
-        
+        javelin.plugin('test', Fixtures.Plugin, Fixtures.DefaultPluginConfig);
+
         //test prefabs
-        
+        javelin.prefab('foo', Fixtures.FooPrefab);
+        javelin.prefab('bar', Fixtures.BarPrefab);
+        javelin.prefab('baz', Fixtures.BazPrefab);
+
         //test scenes
-        
+        javelin.scene('example', Fixtures.Scene);
+
         //test loaders
+        javelin.loader(['.mp3','.ogg'], ['test'], Fixtures.SoundLoader);
+        javelin.loader(['.png','.jpg','.jpeg','.gif'], ['test'], Fixtures.ImageLoader);
         
         //test environment
+        javelin.environment('test', Fixtures.Environment, {foo: 'bar', baz: 'baz'});
     });
 
-    it("should step with no components and or objects");
+    function createEngine(noGameConfig) {
+        if (noGameConfig || false) {
+            return javelin.createGame('test');
+        } else {
+            return javelin.createGame('test', Fixtures.GameConfig);
+        }
+    }
+
+    it("should step with no components and or objects", function() {
+        createEngine().step();
+    });
     
-    it("should properly load and unload plugins");
+    it("should throw error when failing to load a plugin", function() {
+        var game = createEngine();
+        assert.throws(function() {
+            game.loadPlugin('foo');
+        }, /unknown plugin/);
+    });
+
+    it("should properly load and unload plugins", function() {
+        var game, plugin;
+
+        game = createEngine();
+        assert.isFalse(game.getPlugin('test'));
+        game.loadPlugin('test');
+        plugin = game.getPlugin('test');
+        assert.isTrue(plugin instanceof Javelin.Plugin);
+
+        //plugin received default config
+        assert.deepEqual(plugin.config, Fixtures.DefaultPluginConfig);
+        
+        //plugin received config from game
+        game = createEngine(true);
+        game.loadPlugin('test');
+        plugin = game.getPlugin('test');
+        assert.deepEqual(plugin.config, Fixtures.GameConfig.plugins.test);
+
+        //plugin received config from scene
+        game = createEngine(true);
+        game.loadPlugin('test');
+        plugin = game.getPlugin('test');
+        assert.deepEqual(plugin.config, Fixtures.GameConfig.plugins.test);
+    });
 
     it("should notify plugins on step");
 

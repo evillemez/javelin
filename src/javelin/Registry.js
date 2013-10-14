@@ -75,7 +75,7 @@ Javelin.Registry.prototype.plugin = function(name, handler, defaults) {
     this.plugins[name] = definition;
 };
 
-Javelin.Registry.prototype.environment = function(name, handler, config) {
+Javelin.Registry.prototype.environment = function(name, handler, defaults) {
     if (!Javelin.isString(name)) {
         throw new Error("Environments must specify a string name.");
     }
@@ -84,14 +84,14 @@ Javelin.Registry.prototype.environment = function(name, handler, config) {
         throw new Error("Environments must specify a function handler.");
     }
 
-    if (config && !Javelin.isObject(config)) {
-        throw new Error("Default environment configuration must be an object.");
+    if (defaults && !Javelin.isObject(defaults)) {
+        throw new Error("Default environment configuration must be an object literal.");
     }
 
     var def = {
         name: name,
         handler: handler,
-        defaults: config || {}
+        defaults: defaults || {}
     };
 
     this.environments[name] = def;
@@ -235,6 +235,7 @@ Javelin.Registry.prototype.computeComponentRequirements = function() {
 //converts string references inside prefab definitions to
 //in-memory objects, so no extra logic is required during
 //actual instantiation
+//TODO: consider unpacking into a separate object
 Javelin.Registry.prototype.unpackPrefabs = function() {
     var self = this;
 

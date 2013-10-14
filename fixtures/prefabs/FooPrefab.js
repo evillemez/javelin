@@ -1,0 +1,3 @@
+Fixtures.FooPrefab = {
+    tags: ['environment']
+};

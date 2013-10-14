@@ -1,0 +1,3 @@
+Fixtures.BarPrefab = {
+    tags: ['player']
+};

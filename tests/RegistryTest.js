@@ -193,7 +193,7 @@ describe("Registry", function() {
         assert.isTrue(game.loader instanceof Javelin.AssetLoader);
         assert.isTrue(game.environment instanceof Javelin.Environment);
         assert.strictEqual(game.environment.foo, 'foo');
-        assert.strictEqual(game.config, gameConfig);
+        assert.deepEqual(game.config, gameConfig);
     });
     
     it("should properly compute component requirements on optimize()", function() {
