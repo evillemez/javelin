@@ -1,6 +1,6 @@
 Fixtures.GameConfig = {
     plugins: {
-        'testPlugin': {
+        'test': {
             foo: 'bar',
             bar: 'baz'
         }

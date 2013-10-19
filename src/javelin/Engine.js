@@ -1,5 +1,6 @@
 Javelin.Engine = function(registry, environment, config) {
     //this should persist
+    this.registry = registry;
     this.environment = environment;
     this.loader = environment.getLoader();
     this.config = config;
@@ -63,86 +64,77 @@ Javelin.Engine.prototype.getGameObjectById = function(id) {
     return false;
 };
 
-Javelin.Engine.prototype.instantiate = function(mixed) {
-    if (Javelin.isString(mixed)) {
-        return this.instantiatePrefab(mixed);
-    }
-    
-    return this.instantiateObject(mixed);
+Javelin.Engine.prototype.instantiate = function(prefab) {
+    return this.instantiateEntity(this.registry.getPrefab(prefab));
 };
 
-//takes a string
-Javelin.Engine.prototype.instantiatePrefab = function(name) {
-    if (!Javelin.__prefabs[name]) {
-        throw new Error("Tried instantiating unknown prefab: " + name);
-    }
-    
-    return this.instantiateObject(Javelin.__prefabs[name]);
-};
-
-Javelin.Engine.prototype.instantiateObject = function(def, isNestedCall) {
-    var go;
+Javelin.Engine.prototype.instantiateEntity = function(def, isNestedCall) {
+    var ent;
     
     //instantiate game object
     if (def.fromPrefab) {
         //it's not really nested, but we say it is to avoid this call
         //adding dupliate copies of the object
-        go = this.instantiateObject(Javelin.__prefabs[def.fromPrefab], true);
+        ent = this.instantiateEntity(this.registry.getPrefab(def.fromPrefab), true);
     } else {
-        go = new Javelin.GameObject();
-        go.layer = def.layer || 'default';
-        go.name = def.name || 'Anonymous';
-        go.tags = def.tags || [];
+        ent = new Javelin.Entity();
+        ent.layer = def.layer || 'default';
+        ent.name = def.name || 'Anonymous';
+        ent.tags = def.tags || [];
     }
 
-    go.setId(++this.lastGoId);
-    go.engine = this;
+    if (ent.id === -1) {
+        ent.setId(++this.lastGoId);
+    }
     
     //add required components w/ values
     if (def.components) {
         for (var key in def.components) {
-            var c = this.addComponentToGameObject(go, key);
+            var c = this.addComponentToEntity(ent, key);
             c.$unserialize(def.components[key]);
         }
     }
     
     //instantiate children
     if (def.children) {
-        for (var i in def.children) {
-            go.addChild(this.instantiateObject(def.children[i], true));
+        var l = def.children.length;
+        for (var i = 0; i < l; i++) {
+            ent.addChild(this.instantiateEntity(def.children[i], true));
         }
     }
     
     if (!isNestedCall) {
-        this.__addGameObject(go);
+        this.__addGameObject(ent);
     }
     
-    return go;
+    return ent;
 };
 
-Javelin.Engine.prototype.addComponentToGameObject = function(go, alias) {
-    if (go.hasComponent(alias)) {
-        return go.getComponent(alias);
+Javelin.Engine.prototype.addComponentToEntity = function(ent, name) {
+    if (ent.hasComponent(name)) {
+        return ent.get(name);
     }
         
     //add any required components first
-    var reqs = Javelin.getComponentRequirements(alias);
+    var def = this.registry.getComponent(name);
+    var reqs = def.computedRequirements;
     var l = reqs.length;
+
     for (var i = 0; i < l; i++) {
-        this.addComponentToGameObject(go, reqs[i].alias);
+        this.addComponentToEntity(ent, reqs[i]);
     }
     
-    var handler = Javelin.getComponentHandler(alias);
+    var handler = Javelin.getComponentHandler(name);
     if (!handler) {
-        throw new Error("Unknown component [" + alias + "] requested");
+        throw new Error("Unknown component [" + name + "] requested");
     }
 
-    var comp = new Javelin.Component(handler.alias, go);
+    var comp = new Javelin.Component(handler.name, go);
     comp.$id = go.id;
 
     handler(go, comp);
 
-    go.setComponent(alias, comp);
+    go.setComponent(name, comp);
     
     return comp;
 };
@@ -329,13 +321,13 @@ Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
 
 Javelin.Engine.prototype.updatePlugins = function(which, deltaTime) {
     for (var i in this.plugins) {
-        if (this.plugins[i].$active) {
+        if (this.plugins[i].$enabled) {
             if (Javelin.Engine.PRE_UPDATE === which) {
-                this.plugins[i].$onPreUpdateStep(deltaTime);
+                this.plugins[i].$onPreUpdate(deltaTime);
             }
             
             if (Javelin.Engine.POST_UPDATE === which) {
-                this.plugins[i].$onPostUpdateStep(deltaTime);
+                this.plugins[i].$onPostUpdate(deltaTime);
             }
         }
     }
@@ -459,38 +451,34 @@ Javelin.Engine.prototype.loadAssets = function(arr, callback) {
 };
 
 /* Plugin Management */
-Javelin.Engine.prototype.loadPlugin = function(alias, config) {
-    if (this.plugins[alias]) {
+Javelin.Engine.prototype.loadPlugin = function(name, config) {
+    if (this.plugins[name]) {
         return;
     }
     
-    var handler = Javelin.getPluginHandler(alias);
-    if (!handler) {
-        throw new Error("Required plugin [" + alias + "] not registered.");
+    var def = this.registry.getPlugin(name);
+    if (!def) {
+        throw new Error("An unknown plugin [" + name + "] was requested.");
     }
     
     if (Javelin.isEmpty(config)) {
-        if (this.config && this.config.plugins && this.config.plugins[alias]) {
-            config = this.config.plugins[alias];
+        if (this.config && this.config.plugins && this.config.plugins[name]) {
+            config = this.config.plugins[name];
         } else {
-            config = handler.defaults || {};
+            config = def.defaults || {};
         }
     }
     
-    var plugin = new Javelin.EnginePlugin();
-    plugin.$alias = handler.alias;
-    plugin.$engine = this;
+    var plugin = new Javelin.Plugin(name, this);
     
-    handler(plugin, config);
+    def.handler.call(plugin, config);
+    this.plugins[plugin.$name] = plugin;
     plugin.$onLoad();
-    plugin.$active = true;
-    this.plugins[plugin.$alias] = plugin;
 };
 
 Javelin.Engine.prototype.unloadPlugin = function(name) {
     var p = this.getPlugin(name);
     if(p) {
-        p.$active = false;
         p.$onUnload();
         this.plugins[name] = null;
     }

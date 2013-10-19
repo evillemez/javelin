@@ -198,6 +198,7 @@ Javelin.Registry.prototype.createEnvironment = function(environment, configurati
 };
 
 Javelin.Registry.prototype.createGame = function(environment, config) {
+    config = config || {};
     var envConfig = (config.environments && config.environments[environment]) ? config.environments[environment] : null;
 
     return new Javelin.Engine(this, this.createEnvironment(environment, envConfig), config);

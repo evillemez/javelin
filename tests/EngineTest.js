@@ -1,4 +1,3 @@
-//TODO: REFACTOR TO USE FIXTURES PROPERLY
 'use strict';
 
 var chai = require('chai')
@@ -41,14 +40,15 @@ describe("Engine", function() {
         javelin.loader(['.png','.jpg','.jpeg','.gif'], ['test'], Fixtures.ImageLoader);
         
         //test environment
-        javelin.environment('test', Fixtures.Environment, {foo: 'bar', baz: 'baz'});
+        javelin.environment('test', Fixtures.Environment, Fixtures.DefaultEnvirnonmentConfig);
     });
 
-    function createEngine(noGameConfig) {
-        if (noGameConfig || false) {
-            return javelin.createGame('test');
-        } else {
+    function createEngine(withConfig) {
+        var config = (withConfig === true) ? true : false;
+        if (config) {
             return javelin.createGame('test', Fixtures.GameConfig);
+        } else {
+            return javelin.createGame('test');
         }
     }
 
@@ -56,13 +56,6 @@ describe("Engine", function() {
         createEngine().step();
     });
     
-    it("should throw error when failing to load a plugin", function() {
-        var game = createEngine();
-        assert.throws(function() {
-            game.loadPlugin('foo');
-        }, /unknown plugin/);
-    });
-
     it("should properly load and unload plugins", function() {
         var game, plugin;
 
@@ -88,11 +81,53 @@ describe("Engine", function() {
         assert.deepEqual(plugin.config, Fixtures.GameConfig.plugins.test);
     });
 
-    it("should notify plugins on step");
+    it("should notify plugins on step", function() {
+        var engine = createEngine(true);
+        engine.loadPlugin('test');
+        var plugin = engine.getPlugin('test');
 
-    it("should properly instantiate simple entities");
+        assert.strictEqual(plugin.preUpdates, 0);
+        assert.strictEqual(plugin.postUpdates, 0);
+        engine.step();
+        assert.strictEqual(plugin.preUpdates, 1);
+        assert.strictEqual(plugin.postUpdates, 1);
+    });
 
-    it("should properly instantiate complex entities");
+    it("should not notify disabled plugins on step", function() {
+        var engine = createEngine(true);
+        engine.loadPlugin('test');
+        var plugin = engine.getPlugin('test');
+        plugin.$enabled = false;
+
+        assert.strictEqual(plugin.preUpdates, 0);
+        assert.strictEqual(plugin.postUpdates, 0);
+        engine.step();
+        assert.strictEqual(plugin.preUpdates, 0);
+        assert.strictEqual(plugin.postUpdates, 0);
+    });
+
+    it("should properly instantiate simple entities", function() {
+        var engine = createEngine();
+        var ent = engine.instantiateEntity({
+            tags: ['example'],
+            components: {
+                'foo': {
+                    bar: 500
+                }
+            }
+        });
+
+        assert.isTrue(ent instanceof Javelin.Entity);
+        assert.deepEqual(ent.tags, ['example']);
+        assert.strictEqual(ent.name, 'Anonymous');
+        assert.strictEqual(ent.id, 1);
+        assert.isTrue(ent.hasComponent('foo'));
+        assert.strictEqual(ent.get('foo').bar, 500);
+    });
+
+    it("should properly instantiate complex entities", function() {
+
+    });
 
     it("should properly destroy entities");
 
@@ -114,7 +149,7 @@ describe("Engine", function() {
 
     it("should notify plugins on flush");
 
-    it("should step with no errors");
+    it("should step with no errors and a loaded scene");
 
     it("should call entity component callbacks on create/destroy and update");
                 

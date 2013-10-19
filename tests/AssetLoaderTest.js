@@ -1,4 +1,3 @@
-//TODO: REFACTOR TO USE FIXTURES PROPERLY
 'use strict';
 
 var chai = require('chai')
