@@ -23,6 +23,8 @@ describe("Engine", function() {
 
         //components
         javelin.component('foo', Fixtures.FooComponent);
+        javelin.component('bar', Fixtures.BarComponent, ['foo']);
+        javelin.component('baz', Fixtures.BazComponent, ['bar']);
 
         //test plugins
         javelin.plugin('test', Fixtures.Plugin, Fixtures.DefaultPluginConfig);
@@ -41,6 +43,7 @@ describe("Engine", function() {
         
         //test environment
         javelin.environment('test', Fixtures.Environment, Fixtures.DefaultEnvirnonmentConfig);
+        javelin.optimize();
     });
 
     function createEngine(withConfig) {
@@ -112,7 +115,7 @@ describe("Engine", function() {
             tags: ['example'],
             components: {
                 'foo': {
-                    bar: 500
+                    foo: 500
                 }
             }
         });
@@ -122,10 +125,31 @@ describe("Engine", function() {
         assert.strictEqual(ent.name, 'Anonymous');
         assert.strictEqual(ent.id, 1);
         assert.isTrue(ent.hasComponent('foo'));
-        assert.strictEqual(ent.get('foo').bar, 500);
+        assert.strictEqual(ent.get('foo').foo, 500);
     });
 
     it("should properly instantiate complex entities", function() {
+        var engine = createEngine(true);
+        var ent = engine.instantiate('baz');
+
+        assert.isTrue(ent instanceof Javelin.Entity);
+        assert.isTrue(ent.hasComponent('foo'));
+        assert.isTrue(ent.hasComponent('bar'));
+        assert.isTrue(ent.hasComponent('baz'));
+        assert.strictEqual(ent.get('foo').foo, 'fooz');
+        assert.strictEqual(ent.get('bar').bar, 'barz');
+        assert.strictEqual(ent.get('baz').baz, 'bazz');
+        assert.strictEqual(ent.children.length, 2);
+
+        assert.strictEqual(ent.children[0].id, 2);
+        assert.isTrue(ent.children[0].hasComponent('foo'));
+        assert.isTrue(ent.children[0].hasComponent('bar'));
+        assert.strictEqual(ent.children[1].id, 3);
+        assert.isTrue(ent.children[1].hasComponent('foo'));
+        assert.isTrue(ent.children[1].hasComponent('bar'));
+    });
+
+    it.skip("should instantiate entities during update", function() {
 
     });
 

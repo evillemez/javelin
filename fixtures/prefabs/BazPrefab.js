@@ -1,3 +1,12 @@
 Fixtures.BazPrefab = {
-    tags: ['environment']
+    tags: ['environment'],
+    components: {
+        'baz': {
+            baz: 'bazz'
+        }
+    },
+    children: [
+        'bar',
+        'bar'
+    ]
 };

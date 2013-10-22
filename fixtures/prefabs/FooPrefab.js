@@ -1,3 +1,8 @@
 Fixtures.FooPrefab = {
-    tags: ['environment']
+    tags: ['environment'],
+    components: {
+        'foo': {
+            foo: 'fooz'
+        }
+    }
 };

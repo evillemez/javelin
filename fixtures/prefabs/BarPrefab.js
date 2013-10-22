@@ -1,3 +1,8 @@
 Fixtures.BarPrefab = {
-    tags: ['player']
+    tags: ['player'],
+    components: {
+        'bar': {
+            bar: 'barz'
+        }
+    }
 };

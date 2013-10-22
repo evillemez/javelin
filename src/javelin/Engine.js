@@ -124,17 +124,11 @@ Javelin.Engine.prototype.addComponentToEntity = function(ent, name) {
         this.addComponentToEntity(ent, reqs[i]);
     }
     
-    var handler = Javelin.getComponentHandler(name);
-    if (!handler) {
-        throw new Error("Unknown component [" + name + "] requested");
-    }
+    var comp = new Javelin.Component(name);
+    comp.$id = ent.id;
+    def.handler.call(comp, ent, this);
 
-    var comp = new Javelin.Component(handler.name, go);
-    comp.$id = go.id;
-
-    handler(go, comp);
-
-    go.setComponent(name, comp);
+    ent.setComponent(name, comp);
     
     return comp;
 };

@@ -81,7 +81,7 @@ Javelin.Entity.prototype.setComponents = function(arr) {
     this.setModified();
 };
 
-Javelin.Entity.prototype.getComponent = function(name) {
+Javelin.Entity.prototype.get = function(name) {
     return this.components[name] || false;
 };
 
@@ -108,7 +108,7 @@ Javelin.Entity.prototype.getComponentsInChildren = function(name) {
         }
         
         //get component of child
-        var component = c.getComponent(name);
+        var component = c.get(name);
         if (component) {
             components.push(component);
         }

@@ -10,7 +10,7 @@ module.exports = function(grunt) {
         
         //this is for convenience, used in other configs
         fileCollections: {
-            lint: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', 'fixtures/**/*.js'],
+            lint: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', 'fixtures/**/*.js', 'tasks/**/*.js'],
             test: ['tests/**/*.js'],
             javelinCore: [
                 'util/javelin.prefix',
@@ -65,7 +65,7 @@ module.exports = function(grunt) {
                 src: '<%= fileCollections.test %>'
             }
         },
-        concat: {
+        concat_sourcemap: {
             options: {
                 separator: "\n\n"
             },
@@ -106,22 +106,25 @@ module.exports = function(grunt) {
                 }
             }
         },
-        javelindocs: {
+        javelin_docs: {
             options: {
                 target: 'build/docs/'
             }
         }
     });
     
-    //register commands from plugins
+    //load commands from plugins
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-concat-sourcemap');
+    //grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-simple-mocha');
+
+    //load custom tasks
+    grunt.loadTasks('tasks/');
     
-    // Default task
-    grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'simplemocha']);
+    // Custom tasks
+    grunt.registerTask('default', ['jshint', 'concat_sourcemap', 'uglify', 'simplemocha']);
     grunt.registerTask('build', ['jshint', 'concat', 'uglify']);
-    grunt.registerTask('docs', function() { throw new Error("Not yet implemented."); });
 };

@@ -18,11 +18,11 @@ describe("Entity", function() {
         var ent = new Javelin.Entity();
         var c = new Javelin.Component();
         assert.isFalse(ent.hasComponent('foo'));
-        assert.isFalse(ent.getComponent('foo'));
+        assert.isFalse(ent.get('foo'));
         
         ent.setComponent('foo', c);
         assert.isTrue(ent.hasComponent('foo'));
-        assert.isObject(ent.getComponent('foo'));
+        assert.isObject(ent.get('foo'));
         
         ent = new Javelin.Entity();
         var c1 = new Javelin.Component();
