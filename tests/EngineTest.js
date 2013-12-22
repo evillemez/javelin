@@ -25,6 +25,7 @@ describe("Engine", function() {
         javelin.component('foo', Fixtures.FooComponent);
         javelin.component('bar', Fixtures.BarComponent, ['foo']);
         javelin.component('baz', Fixtures.BazComponent, ['bar']);
+        javelin.component('manager', Fixtures.ManagerComponent);
 
         //test plugins
         javelin.plugin('test', Fixtures.Plugin, Fixtures.DefaultPluginConfig);
@@ -33,6 +34,7 @@ describe("Engine", function() {
         javelin.prefab('foo', Fixtures.FooPrefab);
         javelin.prefab('bar', Fixtures.BarPrefab);
         javelin.prefab('baz', Fixtures.BazPrefab);
+        javelin.prefab('manager', Fixtures.ManagerPrefab);
 
         //test scenes
         javelin.scene('example', Fixtures.Scene);
@@ -136,9 +138,8 @@ describe("Engine", function() {
         assert.isTrue(ent.hasComponent('foo'));
         assert.isTrue(ent.hasComponent('bar'));
         assert.isTrue(ent.hasComponent('baz'));
-        assert.strictEqual(ent.get('foo').foo, 'fooz');
-        assert.strictEqual(ent.get('bar').bar, 'barz');
         assert.strictEqual(ent.get('baz').baz, 'bazz');
+        assert.strictEqual(ent.get('foo').foo, 500);
         assert.strictEqual(ent.children.length, 2);
 
         assert.strictEqual(ent.children[0].id, 2);
@@ -149,11 +150,35 @@ describe("Engine", function() {
         assert.isTrue(ent.children[1].hasComponent('bar'));
     });
 
-    it.skip("should instantiate entities during update", function() {
+    it("should instantiate entities during update", function() {
+        var engine = createEngine();
 
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
+
+        var manager = engine.instantiate('manager');
+        assert.strictEqual(engine.gos.length, 1);
+
+        engine.step();
+        assert.strictEqual(engine.gos.length, 2);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 3);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 4);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 5);
+
+        engine.step();
+        assert.strictEqual(engine.gos.length, 5);
+
+        manager.destroy();
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
     });
 
-    it("should properly destroy entities");
+    it("should properly destroy entities during update");
 
     it("should retrieve entities by id");
 

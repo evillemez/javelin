@@ -3,6 +3,9 @@ Fixtures.BazPrefab = {
     components: {
         'baz': {
             baz: 'bazz'
+        },
+        'foo': {
+            foo: 500
         }
     },
     children: [
