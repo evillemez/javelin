@@ -1,4 +1,4 @@
-Fixtures.Scene = {
+Fixtures.SimpleScene = {
     entities: [
         'foo',
         'bar',

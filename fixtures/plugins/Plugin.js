@@ -28,10 +28,10 @@ Fixtures.Plugin = function(config) {
     this.$onPreUpdate = function(deltaTime) { self.preUpdates++; };
     this.$onPostUpdate = function(deltaTime) { self.postUpdates++; };
 
-    this.$onPrefabCreated = function() { self.prefabsCreated++; };
-    this.$onPrefabDestroyed = function() { self.prefabsDestroyed++; };
+    this.$onPrefabCreate = function() { self.prefabsCreated++; };
+    this.$onPrefabDestroy = function() { self.prefabsDestroyed++; };
 
-    this.$onEntityCreated = function() { self.entitiesCreated++; };
-    this.$onEntityDestroyed = function() { self.entitiesDestroyed++; };
+    this.$onEntityCreate = function() { self.entitiesCreated++; };
+    this.$onEntityDestroy = function() { self.entitiesDestroyed++; };
 
 };

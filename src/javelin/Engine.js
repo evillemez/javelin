@@ -53,7 +53,7 @@ Javelin.Engine.prototype.reset = function() {
 
 /* Managing Game Objects */
 
-Javelin.Engine.prototype.getGameObjectById = function(id) {
+Javelin.Engine.prototype.getEntityById = function(id) {
     var l = this.gos.length;
     for (var i = 0; i < l; i++) {
         if (this.gos[i].id === id) {
@@ -81,6 +81,7 @@ Javelin.Engine.prototype.instantiateEntity = function(def, isNestedCall) {
         ent.layer = def.layer || 'default';
         ent.name = def.name || 'Anonymous';
         ent.tags = def.tags || [];
+        ent.engine = this;
     }
 
     if (ent.id === -1) {
@@ -139,7 +140,7 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
     } else {
         this.gos.push(go);
 
-        this.pluginsOnGameObjectCreate(go);
+        this.pluginsOnEntityCreate(go);
         
         if (go.children.length) {
             for (var i in go.children) {
@@ -193,7 +194,7 @@ Javelin.Engine.prototype.destroy = function(go, destroyingNested) {
         }
 
         //notify plugins
-        this.pluginsOnGameObjectDestroy(go);
+        this.pluginsOnEntityDestroy(go);
         
         //make sure this object is detached from any parents, 
         //because we abandoned and deleted children already,
@@ -217,38 +218,7 @@ Javelin.Engine.prototype.destroy = function(go, destroyingNested) {
 
 //This must be called before loading and running scenes
 Javelin.Engine.prototype.initialize = function() {
-    var func;
-    var obj;
-    
-    if (this.config.autoregisterPlugins) {
-        for (func in this.config.autoregisterPlugins) {
-            Javelin.registerPlugin(this.config.autoregisterPlugins[func]);
-        }
-    }
-    
-    if (this.config.autoregisterComponents) {
-        for (func in this.config.autoregisterComponents) {
-            Javelin.registerComponent(this.config.autoregisterComponents[func]);
-        }
-    }
-    
-    if (this.config.autoregisterPrefabs) {
-        for (obj in this.config.autoregisterPrefabs) {
-            Javelin.registerPrefab(this.config.autoregisterPrefabs[obj]);
-        }
-    }
-    
-    if (this.config.autoregisterScenes) {
-        for (obj in this.config.autoregisterScenes) {
-            Javelin.registerScene(this.config.autoregisterScenes[obj]);
-        }
-    }
-
-    //build up maps of component dependencies and whatever else
-    Javelin.initialize();
-    
-    //TODO: load required assets
-    
+    this.registry.optimize();
     this.initialized = true;
 };
 
@@ -348,15 +318,15 @@ Javelin.Engine.prototype.cleanupStep = function() {
     this.destroyedGos = [];
 };
 
-Javelin.Engine.prototype.pluginsOnGameObjectCreate = function(go) {
+Javelin.Engine.prototype.pluginsOnEntityCreate = function(go) {
     for (var i in this.plugins) {
-        this.plugins[i].$onGameObjectCreate(go);
+        this.plugins[i].$onEntityCreate(go);
     }
 };
 
-Javelin.Engine.prototype.pluginsOnGameObjectDestroy = function(go) {
+Javelin.Engine.prototype.pluginsOnEntityDestroy = function(go) {
     for (var i in this.plugins) {
-        this.plugins[i].$onGameObjectDestroy(go);
+        this.plugins[i].$onEntityDestroy(go);
     }
 };
 
@@ -370,6 +340,23 @@ Javelin.Engine.prototype.pluginsOnPrefabDestroy = function(go) {
     for (var i in this.plugins) {
         this.plugins[i].$onPrefabDestroy(go);
     }
+};
+
+Javelin.Engine.prototype.pluginsOnFlush = function() {
+    for (var i in this.plugins) {
+        this.plugins[i].$onFlush();
+    }
+};
+
+//this should act as a manual trigger for garbage collection
+Javelin.Engine.prototype.flush = function() {
+    //internal flushing?
+    //remove references, if I ever implement weak references
+    //finalize removal of destroyed entities, if I stop removing immediately
+
+    //notify plugins of flush, they should remove any references in order to force
+    //garbage collection
+    this.pluginsOnFlush();
 };
 
 /* Scene management */
@@ -396,7 +383,7 @@ Javelin.Engine.prototype.loadScene = function(name, callback) {
         this.initialize();
     }
     
-    var scene = Javelin.getScene(name);
+    var scene = this.registry.getScene(name);
     
     if(!scene) {
         throw new Error("Tried loading unregistered scene: " + name);
@@ -412,14 +399,20 @@ Javelin.Engine.prototype.loadScene = function(name, callback) {
             var config = !Javelin.isEmpty(scene.plugins[alias]) ? scene.plugins[alias] : {};
             this.loadPlugin(alias, config);
         }
-    } else {
+    } else if (this.config.plugins) {
         for (alias in this.config.plugins) {
-            this.loadPlugin(alias, {});
+            this.loadPlugin(alias, this.config.plugins[alias]);
         }
     }
 
-    for (var i = 0; i < scene.objects.length; i++) {
-        this.instantiate(scene.objects[i]);
+    if (scene.entities) {
+        for (var i = 0; i < scene.entities.length; i++) {
+            if (Javelin.isString(scene.entities[i])) {
+                this.instantiate(scene.entities[i]);
+            } else {
+                this.instantiateEntity(scene.entities[i]);
+            }
+        }
     }
     
     if (callback) {
@@ -488,6 +481,8 @@ Javelin.Engine.prototype.getPlugin = function(alias) {
     return this.plugins[alias] || false;
 };
 
+//note that components should never use this - this is primarily a mechanism
+//for code that lives outside of the game, for example a standalone HTML/JS GUI
 Javelin.Engine.prototype.on = function(event, callback) {
     this.dispatcher.on(event, callback);
 };

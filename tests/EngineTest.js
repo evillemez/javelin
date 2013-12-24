@@ -37,7 +37,9 @@ describe("Engine", function() {
         javelin.prefab('manager', Fixtures.ManagerPrefab);
 
         //test scenes
-        javelin.scene('example', Fixtures.Scene);
+        javelin.scene('basic', Fixtures.SimpleScene);
+        javelin.scene('complex', Fixtures.ComplexScene);
+        javelin.scene('empty', Fixtures.EmptyScene);
 
         //test loaders
         javelin.loader(['.mp3','.ogg'], ['test'], Fixtures.SoundLoader);
@@ -48,13 +50,12 @@ describe("Engine", function() {
         javelin.optimize();
     });
 
-    function createEngine(withConfig) {
-        var config = (withConfig === true) ? true : false;
-        if (config) {
-            return javelin.createGame('test', Fixtures.GameConfig);
-        } else {
-            return javelin.createGame('test');
-        }
+    function createEngine() {
+        return javelin.createGame('test');
+    }
+
+    function createEngineWithConfig() {
+        return javelin.createGame('test', Fixtures.GameConfig);
     }
 
     it("should step with no components and or objects", function() {
@@ -74,20 +75,20 @@ describe("Engine", function() {
         assert.deepEqual(plugin.config, Fixtures.DefaultPluginConfig);
         
         //plugin received config from game
-        game = createEngine(true);
+        game = createEngineWithConfig();
         game.loadPlugin('test');
         plugin = game.getPlugin('test');
         assert.deepEqual(plugin.config, Fixtures.GameConfig.plugins.test);
 
         //plugin received config from scene
-        game = createEngine(true);
+        game = createEngineWithConfig();
         game.loadPlugin('test');
         plugin = game.getPlugin('test');
         assert.deepEqual(plugin.config, Fixtures.GameConfig.plugins.test);
     });
 
     it("should notify plugins on step", function() {
-        var engine = createEngine(true);
+        var engine = createEngineWithConfig();
         engine.loadPlugin('test');
         var plugin = engine.getPlugin('test');
 
@@ -99,7 +100,7 @@ describe("Engine", function() {
     });
 
     it("should not notify disabled plugins on step", function() {
-        var engine = createEngine(true);
+        var engine = createEngineWithConfig();
         engine.loadPlugin('test');
         var plugin = engine.getPlugin('test');
         plugin.$enabled = false;
@@ -131,7 +132,7 @@ describe("Engine", function() {
     });
 
     it("should properly instantiate complex entities", function() {
-        var engine = createEngine(true);
+        var engine = createEngineWithConfig();
         var ent = engine.instantiate('baz');
 
         assert.isTrue(ent instanceof Javelin.Entity);
@@ -159,6 +160,7 @@ describe("Engine", function() {
         assert.strictEqual(engine.gos.length, 0);
 
         var manager = engine.instantiate('manager');
+        manager.get('manager').setMode('create');
         assert.strictEqual(engine.gos.length, 1);
 
         engine.step();
@@ -178,35 +180,221 @@ describe("Engine", function() {
         assert.strictEqual(engine.gos.length, 0);
     });
 
-    it("should properly destroy entities during update");
+    it("should properly destroy entities during update", function() {
+        var engine = createEngine();
 
-    it("should retrieve entities by id");
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
 
-    it("should load and unload scenes"); //ensure proper callbacks called
+        //create some entities
+        var manager = engine.instantiate('manager');
+        manager.get('manager').setMode('create');
+        engine.step();
+        engine.step();
+        engine.step();
+        engine.step();
+        engine.step();
+        assert.strictEqual(engine.gos.length, 5);
 
-    it("should instantiate plugins when loading scenes");
+        //destroy some entities
+        manager.get('manager').setMode('destroy');
+        engine.step();
+        assert.strictEqual(engine.gos.length, 4);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 3);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 2);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 1);
 
-    it("should load required assets when loading scenes");
+        engine.step();
+        engine.step();
+        assert.strictEqual(engine.gos.length, 1);
 
-    it("should instantiate entities when loading scenes");
+        manager.destroy();
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
+    });
+
+    it("should retrieve entities by id", function() {
+        var engine = createEngine();
+        var foo = engine.instantiate('foo');
+        var bar = engine.instantiate('bar');
+        var baz = engine.instantiate('baz');
+
+        assert.strictEqual(foo.id, 1);
+        assert.strictEqual(bar.id, 2);
+        assert.strictEqual(baz.id, 3);
+
+        var ent = engine.getEntityById(1);
+        assert.deepEqual(ent, foo);
+        ent = engine.getEntityById(2);
+        assert.deepEqual(ent, bar);
+        ent = engine.getEntityById(3);
+        assert.deepEqual(ent, baz);
+    });
+
+    it("should load and unload scenes", function() {
+        var engine = createEngine();
+        var called = false;
+
+        assert.isFalse(called);
+
+        engine.loadScene('basic', function() {
+            called = true;
+        });
+
+        assert.isTrue(called);
+        assert.isTrue(engine.gos.length > 0);
+
+        engine.unloadScene();
+        assert.strictEqual(engine.gos.length, 0);
+    });
+
+    it("should instantiate plugins defined in game when loading scenes", function() {
+        var engine = createEngineWithConfig();
+
+        assert.isFalse(engine.getPlugin('test'));
+        engine.loadScene('basic', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+        assert.isTrue(plugin instanceof Javelin.Plugin);
+        assert.strictEqual(plugin.config.foo, 'bar');
+        assert.strictEqual(plugin.config.bar, 'baz');
+    });
+
+    it("should instantiate plugins defined in scene when loading scenes", function() {
+        var engine = createEngineWithConfig();
+
+        assert.isFalse(engine.getPlugin('test'));
+        engine.loadScene('complex', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+        assert.isTrue(plugin instanceof Javelin.Plugin);
+        assert.strictEqual(plugin.config.foo, 500);
+        assert.strictEqual(plugin.config.bar, 600);
+    });
+
+    it.skip("should load required assets when loading scenes", function() {
+        //TODO: implement idea in README for required assets
+    });
+
+    it("should instantiate entities when loading scenes", function() {
+        var engine = createEngineWithConfig();
+
+        assert.strictEqual(engine.gos.length, 0);
+        engine.loadScene('basic', Javelin.noop);
+        assert.strictEqual(engine.gos.length, 8);
+    });
+        
+    it("should call plugins on entity create and destroy", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('empty', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+
+        assert.strictEqual(plugin.entitiesCreated, 0);
+        assert.strictEqual(plugin.entitiesDestroyed, 0);
+        var ent1 = engine.instantiate('foo');
+        assert.strictEqual(plugin.entitiesCreated, 1);
+        assert.strictEqual(plugin.entitiesDestroyed, 0);
+        var ent2 = engine.instantiate('foo');
+        assert.strictEqual(plugin.entitiesCreated, 2);
+        assert.strictEqual(plugin.entitiesDestroyed, 0);
+
+        ent1.destroy();
+        assert.strictEqual(plugin.entitiesCreated, 2);
+        assert.strictEqual(plugin.entitiesDestroyed, 1);
+        ent2.destroy();
+        assert.strictEqual(plugin.entitiesCreated, 2);
+        assert.strictEqual(plugin.entitiesDestroyed, 2);
+    });
     
-    it("should load required assets when loading scenes");
-    
-    it("should call plugins on entity create and destroy");
-    
-    it("should notify plugins on prefab instantiate and destroy");
+    it("should notify plugins on prefab instantiate and destroy", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('empty', Javelin.noop);
+        var plugin = engine.getPlugin('test');
 
-    it("should notify plugins on flush");
+        assert.strictEqual(plugin.entitiesCreated, 0);
+        assert.strictEqual(plugin.prefabsCreated, 0);
+        var ent1 = engine.instantiate('foo');
+        assert.strictEqual(plugin.entitiesCreated, 1);
+        assert.strictEqual(plugin.prefabsCreated, 1);
 
-    it("should step with no errors and a loaded scene");
+        var ent2 = engine.instantiate('baz');
+        assert.strictEqual(plugin.entitiesCreated, 4);
+        assert.strictEqual(plugin.prefabsCreated, 2);
 
-    it("should call entity component callbacks on create/destroy and update");
-                
-    it("should properly instantiate and destroy entities during update step");
+        ent1.destroy();
+        assert.strictEqual(plugin.entitiesDestroyed, 1);
+        assert.strictEqual(plugin.prefabsDestroyed, 1);
+
+        ent2.destroy();
+        assert.strictEqual(plugin.entitiesDestroyed, 4);
+        assert.strictEqual(plugin.prefabsDestroyed, 2);
+    });
+
+    it("should notify plugins on flush", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('empty', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+
+        assert.strictEqual(plugin.flushes, 0);
+        engine.flush();
+        assert.strictEqual(plugin.flushes, 1);
+    });
+
+    it("should step with no errors and a loaded scene", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('complex', Javelin.noop);
+        engine.step();
+    });
+
+    it("should call entity component callbacks on create/destroy and update", function() {
+        var engine = createEngineWithConfig();
+        var ent = engine.instantiate('foo');
+        var foo = ent.get('foo');
+
+        assert.isTrue(foo.created);
+        assert.isFalse(foo.updated);
+        assert.isFalse(foo.destroyed);
+
+        engine.step();
+        assert.isTrue(foo.created);
+        assert.isTrue(foo.updated);
+        assert.isFalse(foo.destroyed);
+
+        ent.destroy();
+        assert.isTrue(foo.created);
+        assert.isTrue(foo.updated);
+        assert.isTrue(foo.destroyed);
+    });
     
-    it("should emit events emitted by root entities");
+    it("should emit events emitted by root entities", function() {
+        var engine = createEngineWithConfig();
+        var ent = engine.instantiate('foo');
+
+        var data = {called: false};
+        engine.on('foo.event', function(eventData) {
+            data = eventData;
+        });
+
+        assert.isFalse(data.called);
+        ent.emit('foo.event', {called: true});
+        assert.isTrue(data.called);
+    });
     
-    it("should dispatch events to root level entities");
+    it("should dispatch events to root level entities", function() {
+        var engine = createEngineWithConfig();
+        var ent = engine.instantiate('foo');
+
+        var data = {called: false};
+        ent.on('foo.event', function(eventData) {
+            data = eventData;
+        });
+
+        assert.isFalse(data.called);
+        engine.broadcast('foo.event', {called: true});
+        assert.isTrue(data.called);
+    });
 
 });
-//*/

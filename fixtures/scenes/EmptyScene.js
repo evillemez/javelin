@@ -1,0 +1,5 @@
+Fixtures.EmptyScene = {
+    plugins: {
+        'test': {}
+    }
+};

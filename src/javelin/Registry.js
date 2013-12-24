@@ -268,4 +268,6 @@ Javelin.Registry.prototype.unpackPrefabs = function() {
 Javelin.Registry.prototype.optimize = function() {
     this.computeComponentRequirements();
     this.unpackPrefabs();
+
+    //TODO: consider unpacking scenes entities the same way as unpacking prefabs
 };
