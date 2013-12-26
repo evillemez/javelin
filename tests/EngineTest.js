@@ -1,383 +1,421 @@
 'use strict';
 
-var chai = require('chai');
+var chai = require('chai')
+    , spies = require('chai-spies')
+    , assert = chai.assert
+    , expect = chai.expect
+    , Javelin = require('../build/javelin.js')
+;
+chai.use(spies);
 chai.Assertion.includeStack = true;
-var assert = chai.assert;
 
-describe("Javelin Engine", function() {
+describe("Engine", function() {
     
-    var j, f;
-    
+    var javelin, spies, Fixtures;
+
+    //before each test create an empty javelin
+    //repository and register the test fixtures
     beforeEach(function() {
-        j = require('../build/javelin.js');
-        f = require('./fixtures/fixtures.js');
-        j.reset();
+        //TODO: don't allow fixtures to be cached
+        Fixtures = require('../build/fixtures.js');
+        javelin = Javelin.createNewInstance();
+        spies = {};
+
+        //components
+        javelin.component('foo', Fixtures.FooComponent);
+        javelin.component('bar', Fixtures.BarComponent, ['foo']);
+        javelin.component('baz', Fixtures.BazComponent, ['bar']);
+        javelin.component('manager', Fixtures.ManagerComponent);
+
+        //test plugins
+        javelin.plugin('test', Fixtures.Plugin, Fixtures.DefaultPluginConfig);
+
+        //test prefabs
+        javelin.prefab('foo', Fixtures.FooPrefab);
+        javelin.prefab('bar', Fixtures.BarPrefab);
+        javelin.prefab('baz', Fixtures.BazPrefab);
+        javelin.prefab('manager', Fixtures.ManagerPrefab);
+
+        //test scenes
+        javelin.scene('basic', Fixtures.SimpleScene);
+        javelin.scene('complex', Fixtures.ComplexScene);
+        javelin.scene('empty', Fixtures.EmptyScene);
+
+        //test loaders
+        javelin.loader(['.mp3','.ogg'], ['test'], Fixtures.SoundLoader);
+        javelin.loader(['.png','.jpg','.jpeg','.gif'], ['test'], Fixtures.ImageLoader);
+        
+        //test environment
+        javelin.environment('test', Fixtures.Environment, Fixtures.DefaultEnvirnonmentConfig);
+        javelin.optimize();
     });
 
-    //for convenience
-    var getEngine = function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), f.GameConfig);
-        e.initialize();
-        return e;
-    };
-    
-    var getEmptyEngine = function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
-        e.initialize();
-        return e;
-    };    
-    
-    it("should instantiate with game configuration and environment", function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), f.GameConfig);
-    });
-    
-    it("should automatically register game plugins, prefabs, scenes and components upon initialize", function() {
-        assert.isFalse(j.getComponentHandler('f.foo'));
-        assert.isFalse(j.getPluginHandler('f.test_plugin'));
-        assert.isFalse(j.getPrefab('f.testPrefab'));
-        assert.isFalse(j.getScene('f.scene1'));
-        var e = getEngine();
-        assert.isFunction(j.getComponentHandler('f.foo'));
-        assert.isFunction(j.getPluginHandler('f.test_plugin'));
-        assert.isObject(j.getPrefab('f.testPrefab'));
-        assert.isObject(j.getScene('f.scene1'));
-    });
-    
+    function createEngine() {
+        return javelin.createGame('test');
+    }
+
+    function createEngineWithConfig() {
+        return javelin.createGame('test', Fixtures.GameConfig);
+    }
+
     it("should step with no components and or objects", function() {
-        var e = new j.Engine(new f.Env.TestEnvironment(), {});
-        assert.equal(0, e.stepId);
-        e.step();
-        assert.equal(1, e.stepId);
+        createEngine().step();
     });
     
     it("should properly load and unload plugins", function() {
-        var e = getEngine();
-        assert.isFalse(e.getPlugin('f.test_plugin'));
+        var game, plugin;
+
+        game = createEngine();
+        assert.isFalse(game.getPlugin('test'));
+        game.loadPlugin('test');
+        plugin = game.getPlugin('test');
+        assert.isTrue(plugin instanceof Javelin.Plugin);
+
+        //plugin received default config
+        assert.deepEqual(plugin.config, Fixtures.DefaultPluginConfig);
         
-        e = getEngine();
-        e.loadPlugin('f.test_plugin');
-        var p = e.getPlugin('f.test_plugin');
-        assert.isTrue(p instanceof j.EnginePlugin);
-        assert.isTrue(p.$engine instanceof j.Engine);
-        e.unloadPlugin('f.test_plugin');
-        assert.isFalse(e.getPlugin('f.test_plugin'));
-                
-        //config inherited from game config
-        e.loadPlugin('f.test_plugin');
-        p = e.getPlugin('f.test_plugin');
-        assert.isTrue(p instanceof j.EnginePlugin);
-        assert.strictEqual('override', p.config.foo);
-        e.unloadPlugins();
-        assert.isFalse(e.getPlugin('f.test_plugin'));
-        
-        //load w/ config
-        e.loadPlugin('f.test_plugin', {
-            foo: 'I have a milkshake.'
-        });
-        p = e.getPlugin('f.test_plugin');
-        assert.strictEqual('I have a milkshake.', p.config.foo);
-        e.unloadPlugin();
+        //plugin received config from game
+        game = createEngineWithConfig();
+        game.loadPlugin('test');
+        plugin = game.getPlugin('test');
+        assert.deepEqual(plugin.config, Fixtures.GameConfig.plugins.test);
+
+        //plugin received config from scene
+        game = createEngineWithConfig();
+        game.loadPlugin('test');
+        plugin = game.getPlugin('test');
+        assert.deepEqual(plugin.config, Fixtures.GameConfig.plugins.test);
     });
-    
-    it("should properly call plugins on step", function() {
-        var e = getEngine();
-        e.loadPlugin('f.test_plugin');
-        var p = e.getPlugin('f.test_plugin');
-        assert.equal(0, p.stepCount);
-        e.step();
-        assert.equal(1, p.stepCount);
+
+    it("should notify plugins on step", function() {
+        var engine = createEngineWithConfig();
+        engine.loadPlugin('test');
+        var plugin = engine.getPlugin('test');
+
+        assert.strictEqual(plugin.preUpdates, 0);
+        assert.strictEqual(plugin.postUpdates, 0);
+        engine.step();
+        assert.strictEqual(plugin.preUpdates, 1);
+        assert.strictEqual(plugin.postUpdates, 1);
     });
-    
-    it("should properly add game object components to game objects", function() {
-        var e = getEngine();
-        var go;
-        
-        //basic requirements
-        go = new j.GameObject();
-        assert.isFalse(go.hasComponent('f.blar'));
-        assert.isFalse(go.hasComponent('f.blag'));
-        assert.isFalse(go.hasComponent('f.blaz'));
-        e.addComponentToGameObject(go, 'f.blaz');
-        assert.isTrue(go.hasComponent('f.blar'));
-        assert.isTrue(go.hasComponent('f.blag'));
-        assert.isTrue(go.hasComponent('f.blaz'));
-        
+
+    it("should not notify disabled plugins on step", function() {
+        var engine = createEngineWithConfig();
+        engine.loadPlugin('test');
+        var plugin = engine.getPlugin('test');
+        plugin.$enabled = false;
+
+        assert.strictEqual(plugin.preUpdates, 0);
+        assert.strictEqual(plugin.postUpdates, 0);
+        engine.step();
+        assert.strictEqual(plugin.preUpdates, 0);
+        assert.strictEqual(plugin.postUpdates, 0);
     });
-    
-    it("should instantiate objects with proper components", function() {
-        //TODO: similar test as above, but configuring multiple components
-        var e = getEngine();
-        var obj = {
-            name: 'test',
+
+    it("should properly instantiate simple entities", function() {
+        var engine = createEngine();
+        var ent = engine.instantiateEntity({
+            tags: ['example'],
             components: {
-                'f.bar': {
-                    foo: 'blip',
-                },
-                'f.blar': {
-                    bar: 'bling'
-                },
-                'f.shqip': {},
-                'f.blav': {
-                    baz: 'turtles'
+                'foo': {
+                    foo: 500
                 }
             }
-        };
-        
-        var go = e.instantiateObject(obj);
-        
-        //assert all the things...  ALL OF THEM!        
-        assert.isTrue(go.hasComponent('f.bar'));
-        assert.isTrue(go.hasComponent('f.blar'));
-        assert.isTrue(go.hasComponent('f.blag'));
-        assert.isTrue(go.hasComponent('f.blaz'));
-        assert.isTrue(go.hasComponent('f.quip'));
-        assert.isTrue(go.hasComponent('f.shqip'));
+        });
+
+        assert.isTrue(ent instanceof Javelin.Entity);
+        assert.deepEqual(ent.tags, ['example']);
+        assert.strictEqual(ent.name, 'Anonymous');
+        assert.strictEqual(ent.id, 1);
+        assert.isTrue(ent.hasComponent('foo'));
+        assert.strictEqual(ent.get('foo').foo, 500);
     });
 
-    it("should instantiate and destroy game objects", function() {
-        var go;
-        var obj = {
-            name: "example",
-            components: {
-                'f.foo': {}
-            }
-        };        
+    it("should properly instantiate complex entities", function() {
+        var engine = createEngineWithConfig();
+        var ent = engine.instantiate('baz');
 
-        var e = getEngine();
-        
-        //instantiate prefab
-        assert.equal(0, e.gos.length);
-        go = e.instantiatePrefab('f.testPrefab');
-        assert.equal(1, e.gos.length);
-        assert.isTrue(go.hasComponent('sprite'));
-        assert.isTrue(go.hasComponent('transform2d'));
-        assert.equal(1, go.id);
-        e.destroy(go);
-        assert.equal(-1, go.id);
-        assert.equal(0, e.gos.length);
+        assert.isTrue(ent instanceof Javelin.Entity);
+        assert.isTrue(ent.hasComponent('foo'));
+        assert.isTrue(ent.hasComponent('bar'));
+        assert.isTrue(ent.hasComponent('baz'));
+        assert.strictEqual(ent.get('baz').baz, 'bazz');
+        assert.strictEqual(ent.get('foo').foo, 500);
+        assert.strictEqual(ent.children.length, 2);
 
-        //instantiate object
-        go = e.instantiate(obj);
-        assert.equal(1, e.gos.length);
-        assert.equal(2, go.id);
-        assert.isTrue(go.hasComponent('f.foo'));
-        e.destroy(go);
-        assert.equal(-1, go.id);
-        assert.equal(0, e.gos.length);
-
-        //regular instantiate, using both prefab reference
-        //and object
-        assert.equal(0, e.gos.length);
-        go = e.instantiate('f.testPrefab');
-        assert.equal(1, e.gos.length);
-        assert.equal(3, go.id);
-        assert.isTrue(go.hasComponent('sprite'));
-        assert.isTrue(go.hasComponent('transform2d'));
-        e.destroy(go);
-        assert.equal(-1, go.id);
-        assert.equal(0, e.gos.length);
-        
-        go = e.instantiate(obj);
-        assert.equal(1, e.gos.length);
-        assert.equal(4, go.id);
-        assert.isTrue(go.hasComponent('f.foo'));
-        e.destroy(go);
-        assert.equal(-1, go.id);
-        assert.equal(0, e.gos.length);
+        assert.strictEqual(ent.children[0].id, 2);
+        assert.isTrue(ent.children[0].hasComponent('foo'));
+        assert.isTrue(ent.children[0].hasComponent('bar'));
+        assert.strictEqual(ent.children[1].id, 3);
+        assert.isTrue(ent.children[1].hasComponent('foo'));
+        assert.isTrue(ent.children[1].hasComponent('bar'));
     });
-    
-    it("should instantiate and destroy nested objects", function() {
-        var e = getEngine();
-        assert.strictEqual(e.gos.length, 0);
-        var go = e.instantiatePrefab('f.nestedPrefab');
-        assert.strictEqual(e.gos.length, 3);
-        assert.strictEqual(e.lastGoId, 3);
-        
-        assert.isTrue(go.hasChildren());
-        assert.strictEqual(go.id, 1);
-        assert.strictEqual(go.children.length, 2);
 
-        assert.strictEqual(go.children[0].id, 2);
-        assert.isTrue(go.children[0].hasParent());
-        assert.isTrue(go.children[0].hasComponent('transform2d'));
-        assert.strictEqual(go.children[1].id, 3);
-        assert.isTrue(go.children[1].hasParent());
-        assert.isTrue(go.children[1].hasComponent('f.bar'));
-        
-        e.destroy(go);
-        assert.strictEqual(e.gos.length, 0);
+    it("should instantiate entities during update", function() {
+        var engine = createEngine();
+
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
+
+        var manager = engine.instantiate('manager');
+        manager.get('manager').setMode('create');
+        assert.strictEqual(engine.gos.length, 1);
+
+        engine.step();
+        assert.strictEqual(engine.gos.length, 2);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 3);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 4);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 5);
+
+        engine.step();
+        assert.strictEqual(engine.gos.length, 5);
+
+        manager.destroy();
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
     });
-    
-    it("should retrieve objects by id", function() {
-        var e = getEngine();
-        e.instantiate('f.testPrefab');
-        e.instantiate('f.managerPrefab');
-        
-        var go = e.getGameObjectById(2);
-        assert.isTrue(go.hasComponent('f.manager'));
-        
-        go = e.getGameObjectById(1);
-        assert.isTrue(go.hasComponent('sprite'));
-        assert.isTrue(go.hasComponent('transform2d'));
+
+    it("should properly destroy entities during update", function() {
+        var engine = createEngine();
+
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
+
+        //create some entities
+        var manager = engine.instantiate('manager');
+        manager.get('manager').setMode('create');
+        engine.step();
+        engine.step();
+        engine.step();
+        engine.step();
+        engine.step();
+        assert.strictEqual(engine.gos.length, 5);
+
+        //destroy some entities
+        manager.get('manager').setMode('destroy');
+        engine.step();
+        assert.strictEqual(engine.gos.length, 4);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 3);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 2);
+        engine.step();
+        assert.strictEqual(engine.gos.length, 1);
+
+        engine.step();
+        engine.step();
+        assert.strictEqual(engine.gos.length, 1);
+
+        manager.destroy();
+        engine.step();
+        assert.strictEqual(engine.gos.length, 0);
     });
-    
+
+    it("should retrieve entities by id", function() {
+        var engine = createEngine();
+        var foo = engine.instantiate('foo');
+        var bar = engine.instantiate('bar');
+        var baz = engine.instantiate('baz');
+
+        assert.strictEqual(foo.id, 1);
+        assert.strictEqual(bar.id, 2);
+        assert.strictEqual(baz.id, 3);
+
+        var ent = engine.getEntityById(1);
+        assert.deepEqual(ent, foo);
+        ent = engine.getEntityById(2);
+        assert.deepEqual(ent, bar);
+        ent = engine.getEntityById(3);
+        assert.deepEqual(ent, baz);
+    });
+
     it("should load and unload scenes", function() {
-        var e = getEngine();
-        assert.isFalse(e.getCurrentScene());
-        e.loadScene('f.scene1');
-        assert.strictEqual('f.scene1', e.getCurrentScene());
-        e.unloadScene();
-        assert.isFalse(e.getCurrentScene());
-    });
-    
-    it("should initialize plugins upon loading scenes", function() {
-        var e = getEngine();
-        assert.isFalse(e.getPlugin('f.test_plugin'));
-        e.loadScene('f.scene1');
-        var p = e.getPlugin('f.test_plugin');
-        assert.isTrue(p instanceof j.EnginePlugin);
-        assert.isTrue(p.initialized);
-        assert.strictEqual('baz', p.config.foo);
-    });
-    
-    it("should instantiate game objects defined in a scene", function() {
-        var e = getEngine();
-        assert.strictEqual(e.gos.length, 0);
-        e.loadScene('f.scene1');
-        assert.strictEqual(e.gos.length, 3);
-    });
-
-    it("should call a callback upon loading a scene", function(done) {
-        var e = getEngine();
+        var engine = createEngine();
         var called = false;
 
-        var testCalled = function() {
-            assert.isTrue(called);
-            assert.strictEqual(e.getCurrentScene(), 'f.scene1');
-            done();
-        };
-
-        var sceneCallback = function() {
-            called = true;
-            testCalled();
-        };
-        
-        
         assert.isFalse(called);
-        assert.isFalse(e.getCurrentScene());
-        e.loadScene('f.scene1', sceneCallback);
-    });
-    
-    it("should notify plugins on game object create and destroy", function() {
-        var e = getEngine();
-        e.loadPlugin('f.test_plugin');
-        var p = e.getPlugin('f.test_plugin');
-        assert.strictEqual(0, p.goCount);
-        
-        //test one
-        var go = e.instantiate('f.testPrefab');
-        assert.strictEqual(1, p.goCount);
-        
-        //test nested
-        var nested = e.instantiate('f.nestedPrefab');
-        assert.strictEqual(4, p.goCount);
-        
-        e.destroy(go);
-        assert.strictEqual(3, p.goCount);
-        
-        e.destroy(nested);
-        assert.strictEqual(0, p.goCount);
-    });
-    
-    it.skip("should notify plugins on prefab instantiate and destroy", function() {
-        //TODO
-    });
-    
-    it("should call game object on update", function() {
-            
-        var e = getEngine();
-        var go = e.instantiate('f.prefab4');
-        assert.equal(0, go.getComponent('f.foo').numUpdates);
-        e.step();
-        assert.equal(1, go.getComponent('f.foo').numUpdates);
-    });
-    
-    it("should call game object on create and destroy", function() {
-        var e = getEngine();
-        var go = e.instantiate('f.prefab4');
-        var c = go.getComponent('f.foo');
-        assert.isTrue(c.started);
-        assert.isFalse(c.destroyed);
-        e.destroy(go);
-        assert.isTrue(c.destroyed);        
-    });
-            
-    it("should properly instantiate and destroy game objects during update step", function() {
-        var e = getEngine();
-        assert.equal(0, e.gos.length);
-        e.instantiatePrefab('f.managerPrefab');
-        assert.equal(5, e.gos.length);
-        e.step();
-        assert.equal(4, e.gos.length);
-        e.step();
-        assert.equal(3, e.gos.length);
-        e.step();
-        assert.equal(2, e.gos.length);
-        e.step();
-        assert.equal(1, e.gos.length);
-        e.step();
-        assert.equal(0, e.gos.length);
-    });
-    
-    it("should emit events emitted by root gameObjects", function() {
-        var e = getEngine();
-        var parent = e.instantiateObject({});
-        var child = e.instantiateObject({});
-        parent.addChild(child);
-        
-        var data = {
-            foo: true
-        };
-        
-        child.on('some.event', function(eventData) {
-            assert.isTrue(eventData.foo);
+
+        engine.loadScene('basic', function() {
+            called = true;
         });
 
-        parent.on('some.event', function(eventData) {
-            assert.isTrue(eventData.foo);
-        });
+        assert.isTrue(called);
+        assert.isTrue(engine.gos.length > 0);
+
+        engine.unloadScene();
+        assert.strictEqual(engine.gos.length, 0);
+    });
+
+    it("should instantiate plugins defined in game when loading scenes", function() {
+        var engine = createEngineWithConfig();
+
+        assert.isFalse(engine.getPlugin('test'));
+        engine.loadScene('basic', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+        assert.isTrue(plugin instanceof Javelin.Plugin);
+        assert.strictEqual(plugin.config.foo, 'bar');
+        assert.strictEqual(plugin.config.bar, 'baz');
+    });
+
+    it("should instantiate plugins defined in scene when loading scenes", function() {
+        var engine = createEngineWithConfig();
+
+        assert.isFalse(engine.getPlugin('test'));
+        engine.loadScene('complex', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+        assert.isTrue(plugin instanceof Javelin.Plugin);
+        assert.strictEqual(plugin.config.foo, 500);
+        assert.strictEqual(plugin.config.bar, 600);
+    });
+
+    it.skip("should load required assets when loading scenes", function() {
+        //TODO: implement idea in README for required assets
+    });
+
+    it("should instantiate entities when loading scenes", function() {
+        var engine = createEngineWithConfig();
+
+        assert.strictEqual(engine.gos.length, 0);
+        engine.loadScene('basic', Javelin.noop);
+        assert.strictEqual(engine.gos.length, 8);
+    });
         
-        e.on('some.event', function(eventData) {
-            assert.isTrue(eventData.foo);
-            eventData.foo = false;
-        });
-        
-        assert.isTrue(data.foo);
-        child.emit('some.event', data);
-        assert.isFalse(data.foo);
+    it("should call plugins on entity create and destroy", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('empty', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+
+        assert.strictEqual(plugin.entitiesCreated, 0);
+        assert.strictEqual(plugin.entitiesDestroyed, 0);
+        var ent1 = engine.instantiate('foo');
+        assert.strictEqual(plugin.entitiesCreated, 1);
+        assert.strictEqual(plugin.entitiesDestroyed, 0);
+        var ent2 = engine.instantiate('foo');
+        assert.strictEqual(plugin.entitiesCreated, 2);
+        assert.strictEqual(plugin.entitiesDestroyed, 0);
+
+        ent1.destroy();
+        assert.strictEqual(plugin.entitiesCreated, 2);
+        assert.strictEqual(plugin.entitiesDestroyed, 1);
+        ent2.destroy();
+        assert.strictEqual(plugin.entitiesCreated, 2);
+        assert.strictEqual(plugin.entitiesDestroyed, 2);
     });
     
-    it("should dispatch events to root level gameObjects", function() {
-        var e = getEngine();
-        var parent = e.instantiateObject({});
-        var child = e.instantiateObject({});
-        parent.addChild(child);
-        
-        var data = {
-            foo: true
-        };
-        
-        parent.on('some.event', function(eventData) {
-            assert.isTrue(eventData.foo);
-        });
+    it("should notify plugins on prefab instantiate and destroy", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('empty', Javelin.noop);
+        var plugin = engine.getPlugin('test');
 
-        child.on('some.event', function(eventData) {
-            assert.isTrue(eventData.foo);
-            eventData.foo = false;
-        });
+        assert.strictEqual(plugin.entitiesCreated, 0);
+        assert.strictEqual(plugin.prefabsCreated, 0);
+        var ent1 = engine.instantiate('foo');
+        assert.strictEqual(plugin.entitiesCreated, 1);
+        assert.strictEqual(plugin.prefabsCreated, 1);
 
-        assert.isTrue(data.foo);
-        e.broadcast('some.event', data);
-        assert.isFalse(data.foo);
+        var ent2 = engine.instantiate('baz');
+        assert.strictEqual(plugin.entitiesCreated, 4);
+        assert.strictEqual(plugin.prefabsCreated, 2);
+
+        ent1.destroy();
+        assert.strictEqual(plugin.entitiesDestroyed, 1);
+        assert.strictEqual(plugin.prefabsDestroyed, 1);
+
+        ent2.destroy();
+        assert.strictEqual(plugin.entitiesDestroyed, 4);
+        assert.strictEqual(plugin.prefabsDestroyed, 2);
     });
+
+    it("should notify plugins on flush", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('empty', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+
+        assert.strictEqual(plugin.flushes, 0);
+        engine.flush();
+        assert.strictEqual(plugin.flushes, 1);
+    });
+
+    it("should notify plugins on load and unload", function() {
+        var engine = createEngineWithConfig();
+        engine.loadPlugin('test');
+        var plugin = engine.getPlugin('test');
+
+        assert.isTrue(plugin.loaded, 1);
+        assert.isFalse(plugin.unloaded, 0);
+
+        engine.unloadPlugin('test');
+        assert.isTrue(plugin.loaded, 1);
+        assert.isTrue(plugin.unloaded, 1);
+    });
+
+    it("should notify plugins after scene loads", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('empty', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+
+        assert.isTrue(plugin.sceneLoaded);
+    });
+
+    it("should step with no errors and a loaded scene", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('complex', Javelin.noop);
+        engine.step();
+    });
+
+    it("should call entity component callbacks on create/destroy and update", function() {
+        var engine = createEngineWithConfig();
+        var ent = engine.instantiate('foo');
+        var foo = ent.get('foo');
+
+        assert.isTrue(foo.created);
+        assert.isFalse(foo.updated);
+        assert.isFalse(foo.destroyed);
+
+        engine.step();
+        assert.isTrue(foo.created);
+        assert.isTrue(foo.updated);
+        assert.isFalse(foo.destroyed);
+
+        ent.destroy();
+        assert.isTrue(foo.created);
+        assert.isTrue(foo.updated);
+        assert.isTrue(foo.destroyed);
+    });
+    
+    it("should emit events emitted by root entities", function() {
+        var engine = createEngineWithConfig();
+        var ent = engine.instantiate('foo');
+
+        var data = {called: false};
+        engine.on('foo.event', function(eventData) {
+            data = eventData;
+        });
+
+        assert.isFalse(data.called);
+        ent.emit('foo.event', {called: true});
+        assert.isTrue(data.called);
+    });
+    
+    it("should dispatch events to root level entities", function() {
+        var engine = createEngineWithConfig();
+        var ent = engine.instantiate('foo');
+
+        var data = {called: false};
+        ent.on('foo.event', function(eventData) {
+            data = eventData;
+        });
+
+        assert.isFalse(data.called);
+        engine.broadcast('foo.event', {called: true});
+        assert.isTrue(data.called);
+    });
+
 });

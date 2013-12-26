@@ -1,5 +1,7 @@
 'use strict';
 
+//TODO: configure fixtures lint/build/etc...
+
 module.exports = function(grunt) {
 
   // Project configuration.
@@ -7,112 +9,122 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         
         //this is for convenience, used in other configs
-        files: {
-            lint: ['Gruntfile.js', 'src/**/*.js', '!src/vendor/**/*.js', 'tests/**/*.js'],
+        fileCollections: {
+            lint: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', 'fixtures/**/*.js', 'tasks/**/*.js'],
             test: ['tests/**/*.js'],
-            
-            //note: src/vendor DOES need to be included in the build, but not until I can make it work
-            //and pass the tests properly
-            build: ['util/build_intro.js', "src/javelin/**/*.js", 'util/build_outro.js']
+            javelinCore: [
+                'util/javelin.prefix',
+                'src/javelin/Javelin.js',
+                'src/javelin/Registry.js',
+                'src/javelin/Engine.js',
+                'src/javelin/Plugin.js',
+                'src/javelin/AssetLoader.js',
+                'src/javelin/Dispatcher.js',
+                'src/javelin/Environment.js',
+                'src/javelin/Component.js',
+                'src/javelin/Entity.js',
+                'util/javelin.suffix'
+            ],
+            javelinFull: [
+                'util/javelin.prefix',
+                'src/javelin/Javelin.js',
+                'src/javelin/Registry.js',
+                'src/javelin/Engine.js',
+                'src/javelin/Plugin.js',
+                'src/javelin/AssetLoader.js',
+                'src/javelin/Dispatcher.js',
+                'src/javelin/Environment.js',
+                'src/javelin/Component.js',
+                'src/javelin/Entity.js',
+                'src/components/**/*.js',
+                'src/environments/**/*.js',
+                'src/loaders/**/*.js',
+                'src/plugins/**/*.js',
+                'util/javelin.suffix'
+            ],
+            fixtures: [
+                'util/fixtures.prefix',
+                'fixtures/**/*.js',
+                'util/fixtures.suffix'
+            ]
+        },
+        jshint: {
+            options: {
+                jshintrc: '.jshintrc'
+            },
+            all: "<%= fileCollections.lint %>"
+        },
+        simplemocha: {
+            options: {
+                timeout: 3000,
+                ignoreLeaks: false,
+                ui: 'bdd',
+                reporter: 'spec'
+            },
+            all: {
+                src: '<%= fileCollections.test %>'
+            }
+        },
+        concat_sourcemap: {
+            options: {
+                separator: "\n\n"
+            },
+            full: {
+                src: "<%= fileCollections.javelinFull %>",
+                dest: 'build/javelin.js'
+            },
+            core: {
+                src: "<%= fileCollections.javelinCore %>",
+                dest: 'build/javelin.core.js'
+            },
+            fixtures: {
+                src: "<%= fileCollections.fixtures %>",
+                dest: 'build/fixtures.js'
+            }
+        },
+        uglify: {
+            options: {
+                mangle: true
+            },
+            full: {
+                files: {
+                    'build/javelin.min.js': ['build/javelin.js']
+                }
+            },
+            core: {
+                files: {
+                    'build/javelin.core.min.js': ['build/javelin.core.js']
+                }
+            }
         },
         watch: {
             all: {
-                files: "<%= files.lint %>",
+                files: "<%= fileCollections.lint %>",
                 tasks: ["default"],
                 options: {
                     interrupt: true
                 }
             }
         },
-        jsdoc : {
-            dist : {
-                src: ['src/**/*.js'], 
-                options: {
-                    destination: 'doc'
-                }
-            }
-        },
-        jshint: {
+        javelin_docs: {
             options: {
-                curly: true
-                ,eqeqeq: true
-                ,immed: true
-                ,latedef: true
-                ,newcap: true
-                ,noarg: true
-                ,sub: true
-                ,undef: true
-                ,boss: true
-                ,eqnull: true
-                ,node: true
-                ,es5: true
-                ,strict: true
-                ,browser: true
-                ,laxcomma: true
-                ,loopfunc: true
-                ,globals: {
-                    Javelin: true
-                    ,_: true
-                    ,should: true
-                    ,it: true
-                    ,before: true
-                    ,after: true
-                    ,beforeEach: true
-                    ,afterEach: true
-                    ,define: true
-                    ,require: true
-                    ,describe: true
-                    ,CANNON: true
-                    ,THREE: true
-                    ,self: true
-                    //,window: true
-                }
-            },
-            all: "<%= files.lint %>"
-        },
-        simplemocha: {
-            options: {
-                globals: ['_', 'should', 'it', 'define','require','describe','Javelin', 'THREE', 'window', 'self', 'before','after','beforeEach','afterEach'],
-                timeout: 3000,
-                ignoreLeaks: false,
-                ui: 'bdd',
-                reporter: 'tap'
-            },
-            all: {
-                src: '<%= files.test %>'
-            }
-        },
-        concat: {
-            options: {
-                separator: ";"
-            },
-            dist: {
-                src: "<%= files.build %>",
-                dest: 'build/javelin.js'
-            }
-        },
-        uglify: {
-            //not entirely sure whether or not I can use mangle... will have to experiment
-            options: {
-                mangle: false
-            },
-            my_target: {
-                files: {
-                    'build/javelin.min.js': ['build/javelin.js']
-                }
+                target: 'build/docs/'
             }
         }
     });
     
-    //register commands from plugins
+    //load commands from plugins
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-concat-sourcemap');
+    //grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-simple-mocha');
-    grunt.loadNpmTasks('grunt-jsdoc');
+
+    //load custom tasks
+    grunt.loadTasks('tasks/');
     
-    // Default task
-    grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'simplemocha']);
+    // Custom tasks
+    grunt.registerTask('default', ['jshint', 'concat_sourcemap', 'uglify', 'simplemocha']);
     grunt.registerTask('build', ['jshint', 'concat', 'uglify']);
 };

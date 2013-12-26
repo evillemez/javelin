@@ -1,17 +1,17 @@
 {
   "name": "javelin",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "description": "A component-based game engine for the modern web.",
   "private": true,
-  "dependencies": {},
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.1.0",
     "grunt-simple-mocha": "https://github.com/yaymukund/grunt-simple-mocha/tarball/master",
     "grunt-contrib-watch": "~0.2.0",
-    "grunt-contrib-concat": "~0.1.1",
     "grunt-contrib-uglify": "~0.1.0",
     "chai": "~1.5.0",
-    "grunt-jsdoc": "~0.2.4"
+    "dox": "~0.4.4",
+    "chai-spies": "~0.5.1",
+    "grunt-concat-sourcemap": "~0.3.1"
   }
 }
