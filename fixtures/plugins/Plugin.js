@@ -13,9 +13,9 @@ Fixtures.Plugin = function(config) {
     this.runs = 0;
     this.stops = 0;
     this.flushes = 0;
-    this.loaded = false;
+    this.loads = false;
     this.unloaded = false;
-    this.sceneLoaded = false;
+    this.sceneLoads = false;
 
     this.$onLoad = function() { self.loaded = true; };
     this.$onUnload = function() { self.unloaded = true; };

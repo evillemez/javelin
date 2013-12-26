@@ -1,9 +1,8 @@
-'use strict';
-
 /**
- * Canvas2d draws sprite components for 2d scenes.
+ * Renderer2d provides an API to components for drawing paths and images to HTML5 canvas.
+ * It also handles multiple layers, with configurable render modes per layer.
  */
-Javelin.Plugins.Canvas2d = function(config, engine) {
+Javelin.Plugins.Renderer2d = function(config, engine) {
     var self = this;
 
     this.config = config;
@@ -14,47 +13,48 @@ Javelin.Plugins.Canvas2d = function(config, engine) {
     this.canvases = {};
     
     this.$onLoad = function() {
-        if (document) {
-            
-            self.fps = self.config.framesPerSecond || engine.stepsPerSecond;
-            self.lastTimeRendered = 0.0;        
-            var target = document.getElementById(self.config.renderTargetId);
-            self.renderTarget = target;
-            var top = target.offsetTop;
-            var left = target.offsetLeft;
-            
-            if (!target) {
-                throw new Error("No render target defined!");
-            }
-            
-            if (!self.config.layers) {
-                self.config.layers = ['default'];
-            }
-            
-            //create and stack canvas layers
-            var z = 0;
-            for (var i in self.config.layers) {
-                z++;
-                var layer = self.config.layers[i];
-                var canvas = document.createElement('canvas');
-                canvas.height = self.config.height;
-                canvas.width = self.config.width;
-                canvas.style.zIndex = z;
-                canvas.id = 'javelin-layer-' + layer;
-                
-                self.canvases[layer] = canvas;
-                self.contexts[layer] = canvas.getContext('2d');
-                self.cameras[layer] = {
-                    x: 0,
-                    y: 0,
-                    height: 0,
-                    width: 0
-                };
-                
-                target.appendChild(canvas);
-            }
-        } else {
+        //only active in the browser
+        if (!document) {
             self.$active = false;
+            return;
+        }
+            
+        self.fps = self.config.framesPerSecond || engine.stepsPerSecond;
+        self.lastTimeRendered = 0.0;        
+        var target = document.getElementById(self.config.renderTargetId);
+        self.renderTarget = target;
+        var top = target.offsetTop;
+        var left = target.offsetLeft;
+        
+        if (!target) {
+            throw new Error("No render target defined!");
+        }
+        
+        if (!self.config.layers) {
+            self.config.layers = ['default'];
+        }
+        
+        //create and stack canvas layers
+        var z = 0;
+        for (var i in self.config.layers) {
+            z++;
+            var layer = self.config.layers[i];
+            var canvas = document.createElement('canvas');
+            canvas.height = self.config.height;
+            canvas.width = self.config.width;
+            canvas.style.zIndex = z;
+            canvas.id = 'javelin-layer-' + layer;
+            
+            self.canvases[layer] = canvas;
+            self.contexts[layer] = canvas.getContext('2d');
+            self.cameras[layer] = {
+                x: 0,
+                y: 0,
+                height: 0,
+                width: 0
+            };
+            
+            target.appendChild(canvas);
         }
     };
     

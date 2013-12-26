@@ -140,7 +140,7 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
     } else {
         this.gos.push(go);
 
-        this.pluginsOnEntityCreate(go);
+        this.callPlugins('$onEntityCreate', [go]);
         
         if (go.children.length) {
             for (var i in go.children) {
@@ -151,7 +151,7 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
         if (go.isRoot()) {
             go.enable();
             
-            this.pluginsOnPrefabCreate(go);
+            this.callPlugins('$onPrefabCreate', [go]);
 
             var cbs = go.getCallbacks('engine.create', true) || [];
             for (var j = 0; j < cbs.length; j++) {
@@ -175,7 +175,7 @@ Javelin.Engine.prototype.destroy = function(go, destroyingNested) {
                 cbs[i]();
             }
             
-            this.pluginsOnPrefabDestroy(go);
+            this.callPlugins('$onPrefabDestroy', [go]);
         }
         
         //destroy children first
@@ -194,7 +194,7 @@ Javelin.Engine.prototype.destroy = function(go, destroyingNested) {
         }
 
         //notify plugins
-        this.pluginsOnEntityDestroy(go);
+        this.callPlugins('$onEntityDestroy', [go]);
         
         //make sure this object is detached from any parents, 
         //because we abandoned and deleted children already,
@@ -240,12 +240,12 @@ Javelin.Engine.prototype.step = function() {
     this.deltaTime = (this.time - this.prevStepTime) * 0.001;
     
     //some plugins process before GO udpates
-    this.updatePlugins(Javelin.Engine.PRE_UPDATE, this.deltaTime);
+    this.callPlugins('$onPreUpdate', [this.deltaTime]);
     
     this.updateGameObjects(this.deltaTime);
     
     //some process after
-    this.updatePlugins(Javelin.Engine.POST_UPDATE, this.deltaTime);
+    this.callPlugins('$onPostUpdate', [this.deltaTime]);
     this.updating = false;
 
     //clean now, so next step contains the modifications
@@ -283,20 +283,6 @@ Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
     }
 };
 
-Javelin.Engine.prototype.updatePlugins = function(which, deltaTime) {
-    for (var i in this.plugins) {
-        if (this.plugins[i].$enabled) {
-            if (Javelin.Engine.PRE_UPDATE === which) {
-                this.plugins[i].$onPreUpdate(deltaTime);
-            }
-            
-            if (Javelin.Engine.POST_UPDATE === which) {
-                this.plugins[i].$onPostUpdate(deltaTime);
-            }
-        }
-    }
-};
-
 Javelin.Engine.prototype.cleanupStep = function() {
     var lc = this.createdGos.length;
     var ld = this.destroyedGos.length;
@@ -318,33 +304,13 @@ Javelin.Engine.prototype.cleanupStep = function() {
     this.destroyedGos = [];
 };
 
-Javelin.Engine.prototype.pluginsOnEntityCreate = function(go) {
-    for (var i in this.plugins) {
-        this.plugins[i].$onEntityCreate(go);
-    }
-};
-
-Javelin.Engine.prototype.pluginsOnEntityDestroy = function(go) {
-    for (var i in this.plugins) {
-        this.plugins[i].$onEntityDestroy(go);
-    }
-};
-
-Javelin.Engine.prototype.pluginsOnPrefabCreate = function(go) {
-    for (var i in this.plugins) {
-        this.plugins[i].$onPrefabCreate(go);
-    }
-};
-
-Javelin.Engine.prototype.pluginsOnPrefabDestroy = function(go) {
-    for (var i in this.plugins) {
-        this.plugins[i].$onPrefabDestroy(go);
-    }
-};
-
-Javelin.Engine.prototype.pluginsOnFlush = function() {
-    for (var i in this.plugins) {
-        this.plugins[i].$onFlush();
+Javelin.Engine.prototype.callPlugins = function(method, args) {
+    args = args || [];
+    for (var name in this.plugins) {
+        var p = this.plugins[name];
+        if (p.$enabled) {
+            p[method].apply(p, args);
+        }
     }
 };
 
@@ -356,7 +322,7 @@ Javelin.Engine.prototype.flush = function() {
 
     //notify plugins of flush, they should remove any references in order to force
     //garbage collection
-    this.pluginsOnFlush();
+    this.callPlugins('$onFlush');
 };
 
 /* Scene management */
@@ -405,6 +371,9 @@ Javelin.Engine.prototype.loadScene = function(name, callback) {
         }
     }
 
+    //TODO: load required assets, should be done before entities are instantiated
+
+    //instantiate any entities
     if (scene.entities) {
         for (var i = 0; i < scene.entities.length; i++) {
             if (Javelin.isString(scene.entities[i])) {
@@ -414,6 +383,8 @@ Javelin.Engine.prototype.loadScene = function(name, callback) {
             }
         }
     }
+
+    this.callPlugins('$onSceneLoaded');
     
     if (callback) {
         callback();

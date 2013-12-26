@@ -343,6 +343,27 @@ describe("Engine", function() {
         assert.strictEqual(plugin.flushes, 1);
     });
 
+    it("should notify plugins on load and unload", function() {
+        var engine = createEngineWithConfig();
+        engine.loadPlugin('test');
+        var plugin = engine.getPlugin('test');
+
+        assert.isTrue(plugin.loaded, 1);
+        assert.isFalse(plugin.unloaded, 0);
+
+        engine.unloadPlugin('test');
+        assert.isTrue(plugin.loaded, 1);
+        assert.isTrue(plugin.unloaded, 1);
+    });
+
+    it("should notify plugins after scene loads", function() {
+        var engine = createEngineWithConfig();
+        engine.loadScene('empty', Javelin.noop);
+        var plugin = engine.getPlugin('test');
+
+        assert.isTrue(plugin.sceneLoaded);
+    });
+
     it("should step with no errors and a loaded scene", function() {
         var engine = createEngineWithConfig();
         engine.loadScene('complex', Javelin.noop);

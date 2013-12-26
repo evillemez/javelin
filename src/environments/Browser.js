@@ -1,11 +1,3 @@
-
-/*
-An interface (or something) for functionality that must be implemented in an environment-specific
-manner.
-*/
-
-'use strict';
-
 Javelin.Environments.Browser = function(config, engine) {
     var self = this;
     this.intervalId = null;

@@ -1,5 +1,3 @@
-'use strict';
-
 Javelin.Components.AudioEmitter2d = function(entity, game) {
     var self = this;
     var audio = null,

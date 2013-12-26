@@ -1,12 +1,3 @@
-/*global Box2D:true */
-
-'use strict';
-
-/**
- * The `rigidbody2d` component provides a wrapper for methods in the Box2D API.
- * 
- * @author Evan Villemez
- */
 Javelin.Components.Rigidbody2d = function(entity, game) {
     var self = this;
     var box2d = game.getPlugin('box2d');

@@ -18,6 +18,8 @@ Javelin.Entity = function (name, id) {
 /* Lifecycle */
 
 Javelin.Entity.prototype.destroy = function() {
+    this.broadcast('entity.destroy');
+
     if (this.engine) {
         this.engine.destroy(this);
     }
@@ -33,6 +35,7 @@ Javelin.Entity.prototype.setId = function(id) {
 
 Javelin.Entity.prototype.enable = function() {
     this.enabled = true;
+    this.dispatcher.dispatch('entity.enable');
 
     if (this.children) {
         for (var index in this.children) {
@@ -46,6 +49,7 @@ Javelin.Entity.prototype.enable = function() {
 };
 
 Javelin.Entity.prototype.disable = function() {
+    this.dispatcher.dispatch('entity.disable');
     this.enabled = false;
     
     if (this.children) {
