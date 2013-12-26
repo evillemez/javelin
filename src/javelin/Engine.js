@@ -13,10 +13,6 @@ Javelin.Engine = function(registry, environment, config) {
     this.reset();
 };
 
-//constant flags
-Javelin.Engine.PRE_UPDATE = 0;
-Javelin.Engine.POST_UPDATE = 1;
-
 Javelin.Engine.prototype.reset = function() {
     //general state
     this.running = false;
