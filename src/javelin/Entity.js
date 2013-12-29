@@ -1,3 +1,10 @@
+/**
+ * Entities are processed by the engine.  Entities contain components that implement custom
+ * game logic.
+ * 
+ * @param {string} name
+ * @param {int} id
+ */
 Javelin.Entity = function (name, id) {
     this.id = id || -1;                             //UID assigned by engine
     this.name = name || "Anonymous";                //human-readable name (for eventual editor)

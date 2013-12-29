@@ -9,10 +9,6 @@ Javelin.Environments.Browser = function(config, engine) {
                 engine.step();
             } catch (e) {
                 console.log(e);
-
-                if (engine.debug) {
-                    alert(e);
-                }
             }
         }, stepsPerSecond);
     };
