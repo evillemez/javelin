@@ -13,7 +13,7 @@ assumptions:
 
 * 800x600 viewport
 * all assets will be automatically loaded before the demo starts
-* 
+* Demo README is shown on the page
 
 ## Directories ##
 
