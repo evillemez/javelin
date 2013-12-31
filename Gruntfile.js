@@ -26,7 +26,7 @@ module.exports = function(grunt) {
                 'util/javelin.suffix'
             ],
             javelinFull: [
-                'util/javelin.prefix',
+                'util/build/javelin.prefix',
                 'src/javelin/Javelin.js',
                 'src/javelin/Registry.js',
                 'src/javelin/Engine.js',
@@ -40,12 +40,12 @@ module.exports = function(grunt) {
                 'src/environments/**/*.js',
                 'src/loaders/**/*.js',
                 'src/plugins/**/*.js',
-                'util/javelin.suffix'
+                'util/build/javelin.suffix'
             ],
             fixtures: [
-                'util/fixtures.prefix',
+                'util/build/fixtures.prefix',
                 'fixtures/**/*.js',
-                'util/fixtures.suffix'
+                'util/build/fixtures.suffix'
             ]
         },
         jshint: {

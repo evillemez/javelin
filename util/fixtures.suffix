@@ -1,9 +1,0 @@
-
-    if (typeof module !== 'undefined') {
-        // export for node
-        module.exports = Fixtures;
-    } else {
-        // assign to window
-        this.Fixtures = Fixtures;
-    }
-}).apply(this);

@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<head>
+
+</head>
+<body>
+  <h1>Javelin</h1>
+  <p>This is the eventual GH pages site with basic information.  It will link to the versioned
+    documentation sites.</p>
+  <p>Available versions:</p>
+  <ul>
+    {% for version in versions %}
+    <li><a href="{{baseurl}}/docs/{{version}}/">{{version}}</a></li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
