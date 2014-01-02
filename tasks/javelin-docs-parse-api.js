@@ -4,49 +4,29 @@ var exec = require('child_process').exec,
     fs = require('fs'),
     path = require('path');
 
-//recursively builds array of .js file paths under a given directory
-function appendFiles(dir, files) {
-    var contents = fs.readdirSync(dir);
-    if (!contents.length) {
-        return;
-    }
-
-    contents.forEach(function(item) {
-        var file = [dir, item].join(path.sep);
-        var stat = fs.statSync(file);
-        if (stat && stat.isDirectory()) {
-            appendFiles(file, files);
-        } else if ('.js' === path.extname(file)) {
-            files.push(file);
-        }
-    });
-}
-
 module.exports = function(grunt) {
 
-    grunt.registerTask('javelin-docs-parse-api', 'Aggregate Javelin API documentation from the source.', function() {
+    grunt.registerMultiTask('javelin-docs-parse-api', 'Aggregate Javelin API documentation from the source.', function() {
+        var ops = this.options(this.data);
 
         //define paths and vars
         var root = path.resolve(__dirname, '..');
         var version = JSON.parse(fs.readFileSync([root,'package.json'].join(path.sep))).version;
-        var src = [root, 'src'].join(path.sep),
-            dest = [root, 'build', 'docs', version, 'api', 'api.json'].join(path.sep),
+        var dest = [root, ops.dest].join(path.sep),
             dox = [root,'node_modules','.bin','dox'].join(path.sep),
-            files = [],
+            files = grunt.file.expand(ops.src),
             docs = {},
             done = this.async(),
             parsed = 0;
 
         //create containing versioned directory in build
-        grunt.file.mkdir([root, 'build', 'docs', version, 'api'].join(path.sep));
-
-        //find all src files to parse
-        appendFiles(src, files);
+        grunt.file.mkdir(path.dirname(ops.dest));
 
         //parse all files, storing in map
         files.forEach(function(file) {
-            var relpath = file.substring(root.length+1);
-            docs[relpath] = {relpath: relpath, abspath: file};
+            var relpath = file;
+            var abspath = [root, file].join(path.sep);
+            docs[relpath] = {relpath: relpath, abspath: abspath};
             grunt.log.writeln('Parsing ' + relpath);
 
             //use dox to parse file

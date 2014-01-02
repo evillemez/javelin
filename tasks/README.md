@@ -8,19 +8,16 @@ Local tasks (for developing on this repo directly):
 * `javelin-docs-parse-api` - Compile one `api.json` file, by parsing the code in `src/`.
 * `javelin-docs-build-api` - Build api docs pages into `build/docs/<package.version>/api`.
 * `javelin-docs-build-guides` - Build guides from markdown into `build/docs/<package.version>/guides`.
-* `javelin-docs-scaffold-demo` - Scaffold a new demo in `docs/demos`
 * `javelin-docs-build-demos` - Build javelin demos into `build/docs/<package.version>/demos`.
-* `javelin-docs-build` - Run all docs related build commands to build full docs site in `build/docs/`.
-* `javelin-docs-server` - Start simple node server to view docs site locally.
 * `javelin-ghpages-build` - Build full GHPages site into `build/ghpages`
 * `javelin-build` - Build and test everything.
 
-Plugin tasks, for other projects depending on Javelin:
+For other projects depending on Javelin:
 
-* `javelin-ghpages-server` - Start full GHPages site (will only contain docs for current version)
+* `javelin-ghpages` - Start full GHPages site locally.
 * `javelin-docs` - Build & serve docs site locally.
-* `javelin-server` - Start server to view & live-reload project.
-* `javelin-scaffold` - Scaffold new javelin project.
+* `javelin-server` - Start server to view & live-reload projects scaffolded via `javelin-init`.
+* `javelin-init` - Scaffold new javelin project.
   * including npm/bower reqs, gruntfile
   * or use grunt-init?
   * or use Yeoman?

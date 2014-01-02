@@ -1,10 +1,14 @@
 'use strict';
 
-//TODO: configure fixtures lint/build/etc...
-
+/**
+ * This contains config for several plugins used when building the main `javelin.js` scripts.
+ *
+ * It also contains config for the many included custom tasks, most of which are used for 
+ * generating the documentation, guides and demos - all of which can be run locally, but also
+ * generated for publishing via Github Pages.
+ */
 module.exports = function(grunt) {
 
-  // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         
@@ -13,7 +17,7 @@ module.exports = function(grunt) {
             lint: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', 'fixtures/**/*.js', 'tasks/**/*.js'],
             test: ['tests/**/*.js'],
             javelinCore: [
-                'util/javelin.prefix',
+                'util/build/javelin.prefix',
                 'src/javelin/Javelin.js',
                 'src/javelin/Registry.js',
                 'src/javelin/Engine.js',
@@ -23,7 +27,7 @@ module.exports = function(grunt) {
                 'src/javelin/Environment.js',
                 'src/javelin/Component.js',
                 'src/javelin/Entity.js',
-                'util/javelin.suffix'
+                'util/build/javelin.suffix'
             ],
             javelinFull: [
                 'util/build/javelin.prefix',
@@ -71,11 +75,11 @@ module.exports = function(grunt) {
             },
             full: {
                 src: "<%= fileCollections.javelinFull %>",
-                dest: 'build/javelin.js'
+                dest: 'build/javelin-<%= pkg.version %>.js'
             },
             core: {
                 src: "<%= fileCollections.javelinCore %>",
-                dest: 'build/javelin.core.js'
+                dest: 'build/javelin-<%= pkg.version %>.core.js'
             },
             fixtures: {
                 src: "<%= fileCollections.fixtures %>",
@@ -88,12 +92,12 @@ module.exports = function(grunt) {
             },
             full: {
                 files: {
-                    'build/javelin.min.js': ['build/javelin.js']
+                    'build/javelin-<%= pkg.version %>.min.js': ['build/javelin-<%= pkg.version %>.js']
                 }
             },
             core: {
                 files: {
-                    'build/javelin.core.min.js': ['build/javelin.core.js']
+                    'build/javelin-<%= pkg.version %>.core.min.js': ['build/javelin-<%= pkg.version %>.core.js']
                 }
             }
         },
@@ -106,25 +110,103 @@ module.exports = function(grunt) {
                 }
             }
         },
-        javelin_docs: {
-            options: {
-                target: 'build/docs/'
+        copy: {
+            build: {
+                src: 'build/javelin-<%= pkg.version %>.js',
+                dest: 'build/javelin.js'
             }
-        }
+        },
+        'http-server': {
+            docs: {
+                root: 'build/docs/',
+                port: 8555,
+                host: '127.0.0.1',
+                showDir: true,
+                autoIndex: true,
+                runInBackground: false                
+            },
+            ghp: {
+                root: 'build/ghplocal/',
+                port: 8556,
+                host: '127.0.0.1',
+                showDir: true,
+                autoIndex: true,
+                runInBackground: false
+            }
+        },
+        'javelin-docs-parse-api': {
+            options: {
+                src:'src/**/*.js'
+            },
+            local: {
+                dest: 'build/docs/api/api.json'
+            },
+            ghplocal: {
+                dest: 'build/ghplocal/docs/<%= pkg.version %>/api/api.json'
+            },
+            ghp: {
+                dest: 'build/ghp/docs/<%= pkg.version %>/api/api.json'
+            }
+        },
+        'javelin-docs-build-api': {
+            local:  {
+                dest: 'build/docs/api/',
+                baseurl: '/'
+            },
+            ghplocal: {
+                dest: 'build/ghplocal/docs/<%= pkg.version %>/api/',
+                baseurl: '/docs/<%= pkg.version %>/'
+            },
+            ghp: {
+                dest: 'build/ghp/docs/<%= pkg.version %>/api/',
+                baseurl: '/javelin/docs/<%= pkg.version %>/'
+            }
+        },
+        'javelin-docs-build-guides': {},
+        'javelin-docs-build-demos': {}
     });
     
-    //load commands from plugins
+    //load grunt commands from plugins
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-concat-sourcemap');
     //grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-simple-mocha');
+    grunt.loadNpmTasks('grunt-http-server');
 
-    //load custom tasks
+    //load custom javelin tasks
     grunt.loadTasks('tasks/');
+
+    //build & serve docs site locally
+    grunt.registerTask('javelin-docs', [
+        'javelin-docs-parse-api:local',
+//        'javelin-docs-build-api:local',
+//        'javelin-docs-build-guides:local',
+//        'javelin-docs-build-demos:local',
+        'http-server:docs'
+    ]);
+
+    //build & serve full GH Pages site locally
+    grunt.registerTask('javelin-ghpages', [
+        'javelin-docs-parse-api:ghplocal',
+//        'javelin-docs-build-api:ghplocal',
+//        'javelin-docs-build-guides:ghplocal',
+//        'javelin-docs-build-demos:ghplocal',
+//        'javelin-ghpages-build:local',
+        'http-server:ghp'
+    ]);
+
+    //build GH Pages site, as if it were being served from GH Pages
+    grunt.registerTask('javelin-build-ghpages-live', [
+        'javelin-docs-parse-api:ghp'
+//        'javelin-docs-build-api:ghp',
+//        'javelin-docs-build-guides:ghp',
+//        'javelin-docs-build-demos:ghp',
+//        'javelin-ghpages-build:ghp'
+    ]);
     
-    // Custom tasks
-    grunt.registerTask('default', ['jshint', 'concat_sourcemap', 'uglify', 'simplemocha']);
-    grunt.registerTask('build', ['jshint', 'concat', 'uglify']);
+    grunt.registerTask('build', ['jshint', 'concat_sourcemap', 'uglify', 'copy:build']);
+    grunt.registerTask('default', ['build', 'simplemocha']);
 };
