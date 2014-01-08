@@ -114,7 +114,25 @@ module.exports = function(grunt) {
             build: {
                 src: 'build/javelin-<%= pkg.version %>.js',
                 dest: 'build/javelin.js'
-            }
+            },
+            docs: {files:[
+                {
+                    src: 'util/docs/bower.json',
+                    dest: 'build/docs/bower.json'
+                }
+            ]},
+            ghp: {files: [
+                {
+                    src: 'util/ghpages/bower.json',
+                    dest: 'build/ghp/bower.json'
+                }
+            ]},
+            ghplocal: {files:[
+                {
+                    src: 'util/ghpages/bower.json',
+                    dest: 'build/ghplocal/bower.json'
+                }
+            ]}
         },
         'http-server': {
             docs: {
@@ -125,7 +143,7 @@ module.exports = function(grunt) {
                 autoIndex: true,
                 runInBackground: false                
             },
-            ghp: {
+            ghplocal: {
                 root: 'build/ghplocal/',
                 port: 8556,
                 host: '127.0.0.1',
@@ -163,7 +181,14 @@ module.exports = function(grunt) {
             }
         },
         'javelin-docs-build-guides': {},
-        'javelin-docs-build-demos': {}
+        'javelin-docs-build-demos': {},
+        'javelin-ghpages-build': {
+            ghplocal: {
+                basedir: 'build/ghplocal/',
+                baseurl: '/'
+            },
+            ghp: {}
+        }
     });
     
     //load grunt commands from plugins
@@ -194,8 +219,8 @@ module.exports = function(grunt) {
 //        'javelin-docs-build-api:ghplocal',
 //        'javelin-docs-build-guides:ghplocal',
 //        'javelin-docs-build-demos:ghplocal',
-//        'javelin-ghpages-build:local',
-        'http-server:ghp'
+        'javelin-ghpages-build:ghplocal',
+        'http-server:ghplocal'
     ]);
 
     //build GH Pages site, as if it were being served from GH Pages

@@ -32,7 +32,7 @@ Javelin.AssetLoader.prototype.setLoader = function(extension, loader) {
 
 Javelin.AssetLoader.prototype.getAsset = function(path) {
     if (!this.assets[path]) {
-        throw new Error("["+path+"] was requested, but has not been loaded yet.");
+        return false;
     }
 
     return this.assets[path];

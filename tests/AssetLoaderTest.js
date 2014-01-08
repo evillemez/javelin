@@ -146,11 +146,9 @@ describe("AssetLoader", function() {
         });
     });
 
-    it("should throw exception in getAsset() if not loaded", function() {
+    it("should return false in getAsset() if not loaded", function() {
         var l = createLoader();
-        assert.throws(function() {
-            var asset = l.getAsset('foo.mp3');
-        }, /has not been loaded/);
+        assert.isFalse(l.getAsset('foo.mp3'));
     });
 
     it("should return an asset from getAsset()", function(done) {
