@@ -11,7 +11,7 @@ module.exports = function(grunt) {
 
         //define paths and vars
         var root = path.resolve(__dirname, '..');
-        var version = JSON.parse(fs.readFileSync([root,'package.json'].join(path.sep))).version;
+        var version = grunt.config.get('pkg.version');
         var dest = [root, ops.dest].join(path.sep),
             dox = [root,'node_modules','.bin','dox'].join(path.sep),
             files = grunt.file.expand(ops.src),

@@ -185,9 +185,12 @@ module.exports = function(grunt) {
         'javelin-ghpages-build': {
             ghplocal: {
                 basedir: 'build/ghplocal/',
-                baseurl: '/'
+                baseurl: ''
             },
-            ghp: {}
+            ghp: {
+                basedir: 'build/ghp/',
+                baseurl: '/javelin'
+            }
         }
     });
     
@@ -220,6 +223,7 @@ module.exports = function(grunt) {
 //        'javelin-docs-build-guides:ghplocal',
 //        'javelin-docs-build-demos:ghplocal',
         'javelin-ghpages-build:ghplocal',
+        'copy:ghplocal',
         'http-server:ghplocal'
     ]);
 
