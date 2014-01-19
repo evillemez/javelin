@@ -3,7 +3,8 @@
 var exec = require('child_process').exec,
     fs = require('fs'),
     path = require('path'),
-    swig = require('swig')
+    swig = require('swig'),
+    swigHelper = require(__dirname + '/../util/swigHelpers.js')
 ;
 
 module.exports = function(grunt) {
@@ -33,27 +34,6 @@ module.exports = function(grunt) {
         //TODO: assemble data for other pages
 
         //render all templates to final location
-        var i, l = renderObjects.length, processed = 0;
-        for (i = 0; i < l; i++) {
-
-            var obj = renderObjects[i];
-
-            var cb = function(err, out) {
-                if (err) {
-                    grunt.log.error(err);
-                    done(false);
-                }
-
-                grunt.log.writeln('Writing ' + obj.file);
-                grunt.file.write(obj.file, out);
-                processed++;
-
-                if (processed === l) {
-                    done();
-                }
-            };
-
-            swig.renderFile(obj.template, obj.vars, cb);
-        }
+        swigHelper.renderObjects(grunt, renderObjects, done);
     });
 };

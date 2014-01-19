@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<head>
+
+</head>
+<body>
+  <h1>Javelin {{version}} Demos</h1>
+  <ul>
+    {% for demo in demos %}
+    <li>
+        <a href="{{baseurl}}/demos/{{demo.dir}}">{{demo.name}}</a>
+        <p>{{demo.description}}</p>
+    </li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
