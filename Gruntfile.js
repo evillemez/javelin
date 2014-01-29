@@ -169,19 +169,32 @@ module.exports = function(grunt) {
         'javelin-docs-build-api': {
             local:  {
                 dest: 'build/docs/api/',
-                baseurl: '/'
+                baseurl: ''
             },
             ghplocal: {
                 dest: 'build/ghplocal/docs/<%= pkg.version %>/api/',
-                baseurl: '/docs/<%= pkg.version %>/'
+                baseurl: '/docs/<%= pkg.version %>'
             },
             ghp: {
                 dest: 'build/ghp/docs/<%= pkg.version %>/api/',
-                baseurl: '/javelin/docs/<%= pkg.version %>/'
+                baseurl: '/javelin/docs/<%= pkg.version %>'
             }
         },
         'javelin-docs-build-guides': {},
-        'javelin-docs-build-demos': {},
+        'javelin-docs-build-demos': {
+            local: {
+                dest: 'build/docs/demos/',
+                baseurl: ''
+            },
+            ghplocal: {
+                dest: 'build/ghplocal/docs/<%= pkg.version %>/demos/',
+                baseurl: '/docs/<%= pkg.version %>'
+            },
+            ghp: {
+                dest: 'build/ghp/docs/<%= pkg.version %>/demos/',
+                baseurl: '/docs/<%= pkg.version %>'
+            }
+        },
         'javelin-ghpages-build': {
             ghplocal: {
                 basedir: 'build/ghplocal/',
@@ -212,7 +225,7 @@ module.exports = function(grunt) {
         'javelin-docs-parse-api:local',
 //        'javelin-docs-build-api:local',
 //        'javelin-docs-build-guides:local',
-//        'javelin-docs-build-demos:local',
+        'javelin-docs-build-demos:local',
         'http-server:docs'
     ]);
 
@@ -221,7 +234,7 @@ module.exports = function(grunt) {
         'javelin-docs-parse-api:ghplocal',
 //        'javelin-docs-build-api:ghplocal',
 //        'javelin-docs-build-guides:ghplocal',
-//        'javelin-docs-build-demos:ghplocal',
+        'javelin-docs-build-demos:ghplocal',
         'javelin-ghpages-build:ghplocal',
         'copy:ghplocal',
         'http-server:ghplocal'
@@ -229,10 +242,10 @@ module.exports = function(grunt) {
 
     //build GH Pages site, as if it were being served from GH Pages
     grunt.registerTask('javelin-build-ghpages-live', [
-        'javelin-docs-parse-api:ghp'
+        'javelin-docs-parse-api:ghp',
 //        'javelin-docs-build-api:ghp',
 //        'javelin-docs-build-guides:ghp',
-//        'javelin-docs-build-demos:ghp',
+        'javelin-docs-build-demos:ghp'
 //        'javelin-ghpages-build:ghp'
     ]);
     

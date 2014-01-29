@@ -1,4 +1,6 @@
 {
     "name": "Basic",
-    "description": "The most basic of examples."
+    "dir": "basic",
+    "description": "Move a ball on the screen.",
+    "scene": "basic"
 }

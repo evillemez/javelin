@@ -83,7 +83,7 @@ Javelin.Plugins.Renderer2d = function(config, engine) {
                     ctx = self.contexts[gos[i].layer];
                     camera = self.cameras[gos[i].layer];
                     //check for a draw callbacks to run
-                    var cbs = gos[i].getCallbacks('canvas2d.draw', true);
+                    var cbs = gos[i].getCallbacks('renderer2d.draw', true);
                     for (j in cbs) {
                         cbs[j](ctx, camera);
                     }
