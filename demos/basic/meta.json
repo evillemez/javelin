@@ -1,0 +1,6 @@
+{
+    "name": "Basic",
+    "dir": "basic",
+    "description": "Move a ball on the screen.",
+    "scene": "basic"
+}

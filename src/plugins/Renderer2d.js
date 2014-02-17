@@ -2,7 +2,7 @@
  * Renderer2d provides an API to components for drawing paths and images to HTML5 canvas.
  * It also handles multiple layers, with configurable render modes per layer.
  */
-Javelin.Plugins.Renderer2d = function(config, engine) {
+Javelin.Plugins.Renderer2d = function(config) {
     var self = this;
 
     this.config = config;
@@ -11,6 +11,8 @@ Javelin.Plugins.Renderer2d = function(config, engine) {
     this.cameras = {};
     this.contexts = {};
     this.canvases = {};
+
+    var engine = this.$engine;
     
     this.$onLoad = function() {
         //only active in the browser
@@ -20,7 +22,7 @@ Javelin.Plugins.Renderer2d = function(config, engine) {
         }
             
         self.fps = self.config.framesPerSecond || engine.stepsPerSecond;
-        self.lastTimeRendered = 0.0;        
+        self.lastTimeRendered = 0.0;
         var target = document.getElementById(self.config.renderTargetId);
         self.renderTarget = target;
         var top = target.offsetTop;
@@ -83,7 +85,7 @@ Javelin.Plugins.Renderer2d = function(config, engine) {
                     ctx = self.contexts[gos[i].layer];
                     camera = self.cameras[gos[i].layer];
                     //check for a draw callbacks to run
-                    var cbs = gos[i].getCallbacks('canvas2d.draw', true);
+                    var cbs = gos[i].getCallbacks('renderer2d.draw', true);
                     for (j in cbs) {
                         cbs[j](ctx, camera);
                     }

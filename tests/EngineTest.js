@@ -4,7 +4,7 @@ var chai = require('chai')
     , spies = require('chai-spies')
     , assert = chai.assert
     , expect = chai.expect
-    , Javelin = require('../build/javelin.js')
+    , Javelin = require('../build/javelin/javelin.js')
 ;
 chai.use(spies);
 chai.Assertion.includeStack = true;
@@ -22,10 +22,10 @@ describe("Engine", function() {
         spies = {};
 
         //components
-        javelin.component('foo', Fixtures.FooComponent);
-        javelin.component('bar', Fixtures.BarComponent, ['foo']);
-        javelin.component('baz', Fixtures.BazComponent, ['bar']);
-        javelin.component('manager', Fixtures.ManagerComponent);
+        javelin.component('foo', [], Fixtures.FooComponent);
+        javelin.component('bar', ['foo'], Fixtures.BarComponent);
+        javelin.component('baz', ['bar'], Fixtures.BazComponent);
+        javelin.component('manager', [], Fixtures.ManagerComponent);
 
         //test plugins
         javelin.plugin('test', Fixtures.Plugin, Fixtures.DefaultPluginConfig);

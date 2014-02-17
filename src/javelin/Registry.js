@@ -8,18 +8,18 @@ Javelin.Registry = function() {
 };
 
 //register an entity component
-Javelin.Registry.prototype.component = function(name, handler, requirements) {
+Javelin.Registry.prototype.component = function(name, requirements, handler) {
     if (!Javelin.isString(name)) {
         throw new Error("Components must specify a string name.");
     }
 
-    if (!Javelin.isFunction(handler)) {
-        throw new Error("Components must be functions.");
-    }
-    
-    if (requirements && !Javelin.isArray(requirements)) {
+    if (!Javelin.isArray(requirements)) {
         throw new Error("Component requirements must be an array in " + name + ".");
     }
+
+    if (!Javelin.isFunction(handler)) {
+        throw new Error("Components must be functions in " + name + ".");
+    }    
     
     var definition = {
         name: name,

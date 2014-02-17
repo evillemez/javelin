@@ -1,6 +1,7 @@
 Javelin.Engine = function(registry, environment, config) {
     //this should persist
     this.registry = registry;
+    environment.setEngine(this);
     this.environment = environment;
     this.loader = environment.getLoader();
     this.config = config;

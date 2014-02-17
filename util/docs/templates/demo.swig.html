@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <script src="{{baseurl}}/javelin/build/javelin/javelin.js"></script>
+
+  {% for script in scripts %}
+  <script src="{{baseurl}}/demos/{{meta.dir}}/{{script}}"></script>
+  {% endfor %}
+</head>
+
+<body>
+  <h1>Demo: {{meta.name}}</h1>
+  <div id='viewport'>
+  <!-- game content here -->
+  </div>
+
+  <p>{{meta.description}}</p>
+
+  <div id='readme'>
+    <pre>
+{{readme}}
+    </pre>
+  </div>
+
+
+  <script>
+    var game = javelin.createGame('browser', gameConfig);
+    game.loadScene('{{meta.scene}}');
+  </script>
+</body>
+</html>

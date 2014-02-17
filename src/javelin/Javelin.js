@@ -74,19 +74,19 @@ Javelin.createInstance = function() {
     javelin.loader(['.mp3','.ogg'], ['browser'], Javelin.Loaders.BrowserSoundLoader);
 
     //plugins
-    javelin.plugin('canvas2d', Javelin.Plugins.Canvas2d);
+    javelin.plugin('renderer2d', Javelin.Plugins.Renderer2d);
     javelin.plugin('audio2d', Javelin.Plugins.Audio2d);
     javelin.plugin('box2d', Javelin.Plugins.Box2d);
     javelin.plugin('input', Javelin.Plugins.Input);
 
     //components
-    javelin.component('transform2d', Javelin.Components.Transform2d);
-    javelin.component('rigidbody2d', Javelin.Components.Rigidbody2d, ['transform2d']);
-    javelin.component('audioEmitter2d', Javelin.Components.AudioEmitter2d, ['transform2d']);
-    javelin.component('audioListener2d', Javelin.Components.AudioListener2d, ['transform2d']);
-    javelin.component('sprite2d', Javelin.Components.Sprite2d, ['transform2d']);
-    javelin.component('spriteAnimator2d', Javelin.Components.SpriteAnimator2d, ['sprite2d']);
-    javelin.component('particle2d', Javelin.Components.Particle2d, ['transform2d']);
+    javelin.component('transform2d', [], Javelin.Components.Transform2d);
+    javelin.component('rigidbody2d', ['transform2d'], Javelin.Components.Rigidbody2d);
+    javelin.component('audioEmitter2d', ['transform2d'], Javelin.Components.AudioEmitter2d);
+    javelin.component('audioListener2d', ['transform2d'], Javelin.Components.AudioListener2d);
+    javelin.component('sprite2d', ['transform2d'], Javelin.Components.Sprite2d);
+    javelin.component('spriteAnimator2d', ['sprite2d'], Javelin.Components.SpriteAnimator2d);
+    javelin.component('particle2d', ['transform2d'], Javelin.Components.Particle2d);
 
     return javelin;
 };

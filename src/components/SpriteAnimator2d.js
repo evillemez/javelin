@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * This component is used to define sprite animations.  You can define many animations and reference them by
  * by name.  Every frame, the animator will pick the set the appropriate image to be rendered on the sprite

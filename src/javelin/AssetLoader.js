@@ -1,4 +1,8 @@
 /**
+ * @apidocurl {core.asset-loader}
+ */
+
+/**
  * The AssetLoader returns objects based on string filepaths.  The object is loaded
  * by a function mapped to the file extension.
  */
@@ -30,9 +34,16 @@ Javelin.AssetLoader.prototype.setLoader = function(extension, loader) {
     this.sortLoaders();
 };
 
+/**
+ * Get a specific asset by path, if not already loaded returns false.
+ *
+ * @param  {string} path    Relative path to asset.
+ *
+ * @return {mixed}          The actual asset instance, or false.
+ */
 Javelin.AssetLoader.prototype.getAsset = function(path) {
     if (!this.assets[path]) {
-        throw new Error("["+path+"] was requested, but has not been loaded yet.");
+        return false;
     }
 
     return this.assets[path];
@@ -42,8 +53,8 @@ Javelin.AssetLoader.prototype.getAsset = function(path) {
  * Load an individual asset by path.  Your call back will be called with the loaded
  * object once completed.
  * 
- * @param {string} path Relative path to asset
- * @param {function} callback Callback function to call with the requested asset object
+ * @param {string} path         Relative path to asset
+ * @param {function} callback   Callback function to call with the requested asset object
  */
 Javelin.AssetLoader.prototype.loadAsset = function(path, callback) {
 
@@ -162,7 +173,6 @@ Javelin.AssetLoader.prototype.unload = function(relPath) {
  * 
  * @param {String} path Path to asset file
  * @returns The function that should be called to load the file of the given type
- * @type Function
  */
 Javelin.AssetLoader.prototype.getLoaderForPath = function(path) {
     var exts = this.sortedLoaderExtensions;

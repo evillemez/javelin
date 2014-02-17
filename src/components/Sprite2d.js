@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * The `sprite` component will let you associate an image asset with a entity.  The `image` property can be
  * either an `Image` instance, or an instance of `Javelin.Asset.AtlasImage`.  Images can also specify a scale.

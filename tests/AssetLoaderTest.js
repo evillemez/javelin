@@ -4,7 +4,7 @@ var chai = require('chai')
     , spies = require('chai-spies')
     , assert = chai.assert
     , expect = chai.expect
-    , Javelin = require('../build/javelin.js')
+    , Javelin = require('../build/javelin/javelin.js')
     , Fixtures = require('../build/fixtures.js')
 ;
 chai.use(spies);
@@ -146,11 +146,9 @@ describe("AssetLoader", function() {
         });
     });
 
-    it("should throw exception in getAsset() if not loaded", function() {
+    it("should return false in getAsset() if not loaded", function() {
         var l = createLoader();
-        assert.throws(function() {
-            var asset = l.getAsset('foo.mp3');
-        }, /has not been loaded/);
+        assert.isFalse(l.getAsset('foo.mp3'));
     });
 
     it("should return an asset from getAsset()", function(done) {
