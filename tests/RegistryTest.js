@@ -1,6 +1,6 @@
 'use strict';
 
-var Javelin = require('../build/javelin.js');
+var Javelin = require('../build/javelin/javelin.js');
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
@@ -19,19 +19,24 @@ describe("Registry", function() {
             javelin.component();
         }, /specify a string name/);
 
-        //no function
+        //no requirements
         assert.throws(function() {
             javelin.component('foo');
+        }, /must be an array/);
+
+        //no function
+        assert.throws(function() {
+            javelin.component('foo', []);
         }, /must be functions/);
 
         //bad requirements
         assert.throws(function() {
-            javelin.component('foo', function() {}, {foo: 'bar'});
+            javelin.component('foo', {foo: 'bar'}, function() {});
         }, /must be an array/);
     });
 
     it("should register valid components", function() {
-        javelin.component('foo', function(entity, game) {}, ['transform2d']);
+        javelin.component('foo', ['transform2d'], function(entity, game) {});
         var def = javelin.getComponent('foo');
         assert.isFunction(def.handler);
     });
@@ -197,12 +202,12 @@ describe("Registry", function() {
     });
     
     it("should properly compute component requirements on optimize()", function() {
-        javelin.component('foo', function() {}, []);
-        javelin.component('bar', function() {}, ['foo']);
-        javelin.component('baz', function() {}, ['bar']);
-        javelin.component('qux', function() {}, []);
-        javelin.component('quux', function() {}, ['bar','qux']);
-        javelin.component('quuxx', function() {}, ['quux','bar','foo','bar']);
+        javelin.component('foo', [], function() {});
+        javelin.component('bar', ['foo'], function() {});
+        javelin.component('baz', ['bar'], function() {});
+        javelin.component('qux', [], function() {});
+        javelin.component('quux', ['bar','qux'], function() {});
+        javelin.component('quuxx', ['quux','bar','foo','bar'], function() {});
 
         var names = ['foo','bar','baz','qux','quux','quuxx'];
         for (var name in names) {

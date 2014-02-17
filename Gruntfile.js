@@ -75,11 +75,11 @@ module.exports = function(grunt) {
             },
             full: {
                 src: "<%= fileCollections.javelinFull %>",
-                dest: 'build/javelin-<%= pkg.version %>.js'
+                dest: 'build/javelin/javelin-<%= pkg.version %>.js'
             },
             core: {
                 src: "<%= fileCollections.javelinCore %>",
-                dest: 'build/javelin-<%= pkg.version %>.core.js'
+                dest: 'build/javelin/javelin-<%= pkg.version %>.core.js'
             },
             fixtures: {
                 src: "<%= fileCollections.fixtures %>",
@@ -92,19 +92,26 @@ module.exports = function(grunt) {
             },
             full: {
                 files: {
-                    'build/javelin-<%= pkg.version %>.min.js': ['build/javelin-<%= pkg.version %>.js']
+                    'build/javelin/javelin-<%= pkg.version %>.min.js': ['build/javelin/javelin-<%= pkg.version %>.js']
                 }
             },
             core: {
                 files: {
-                    'build/javelin-<%= pkg.version %>.core.min.js': ['build/javelin-<%= pkg.version %>.core.js']
+                    'build/javelin/javelin-<%= pkg.version %>.core.min.js': ['build/javelin/javelin-<%= pkg.version %>.core.js']
                 }
             }
         },
         watch: {
-            all: {
+            javelin: {
                 files: "<%= fileCollections.lint %>",
                 tasks: ["default"],
+                options: {
+                    interrupt: true
+                }
+            },
+            docs: {
+                files: ["<%= fileCollections.lint %>", 'demos/**/*.*', 'util/docs/**/*.*'],
+                tasks: ['javelin-docs-build-local'],
                 options: {
                     interrupt: true
                 }
@@ -112,13 +119,17 @@ module.exports = function(grunt) {
         },
         copy: {
             build: {
-                src: 'build/javelin-<%= pkg.version %>.js',
-                dest: 'build/javelin.js'
+                src: 'build/javelin/javelin-<%= pkg.version %>.js',
+                dest: 'build/javelin/javelin.js'
             },
             docs: {files:[
                 {
                     src: 'util/docs/bower.json',
                     dest: 'build/docs/bower.json'
+                },
+                {
+                    src: 'build/javelin/**/*.js',
+                    dest: 'build/docs/javelin/'
                 }
             ]},
             ghp: {files: [
@@ -220,17 +231,25 @@ module.exports = function(grunt) {
     //load custom javelin tasks
     grunt.loadTasks('tasks/');
 
-    //build & serve docs site locally
-    grunt.registerTask('javelin-docs', [
+    //build local docs site
+    grunt.registerTask('javelin-docs-build-local', [
+        'build',
         'javelin-docs-parse-api:local',
 //        'javelin-docs-build-api:local',
 //        'javelin-docs-build-guides:local',
         'javelin-docs-build-demos:local',
+        'copy:docs'
+    ]);
+
+    //build & serve docs site locally
+    grunt.registerTask('javelin-docs', [
+        'javelin-docs-build-local',
         'http-server:docs'
     ]);
 
     //build & serve full GH Pages site locally
     grunt.registerTask('javelin-ghpages', [
+        'build',
         'javelin-docs-parse-api:ghplocal',
 //        'javelin-docs-build-api:ghplocal',
 //        'javelin-docs-build-guides:ghplocal',
@@ -242,6 +261,7 @@ module.exports = function(grunt) {
 
     //build GH Pages site, as if it were being served from GH Pages
     grunt.registerTask('javelin-build-ghpages-live', [
+        'build',
         'javelin-docs-parse-api:ghp',
 //        'javelin-docs-build-api:ghp',
 //        'javelin-docs-build-guides:ghp',

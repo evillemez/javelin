@@ -10,6 +10,7 @@ need to be overridden in some cases.
 Javelin.Environment = function(name, loader) {
     this.name = name;
     this.loader = loader;
+    this.engine = null;
 };
 
 Javelin.Environment.prototype.initialize = function() {};
@@ -22,6 +23,10 @@ Javelin.Environment.prototype.run = function(stepsPerSecond) {
 
 Javelin.Environment.prototype.stop = function(callback) {
     throw new Error('Javelin.Environment.stop must be implemented.');
+};
+
+Javelin.Environment.prototype.setEngine = function(engine) {
+	this.engine = engine;
 };
 
 Javelin.Environment.prototype.getLoader = function() {

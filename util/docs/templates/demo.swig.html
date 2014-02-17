@@ -1,17 +1,13 @@
 <!doctype html>
 <html>
 <head>
-  <script src="{{baseurl}}/build/javelin.min.js"></script>
+  <script src="{{baseurl}}/javelin/build/javelin/javelin.js"></script>
 
   {% for script in scripts %}
-  <script src="{{baseurl}}/demos/{{meta.dir}}/js/{{script}}"></script>
+  <script src="{{baseurl}}/demos/{{meta.dir}}/{{script}}"></script>
   {% endfor %}
-
-  <script>
-    var game = javelin.createGame(gameConfig);
-    game.loadScene('{{meta.scene}}');
-  </script>
 </head>
+
 <body>
   <h1>Demo: {{meta.name}}</h1>
   <div id='viewport'>
@@ -26,5 +22,10 @@
     </pre>
   </div>
 
+
+  <script>
+    var game = javelin.createGame('browser', gameConfig);
+    game.loadScene('{{meta.scene}}');
+  </script>
 </body>
 </html>

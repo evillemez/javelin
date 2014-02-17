@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * The `transform2d` component contains 2d position and rotation information.  It also contains helper methods
  * for adjusting those values.  For example, during an update frame, to easily move an object forward, relative

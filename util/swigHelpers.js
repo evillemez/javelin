@@ -13,24 +13,24 @@ function renderObjects(grunt, objects, callback) {
     var i, l = objects.length, processed = 0;
     for (i = 0; i < l; i++) {
 
-        var obj = objects[i];
+        (function (object, callback) {
+            
+            swig.renderFile(object.template, object.vars, function(err, out) {
+                if (err) {
+                    grunt.log.error(err);
+                    callback(false);
+                }
 
-        var cb = function(err, out) {
-            if (err) {
-                grunt.log.error(err);
-                callback(false);
-            }
+                grunt.log.writeln('Writing ' + object.file);
+                grunt.file.write(object.file, out);
+                processed++;
 
-            grunt.log.writeln('Writing ' + obj.file);
-            grunt.file.write(obj.file, out);
-            processed++;
+                if (processed === l) {
+                    callback();
+                }
+            });
 
-            if (processed === l) {
-                callback();
-            }
-        };
-
-        swig.renderFile(obj.template, obj.vars, cb);
+        })(objects[i], callback);
     }    
 }
 

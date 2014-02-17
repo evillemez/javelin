@@ -2,6 +2,7 @@ Javelin.Plugin = function(name, engine) {
     this.$name = name;
     this.$engine = engine;
     this.$enabled = true;
+    this.$priority = 0;
 };
 
 Javelin.Plugin.prototype.$onLoad = function() {};

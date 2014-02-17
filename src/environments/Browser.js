@@ -1,12 +1,12 @@
-Javelin.Environments.Browser = function(config, engine) {
+Javelin.Environments.Browser = function(config) {
     var self = this;
-    this.intervalId = null;
+    var intervalId = null;
 
     //TODO: change to requestAnimationFrame
     this.run = function(stepsPerSecond) {
-        self.intervalId = setInterval(function() {
+        intervalId = setInterval(function() {
             try {
-                engine.step();
+                self.engine.step();
             } catch (e) {
                 console.log(e);
             }
@@ -14,7 +14,7 @@ Javelin.Environments.Browser = function(config, engine) {
     };
 
     this.stop = function(callback) {
-        clearInterval(self.intervalId);
+        clearInterval(intervalId);
         setTimeout(callback, 1);
     };
 

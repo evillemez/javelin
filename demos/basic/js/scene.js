@@ -1,6 +1,10 @@
+var gameConfig = {};
+
 javelin.scene('basic', {
     plugins: {
-        'renderer2d': {},
+        'renderer2d': {
+            renderTargetId: 'viewport'
+        },
         'input': {
             keyboard: {
                 buttons: {

@@ -9,7 +9,7 @@ describe("Input Plugin", function() {
     var e, j, f;
     
     beforeEach(function() {
-        j = require('../build/javelin.js');
+        j = require('../build/javelin/javelin.js');
         f = require('./fixtures/fixtures.js');
         e = new j.Engine(new f.Env.TestEnvironment(), {
             debug: true

@@ -1,7 +1,7 @@
 # Javelin Grunt Tasks #
 
-Lots of tasks are provided to automate working on the Javelin engine, its documentation and demos, as
-well as working on projects that use Javelin.  Brief list of planned tasks:
+Lots of tasks are provided to automate working on the Javelin engine, its documentation 
+and demos, as well as working on projects that use Javelin.  Brief list of planned tasks:
 
 Local tasks (for developing on this repo directly):
 
@@ -14,8 +14,8 @@ Local tasks (for developing on this repo directly):
 
 For other projects depending on Javelin:
 
-* `javelin-ghpages` - Start full GHPages site locally.
-* `javelin-docs` - Build & serve docs site locally.
+* `javelin-ghpages` - Build & run full GHPages site locally.
+* `javelin-docs` - Build & run docs site locally.
 * `javelin-server` - Start server to view & live-reload projects scaffolded via `javelin-init`.
 * `javelin-init` - Scaffold new javelin project.
   * including npm/bower reqs, gruntfile

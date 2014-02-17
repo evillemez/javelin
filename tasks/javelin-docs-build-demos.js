@@ -22,18 +22,35 @@ module.exports = function(grunt) {
         //make build directory
         grunt.file.mkdir(buildDir);
 
-        //assemble demos index
+        //find all demos and parse meta.json files
+        var demoMeta = [];
+        grunt.file.expand(demosDir + '/*/').forEach(function(dir) {
+            var file = dir + '/meta.json';
+
+            if (!grunt.file.exists(file)) {
+                return;
+            }
+
+            var data = grunt.file.readJSON(file);
+            data.path = dir;
+            demoMeta.push(data);
+        });
+
+        //assemble demos index page
         templates.push({
             template: [templatesDir, 'demos.index.swig.html'].join(path.sep),
-            file: [buildDir, 'index.html'].join(path.sep),
-            vars: { baseurl: ops.baseurl }
+            file: path.normalize([buildDir, 'index.html'].join(path.sep)),
+            vars: {
+                baseurl: ops.baseurl,
+                demos: demoMeta
+            }
         });
 
         //assemble individual demo pages
-        grunt.file.expand(demosDir + '/*/').forEach(function(dir) {
+        demoMeta.forEach(function(data) {
 
-            var   fileMeta = dir + '/meta.json'
-                , fileReadme = dir + '/README.md'
+            var   fileMeta = data.path + 'meta.json'
+                , fileReadme = data.path + 'README.md'
                 , templateVars = { baseurl: ops.baseurl }
             ;
             
@@ -41,25 +58,43 @@ module.exports = function(grunt) {
                 return;
             }
 
-            templateVars.meta = grunt.file.readJSON(fileMeta);
+            //read stuff in directory to assemble variables
+            //for swig when rendering demo page template
+            templateVars.meta = data;
             templateVars.readme = grunt.file.read(fileReadme);
-            templateVars.scripts = grunt.file.expand(dir + '/js/**/*.js').map(function(file) {
-                //TODO: resolve properly (nested files)
-                return path.basename(file);
+            templateVars.scripts = grunt.file.expand(data.path + 'js/**/*.js').map(function(file) {
+                return path.relative(data.path, file);
             });
 
-            //TODO: copy demo js files to new location
-            grunt.file.expand(dir + '/js/**/*.js').forEach(function(file) {
-                grunt.log.writeln('FOUND DEMO JS FILE: ' + file);
+            //copy javascript files in demo
+            grunt.file.expand(data.path + 'js/**/*.js').forEach(function(file) {
+                var relative = path.relative(data.path, file);
+                var target = [buildDir, data.dir, relative].join(path.sep);
+                target = path.normalize(target);
+                grunt.log.writeln('Copying js: ' + target);
+                grunt.file.copy(file, target);
             });
 
+            //copy assets in demo
+            grunt.file.expand(data.path + 'assets/**/*.*').forEach(function(file) {
+                var relative = path.relative(data.path, file);
+                var target = [buildDir, data.dir, relative].join(path.sep);
+                target = path.normalize(target);
+                grunt.log.writeln('Copying asset: ' + target);
+                grunt.file.copy(file, target);
+            });
+            
+            // TODO: render README to html
+
+            //add demo template for swig to render
             templates.push({
                 template: [templatesDir, 'demo.swig.html'].join(path.sep),
-                file: [buildDir, templateVars.meta.dir, 'index.html'].join(path.sep),
+                file: path.normalize([buildDir, templateVars.meta.dir, 'index.html'].join(path.sep)),
                 vars: templateVars
             });
         });
-console.log(templates);
+        
+        //make swig render demo pages
         swigHelper.renderObjects(grunt, templates, done);
     });
 };
