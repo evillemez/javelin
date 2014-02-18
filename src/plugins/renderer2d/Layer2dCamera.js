@@ -9,8 +9,7 @@ Javelin.Layer2dCamera = function(name) {
         y: 0
     };
 
-    this.zoomX = 1.0;
-    this.zoomY = 1.0;
+    this.zoom = 1.0;
     this.layer = null;
 };
 
