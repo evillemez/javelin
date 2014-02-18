@@ -7,7 +7,6 @@ var Javelin = Javelin || {
 };
 
 //constants - prepended with $ because you can't start a variable with a number
-Javelin.$VERSION = '0.6.0';
 Javelin.$PI_OVER_180 = Math.PI / 180;
 Javelin.$180_OVER_PI = 180 / Math.PI;
 

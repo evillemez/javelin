@@ -35,16 +35,16 @@ Javelin.Components.Transform2d = function(entity, game) {
     this.rotation = 0.0;
     
     //absolute world coordinates
-    this.getWorldX = function() {
-        return (parentTransform) ? parentTransform.position.x + self.position.x : self.position.x;
+    this.getAbsoluteX = function() {
+        return (parentTransform) ? parentTransform.getWorldX() + self.position.x : self.position.x;
     };
     
-    this.getWorldY = function() {
-        return (parentTransform) ? parentTransform.position.y + self.position.y : self.position.y;
+    this.getAbsoluteY = function() {
+        return (parentTransform) ? parentTransform.getWorldY() + self.position.y : self.position.y;
     };
     
-    this.getWorldRotation = function() {
-        return (parentTransform) ? parentTransform.rotation + self.rotation : self.rotation;
+    this.getAbsoluteRotation = function() {
+        return ((parentTransform) ? parentTransform.getWorldRotation() + self.rotation : self.rotation) % 360;
     };
 
     /**

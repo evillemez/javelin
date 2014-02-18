@@ -77,7 +77,6 @@ Javelin.KeyboardInput.prototype.unregisterListeners = function() {
 };
 
 Javelin.KeyboardInput.prototype.processInputEvents = function(currTime, lastTime, deltaTime) {
-
     for (var code in this.raw) {
         var raw = this.raw[code];
         
@@ -109,7 +108,7 @@ Javelin.KeyboardInput.prototype.processConfig = function(config) {
     this.raw = {};
     
     var control;
-    
+
     //buttons
     if (config.buttons) {
         for (control in config.buttons) {

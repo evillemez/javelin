@@ -1,98 +1,180 @@
 /**
  * Renderer2d provides an API to components for drawing paths and images to HTML5 canvas.
  * It also handles multiple layers, with configurable render modes per layer.
+ *
+ * TODO: document config, including layers and cameras
  */
 Javelin.Plugins.Renderer2d = function(config) {
+    
     var self = this;
-
-    this.config = config;
-    
-    this.renderTarget = null;
-    this.cameras = {};
-    this.contexts = {};
-    this.canvases = {};
-
+    var renderTarget = null;
+    var cameras = {};
+    var layers = {};
+    var layerRenderTargets = {};
     var engine = this.$engine;
-    
+    var lastTimeRendered;
+    var targetFps = 30;
+
+    /**
+     * Get a camera instance by name.
+     *
+     * @param  {string} name            Name of camera to get.
+     *
+     * @return {Javelin.Layer2dCamera}  The camera instance
+     */
+    this.getCamera = function (name) {
+        if (!cameras[name]) {
+            throw new Error("Unknown camera ["+name+"] requested.");
+        }
+
+        return cameras[name];
+    };
+
+    /**
+     * Get a layer instance by name.  Currently only Canvas2dRenderLayers
+     * are supported, but in the future there may be other types of layer
+     * renderers.
+     *
+     * @param  {string} name            Name of layer to get.
+     *
+     * @return {Javelin.Canvas2dRenderer}  The layer instance
+     */
+    this.getLayer = function(name) {
+        if (!layers[name]) {
+            throw new Error("Unknown layer ["+name+"] requested.");
+        }
+
+        return layers[name];
+    };
+
+    /**
+     * Load creates layer and camera instances based on given config.  If config
+     * does not specify anything, there is always a 'default' layer, and a 
+     * 'default' camera.
+     */
     this.$onLoad = function() {
         //only active in the browser
-        if (!document) {
+        if (!document || !window) {
             self.$active = false;
+            console.log("No browser environment detected - deactivating the renderer2d plugin.");
             return;
         }
             
-        self.fps = self.config.framesPerSecond || engine.stepsPerSecond;
-        self.lastTimeRendered = 0.0;
-        var target = document.getElementById(self.config.renderTargetId);
-        self.renderTarget = target;
-        var top = target.offsetTop;
-        var left = target.offsetLeft;
+        targetFps = config.framesPerSecond || engine.stepsPerSecond;
+        lastTimeRendered = 0.0;
+
+        var target = document.getElementById(config.renderTargetId);
+        renderTarget = target;
         
         if (!target) {
             throw new Error("No render target defined!");
         }
         
-        if (!self.config.layers) {
-            self.config.layers = ['default'];
+        //enforce default layer
+        config.layers = config.layers || {};
+        if (!config.layers['default']) {
+            config.layers['default'] = {
+                renderer: 'canvas2d',
+                camera: 'default',
+                clearOnUpdate: true,
+                config: {
+                    pixelsPerUnit: 20
+                }
+            };
+        }
+
+        //enforce default camera
+        config.cameras = config.cameras || {};
+        if (!config.cameras['default']) {
+            config.cameras['default'] = {};
         }
         
-        //create and stack canvas layers
-        var z = 0;
-        for (var i in self.config.layers) {
-            z++;
-            var layer = self.config.layers[i];
-            var canvas = document.createElement('canvas');
-            canvas.height = self.config.height;
-            canvas.width = self.config.width;
-            canvas.style.zIndex = z;
-            canvas.id = 'javelin-layer-' + layer;
-            
-            self.canvases[layer] = canvas;
-            self.contexts[layer] = canvas.getContext('2d');
-            self.cameras[layer] = {
-                x: 0,
-                y: 0,
-                height: 0,
-                width: 0
-            };
-            
-            target.appendChild(canvas);
+        //create cameras
+        for (var cameraName in config.cameras) {
+            cameras[cameraName] = new Javelin.Layer2dCamera(cameraName, config.cameras[cameraName]);
         }
-    };
-    
-    this.$onUnload = function() {
-        for (var i in self.canvases) {
-            self.renderTarget.removeChild(self.canvases[i]);
-        }
-    };
-    
-    this.$onPostUpdateStep = function(deltaTime) {
-        if (engine.time - self.lastTimeRendered >= self.fps && !engine.isRunningSlowly) {
-            var i, j, ctx, canvas, camera;
-            
-            //clear all canvases
-            for (i in self.canvases) {
-                self.contexts[i].clearRect(0, 0, self.canvases[i].width, self.canvases[i].height);
-            }
+        
+        //create and stack layer containers
+        var targetStyle = window.getComputedStyle(renderTarget);
+        var targetHeight = targetStyle.height;
+        var targetWidth = targetStyle.width;
+        var zIndex = targetStyle.zIndex || 0;
+        for (var layerName in config.layers) {
+            var layerConfig = config.layers[layerName];
+            zIndex++;
 
-            //execute `canvas2d.draw` callbacks on all root game objects (by layer)
-            //NOTE: right now, the layer of the root game object filters to children
-            var gos = engine.gos;
-            var l = gos.length;
-            for (i = 0; i < l; i++) {
-                if (gos[i].enabled && gos[i].isRoot()) {
-                    //get layer
-                    ctx = self.contexts[gos[i].layer];
-                    camera = self.cameras[gos[i].layer];
-                    //check for a draw callbacks to run
-                    var cbs = gos[i].getCallbacks('renderer2d.draw', true);
-                    for (j in cbs) {
-                        cbs[j](ctx, camera);
-                    }
+            //create layer render target, add to DOM
+            var layerRenderTarget = document.createElement('div');
+            layerRenderTarget.style.height = targetHeight;
+            layerRenderTarget.style.width = targetWidth;
+            layerRenderTarget.style.zIndex = zIndex;
+            // layerRenderTarget.style.top = top;
+            // layerRenderTarget.style.left = left;
+            layerRenderTarget.id = 'javelin-layer-' + layerName;
+            layerRenderTargets[layerName] = layerRenderTarget;
+            target.appendChild(layerRenderTarget);
+
+            //instantiate layer with render target
+            var layerInstance = createLayerInstance(layerRenderTarget, layerConfig.config);
+            layerInstance.setCamera(self.getCamera(layerConfig.camera || 'default'));
+            layers[layerName] = layerInstance;
+        }
+    };
+    
+    /**
+     * Unload will remove any created layerRenderTargets.
+     */
+    this.$onUnload = function() {
+        for (var name in layerRenderTargets) {
+            renderTarget.removeChild(layerRenderTargets[name]);
+        }
+
+        //drop internally created objects
+        layerRenderTargets = {};
+        layers = {};
+        cameras = {};
+    };
+    
+    /**
+     * PostUpdate will call all available `renderer2d.draw` callbacks registered
+     * by entity components, passing along the relevant layer instance and camera.
+     */
+    this.$onPostUpdate = function(deltaTime) {
+        if (engine.isRunningSlowly || engine.time - lastTimeRendered <= targetFps) {
+            console.log("skipping frame");
+            return;
+        }
+
+        var i, j;
+
+        //clear all layers
+        for (var layerName in config.layers) {
+            if (config.layers[layerName].clearOnUpdate) {
+                layers[layerName].clear();
+            }
+        }
+
+        //execute `renderer2d.draw` callbacks on all root game objects (by layer)
+        var entities = engine.gos;
+        var li = entities.length;
+        for (i = 0; i < li; i++) {
+            if (entities[i].enabled && entities[i].isRoot()) {
+                var cbs = entities[i].getCallbacks('renderer2d.draw', true);
+                var layer = self.getLayer(entities[i].layer);
+                var camera = layer.getCamera();
+                var lj = cbs.length;
+                for (j = 0; j < lj; j++) {
+                    cbs[j](layer, camera);
                 }
             }
-            
-            self.lastTimeRendered = engine.time;
         }
+        
+        lastTimeRendered = engine.time;
+    };
+
+    var createLayerInstance = function(layerRenderTarget, layerConfig) {
+        //one day, this could return different types of
+        //render layers
+        return new Javelin.Layer2dCanvas(layerRenderTarget, layerConfig);
     };
 };

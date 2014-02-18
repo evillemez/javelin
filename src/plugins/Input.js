@@ -14,7 +14,7 @@
  * and process the raw input values.  These handlers are loaded and unloaded automatically
  * based on the configuration passed to the this.
  * 
- * @class Javelin.this.Input
+ * @class Javelin.Plugins.Input
  * @author Evan Villemez
  */
 Javelin.Plugins.Input = function (config, game) {
@@ -26,7 +26,7 @@ Javelin.Plugins.Input = function (config, game) {
     
     //process config and setup relevant listeners
     this.$onLoad = function() {
-        
+
         //setup keyboard controls
         if (self.config.keyboard) {
             var kb = self.handlers.keyboard = new Javelin.KeyboardInput(self, self.config.keyboard);
@@ -46,9 +46,9 @@ Javelin.Plugins.Input = function (config, game) {
         }
     };
     
-    this.$onPreUpdateStep = function(deltaTime) {
+    this.$onPreUpdate = function(deltaTime) {
         var i, j, currTime, lastTime;
-        
+
         currTime = self.$engine.time;
         lastTime = self.$engine.prevTime;
         
@@ -67,18 +67,18 @@ Javelin.Plugins.Input = function (config, game) {
         }
     };
     
-    this.$onPostUpdateStep = function(deltaTime) {
+    this.$onPostUpdate = function(deltaTime) {
         //TODO: clear anything?
     };
     
-    this.$onGameObjectCreate = function(gameObject) {
+    this.$onEntityCreate = function(gameObject) {
         var cbs = gameObject.getCallbacks('input.resolve');
         if (cbs.length) {
             self.callbacks[gameObject.id] = cbs;
         }
     };
     
-    this.$onGameObjectDestroy = function(gameObject) {
+    this.$onEntityDestroy = function(gameObject) {
         if (self.callbacks[gameObject.id]) {
             self.callbacks[gameObject.id] = null;
         }

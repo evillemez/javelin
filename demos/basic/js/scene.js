@@ -3,7 +3,7 @@ var gameConfig = {};
 javelin.scene('basic', {
     plugins: {
         'renderer2d': {
-            renderTargetId: 'viewport'
+            renderTargetId: 'viewport',
         },
         'input': {
             keyboard: {
@@ -11,7 +11,13 @@ javelin.scene('basic', {
                     'up': 'uparrow',
                     'down': 'downarrow',
                     'left': 'leftarrow',
-                    'right': 'rightarrow'
+                    'right': 'rightarrow',
+                    'camUp': 'w',
+                    'camDown': 'd',
+                    'camLeft': 'a',
+                    'camRight': 'd',
+                    'zoomIn': 'e',
+                    'zoomOut': 'q'
                 }
             }
         }

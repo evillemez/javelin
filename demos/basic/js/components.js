@@ -8,9 +8,11 @@ javelin.component('basic.ball', ['transform2d'], function(entity, game) {
 
     //draw the ball on the canvas, but only if it's actually
     //visible in the viewport
-    this.$on('renderer2d.draw', function(layer, camera, plugin) {
-        if (camera.canSeeTransform(transform)) {
-            plugin.drawCircle(transform.x, transform.y, self.radius);
+    this.$on('renderer2d.draw', function(layer, camera) {
+        var x = transform.getAbsoluteX();
+        var y = transform.getAbsoluteY();
+        if (camera.canSeePoint(x, y)) {
+            layer.drawCircle(x, y, self.radius);
         }
     });
 
@@ -31,28 +33,35 @@ javelin.component('basic.controls', ['transform2d'], function(entity, game) {
     //and move the object accordingly
     this.$on('engine.update', function(deltaTime) {
         var moveAmount = self.speed * deltaTime;
-
         if (input.getButton('up')) {
-            transform.y -= moveAmount;
+            transform.position.y -= moveAmount;
         }
 
         if (input.getButton('down')) {
-            transform.y += moveAmount;
+            transform.position.y += moveAmount;
         }
 
         if (input.getButton('right')) {
-            transform.x += moveAmount;
+            transform.position.x += moveAmount;
         }
 
         if (input.getButton('left')) {
-            transform.x -= moveAmount;
+            transform.position.x -= moveAmount;
         }
     });
 });
 
 //draws grid lines to demonstrate the coordinate system for reference
 javelin.component('basic.grid', [], function(entity, game) {
-    this.$on('renderer2d.draw', function(layer, camera, plugin) {
-        //TODO: draw grid lines
+
+    this.$on('renderer2d.draw', function(layer, camera) {
+        
+        //TODO: draw grid lines for cameras view
+        for (var i = 0; i < 10; i++) {
+            //make a real loop...
+            //layer.drawLine();
+        }
+        
     });
+
 });

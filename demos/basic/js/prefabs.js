@@ -5,7 +5,7 @@ javelin.prefab('basic.player', {
         },
         'basic.ball': {
             color: '00FF00',
-            radius: 4
+            radius: 1
         }
     }
 });
