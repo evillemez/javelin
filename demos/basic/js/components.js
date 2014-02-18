@@ -27,18 +27,23 @@ javelin.component('basic.controls', ['transform2d'], function(entity, game) {
     var self = this
         , transform = entity.get('transform2d')
         , input = game.getPlugin('input')
+        , camera = game.getPlugin('renderer2d').getCamera('default')
     ;
     
+    //TODO: camera controls
+
     //on every update, check for controls pressed
     //and move the object accordingly
     this.$on('engine.update', function(deltaTime) {
         var moveAmount = self.speed * deltaTime;
+
+        //ball movement
         if (input.getButton('up')) {
-            transform.position.y -= moveAmount;
+            transform.position.y += moveAmount;
         }
 
         if (input.getButton('down')) {
-            transform.position.y += moveAmount;
+            transform.position.y -= moveAmount;
         }
 
         if (input.getButton('right')) {
@@ -48,6 +53,25 @@ javelin.component('basic.controls', ['transform2d'], function(entity, game) {
         if (input.getButton('left')) {
             transform.position.x -= moveAmount;
         }
+
+        //camera movement
+        if (input.getButton('camUp')) {
+            camera.position.y += moveAmount;
+        }
+
+        if (input.getButton('camDown')) {
+            camera.position.y -= moveAmount;
+        }
+
+        if (input.getButton('camRight')) {
+            camera.position.x += moveAmount;
+        }
+
+        if (input.getButton('camLeft')) {
+            camera.position.x -= moveAmount;
+        }
+        
+        //TODO: zoom in/out
     });
 });
 
@@ -57,6 +81,7 @@ javelin.component('basic.grid', [], function(entity, game) {
     this.$on('renderer2d.draw', function(layer, camera) {
         
         //TODO: draw grid lines for cameras view
+        var boundry = camera.getBoundry();
         for (var i = 0; i < 10; i++) {
             //make a real loop...
             //layer.drawLine();

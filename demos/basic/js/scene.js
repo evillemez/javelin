@@ -13,7 +13,7 @@ javelin.scene('basic', {
                     'left': 'leftarrow',
                     'right': 'rightarrow',
                     'camUp': 'w',
-                    'camDown': 'd',
+                    'camDown': 's',
                     'camLeft': 'a',
                     'camRight': 'd',
                     'zoomIn': 'e',

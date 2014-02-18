@@ -31,6 +31,9 @@ Javelin.Layer2dCanvas.prototype.drawCircle = function(x, y, radius) {
     var c = this.context;
     var pos = this.normalizeCanvasPosition(x, y);
 
+    //console.log('normalized at', pos);
+    //throw new Error('pause');
+
     c.save();
     c.translate(pos.x, pos.y);
     c.beginPath();
@@ -54,13 +57,14 @@ Javelin.Layer2dCanvas.prototype.clear = function() {
 
 Javelin.Layer2dCanvas.prototype.normalizeCanvasPosition = function(x, y) {
     return {
-        x: ((x * this.pixelsPerUnit) + (this.canvas.width * 0.5)) * this.camera.zoomX,
-        y: ((y * this.pixelsPerUnit) + (this.canvas.height * 0.5)) * this.camera.zoomY
+        x: (((x - this.camera.position.x) * this.pixelsPerUnit) + (this.canvas.width * 0.5)) * this.camera.zoomX,
+        y: (((y - this.camera.position.y) * this.pixelsPerUnit) + (this.canvas.height * 0.5)) * this.camera.zoomY
     };
 };
 
 Javelin.Layer2dCanvas.prototype.setCamera = function(camera) {
     this.camera = camera;
+    camera.setLayer(this);
 };
 
 Javelin.Layer2dCanvas.prototype.getCamera = function() {
