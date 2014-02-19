@@ -1,6 +1,6 @@
 var gameConfig = {};
 
-javelin.scene('basic', {
+javelin.scene('default', {
     plugins: {
         'renderer2d': {
             renderTargetId: 'viewport',
@@ -23,7 +23,7 @@ javelin.scene('basic', {
         }
     },
     entities: [
-        'basic.player',
-        'basic.grid'
+        'player',
+        'grid'
     ]
 });

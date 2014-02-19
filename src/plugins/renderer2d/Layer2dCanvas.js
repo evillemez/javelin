@@ -56,10 +56,19 @@ Javelin.Layer2dCanvas.prototype.clear = function() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 };
 
+/**
+ * This takes an x and y in game coordinate space, and converts it into canvas coordinates,
+ * while taking into account the cameras position and zoom.  It also takes care of inverting
+ * the y axis.
+ * 
+ * @param  {float} x    Game x position
+ * @param  {float} y    Game y position
+ * @return {object}     An object containing normalized x and y properties.
+ */
 Javelin.Layer2dCanvas.prototype.normalizeCanvasPosition = function(x, y) {
     return {
-        x: (((x - this.camera.position.x) * this.pixelsPerUnit) + (this.canvas.width * 0.5)) * this.camera.zoom,
-        y: (((-y + this.camera.position.y) * this.pixelsPerUnit) + (this.canvas.height * 0.5)) * this.camera.zoom
+        x: (((x - this.camera.position.x) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.width * 0.5)),
+        y: (((-y + this.camera.position.y) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.height * 0.5))
     };
 };
 

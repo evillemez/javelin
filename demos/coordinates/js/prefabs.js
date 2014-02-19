@@ -1,17 +1,17 @@
-javelin.prefab('basic.player', {
+javelin.prefab('player', {
     components: {
-        'basic.controls': {
+        'demo.controls': {
             speed: 5
         },
-        'basic.ball': {
+        'demo.ball': {
             color: '00FF00',
             radius: 1
         }
     }
 });
 
-javelin.prefab('basic.grid', {
+javelin.prefab('grid', {
     component: {
-        'basic.grid': {}
+        'demo.grid': {}
     }
 });
