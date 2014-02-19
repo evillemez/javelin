@@ -1,8 +1,8 @@
 # Coordinate Demo #
 
 This demo allows you to control the circle on the screen, as well as the camera being used
-to draw the layer.  Game coordinates are not pixel coordinates - always keep this in mind. By
-using a different coordinate system, it is easier to integrate with other systems that know
+to draw the layer.  Javelin uses Cartesian coordinates, not pixel coordinates - always keep this in 
+mind. By using Cartesian coordinates, it is easier to integrate with other systems that know
 nothing about pixels, but do need to know where things are located, in particular physics engines.
 In addition, it makes it easier to develop resolution independent games, which is particularly 
 important if your game is intended to run on a variety of devices.
