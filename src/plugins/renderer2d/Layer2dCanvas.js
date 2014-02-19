@@ -2,15 +2,16 @@
 /**
  * This render layer renders to an HTML5 2d Canvas instance.
  */
-Javelin.Layer2dCanvas = function(renderTarget, config) {
+Javelin.Layer2dCanvas = function(renderTarget, camera, config) {
     this.$PI_OVER_180 = Math.PI / 180;
     this.$180_OVER_PI = 180 / Math.PI;
 
     this.renderTarget = renderTarget;
-    this.camera = null;
+    this.camera = camera;
+    this.pixelsPerUnit = config.pixelsPerUnit || 20;
+
     this.context = null;
     this.canvas = null;
-    this.pixelsPerUnit = config.pixelsPerUnit || 20;
 
     //create canvas instance
     var canvas = document.createElement('canvas');
@@ -104,6 +105,8 @@ Javelin.Layer2dCanvas.prototype.normalizeCanvasPosition = function(x, y) {
 /**
  * Get the size of the x and y axis in game coordinates.  Note that this is not
  * relative to the camera - it's a direct translation from canvas space to game space.
+ *
+ * To determine the game coordinate boundaries visible by the camera, call `camera.getBoundries()`.
  * 
  * @return {object}     An object containing x and y properties.
  */
@@ -112,6 +115,10 @@ Javelin.Layer2dCanvas.prototype.getBoundries = function() {
         x: this.canvas.width / this.pixelsPerUnit,
         y: this.canvas.height / this.pixelsPerUnit
     };
+};
+
+Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function() {
+    //TODO: draw debug grid
 };
 
 Javelin.Layer2dCanvas.prototype.setCamera = function(camera) {

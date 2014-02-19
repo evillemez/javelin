@@ -1,6 +1,4 @@
-var gameConfig = {};
-
-javelin.scene('default', {
+var gameConfig = {
     plugins: {
         'renderer2d': {
             renderTargetId: 'viewport',
@@ -21,9 +19,23 @@ javelin.scene('default', {
                 }
             }
         }
-    },
+    }    
+};
+
+javelin.scene('default', {
     entities: [
-        'player',
-        'grid'
+        'player'
     ]
+});
+
+javelin.prefab('player', {
+    components: {
+        'demo.controls': {
+            speed: 5
+        },
+        'demo.ball': {
+            color: '00FF00',
+            radius: 1
+        }
+    }
 });

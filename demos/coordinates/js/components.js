@@ -1,4 +1,6 @@
-//simply draws a circle wherever the entity's transform is located
+/**
+ * This component simply draws a circle on the screen
+ */
 javelin.component('demo.ball', ['transform2d'], function(entity, game) {
     this.color = 'FF0000';
     this.radius = 3;
@@ -6,9 +8,10 @@ javelin.component('demo.ball', ['transform2d'], function(entity, game) {
     var self = this;
     var transform = entity.get('transform2d');
 
-    //draw the ball on the layer, but only if it's actually
-    //visible in the viewport
+    //add a callback for the 
     this.$on('renderer2d.draw', function(layer, camera) {
+        //draw the ball on the layer, but only if it's actually
+        //visible in the viewport
         layer.drawCircle(
             transform.getAbsoluteX(),
             transform.getAbsoluteY(),
@@ -18,7 +21,11 @@ javelin.component('demo.ball', ['transform2d'], function(entity, game) {
 
 });
 
-//listens for control input to move the entity
+/**
+ * This component handles the controls for modifying the circle and camera
+ * positions, and also instructs the render layer to draw the coordinate system 
+ * for debugging purposes.
+ */
 javelin.component('demo.controls', ['transform2d'], function(entity, game) {
     //public component variables (can be configured from a prefab)
     this.speed = 5;
@@ -31,7 +38,7 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
     ;
     
     //on every update, check for controls pressed
-    //and move the object accordingly
+    //and move the circle and/or camera accordingly
     this.$on('engine.update', function(deltaTime) {
         var moveAmount = self.speed * deltaTime;
 
@@ -49,20 +56,10 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
         if (input.getButton('zoomIn'))   { camera.zoom += moveAmount * 0.25; }
         if (input.getButton('zoomOut'))  { camera.zoom = Math.abs(camera.zoom - moveAmount * 0.25); }
     });
-});
 
-//draws grid lines to demonstrate the coordinate system for reference
-javelin.component('demo.grid', [], function(entity, game) {
-
+    //include debug  grid, so we can visualize the
+    //coordinate system
     this.$on('renderer2d.draw', function(layer, camera) {
-        
-        //TODO: draw grid lines for cameras view
-        var boundries = camera.getBoundries();
-        for (var i = 0; i < 10; i++) {
-            //make a real loop...
-            //layer.drawLine();
-        }
-        
+        layer.drawDebugCoordinates();
     });
-
 });

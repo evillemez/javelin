@@ -1,6 +1,9 @@
 
 /**
- * Cameras affect how renderer2d layers are rendered.
+ * Rendering on 2d layers is relative to the position, rotation and zoom of the camera
+ * assigned to the layer.  You can retrieve a camera by name from the `renderer2d` plugin,
+ * or from a layer instance.
+ * 
  */
 Javelin.Layer2dCamera = function(name) {
 
@@ -40,7 +43,7 @@ Javelin.Layer2dCamera = function(name) {
      */
     this.zoom = 1.0;
 
-    
+
     this.layer = null;
 };
 
@@ -57,6 +60,8 @@ Javelin.Layer2dCamera.prototype.canSeeArea = function(ax, ay, bx, by) {
 };
 
 Javelin.Layer2dCamera.prototype.getBoundries = function() {
+    var layerBoundries = this.getLayer().getBoundries();
+
     return {
         x: 1,
         y: 1

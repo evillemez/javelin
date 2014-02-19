@@ -66,7 +66,7 @@ module.exports = function(grunt) {
                 return path.relative(data.path, file);
             });
 
-            //copy javascript files in demo
+            //copy javascript files in demo, TODO: make async
             grunt.file.expand(data.path + 'js/**/*.js').forEach(function(file) {
                 var relative = path.relative(data.path, file);
                 var target = [buildDir, data.dir, relative].join(path.sep);
@@ -75,7 +75,7 @@ module.exports = function(grunt) {
                 grunt.file.copy(file, target);
             });
 
-            //copy assets in demo
+            //copy assets in demo, TODO: make async
             grunt.file.expand(data.path + 'assets/**/*.*').forEach(function(file) {
                 var relative = path.relative(data.path, file);
                 var target = [buildDir, data.dir, relative].join(path.sep);
@@ -84,7 +84,7 @@ module.exports = function(grunt) {
                 grunt.file.copy(file, target);
             });
             
-            // TODO: render README to html
+            // TODO: run README through swig, then render markdown to html
 
             //add demo template for swig to render
             templates.push({
