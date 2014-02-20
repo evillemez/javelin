@@ -5,6 +5,7 @@
 Javelin.Layer2dCanvas = function(renderTarget, camera, config) {
     this.$PI_OVER_180 = Math.PI / 180;
     this.$180_OVER_PI = 180 / Math.PI;
+    this.$2xPI = 2 * Math.PI;
 
     this.renderTarget = renderTarget;
     this.camera = camera;
@@ -54,7 +55,7 @@ Javelin.Layer2dCanvas.prototype.drawCircle = function(x, y, radius, style) {
     c.save();
     c.translate(pos.x, pos.y);
     c.beginPath();
-    c.arc(0, 0, radius * this.pixelsPerUnit * this.camera.zoom, 0, 360);
+    c.arc(0, 0, radius * this.pixelsPerUnit * this.camera.zoom, 0, this.$2xPI);
     c.closePath();
 
     //TODO: handle styles properly

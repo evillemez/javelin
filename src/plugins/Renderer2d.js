@@ -115,8 +115,12 @@ Javelin.Plugins.Renderer2d = function(config) {
             target.appendChild(layerRenderTarget);
 
             //instantiate layer with render target
-            var layerInstance = createLayerInstance(layerRenderTarget, layerConfig.config);
-            layerInstance.setCamera(self.getCamera(layerConfig.camera || 'default'));
+            var layerInstance = createLayerInstance(
+                layerRenderTarget,
+                self.getCamera(layerConfig.camera || 'default'),
+                layerConfig.config
+            );
+
             layers[layerName] = layerInstance;
         }
     };
@@ -172,9 +176,9 @@ Javelin.Plugins.Renderer2d = function(config) {
         lastTimeRendered = engine.time;
     };
 
-    var createLayerInstance = function(layerRenderTarget, layerConfig) {
+    var createLayerInstance = function(layerRenderTarget, camera, layerConfig) {
         //one day, this could return different types of
         //render layers
-        return new Javelin.Layer2dCanvas(layerRenderTarget, layerConfig);
+        return new Javelin.Layer2dCanvas(layerRenderTarget, camera, layerConfig);
     };
 };
