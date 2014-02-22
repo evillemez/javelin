@@ -59,6 +59,7 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
     });
 
     this.$on('renderer2d.draw', function(layer, camera) {
-        layer.drawDebugCoordinates();
+        var interval = 2.0;
+        layer.drawDebugCoordinates(null, interval);
     });
 });

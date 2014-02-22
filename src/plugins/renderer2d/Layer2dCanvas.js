@@ -41,7 +41,6 @@ Javelin.Layer2dCanvas.prototype.drawLine = function(ax, ay, bx, by, style) {
     c.beginPath();
     c.moveTo(p1.x, p1.y);
     c.lineTo(p2.x, p2.y);
-    c.closePath();
 
     //TODO: handle styles properly
     c.stroke();
@@ -121,22 +120,52 @@ Javelin.Layer2dCanvas.prototype.getBoundries = function() {
 
 //TODO: use raw canvas api here, don't use beginPath and stroke within loop - it's bad
 Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(color, interval) {
+    interval = interval || 1.0;
+    color = color || '888888';
+
     var bounds = this.getBoundries();
+    var pos = this.camera.position;
+    var zoom = this.camera.zoom;
 
-    var left = this.camera.position.x - (bounds.x * 0.5) / this.camera.zoom;
-    var right = this.camera.position.x + (bounds.x * 0.5) / this.camera.zoom;
-    var top = this.camera.position.y + (bounds.y * 0.5) / this.camera.zoom;
-    var bottom = this.camera.position.y - (bounds.y * 0.5) / this.camera.zoom;
+    //figure out camera's visibility in game coordinates
+    var left = pos.x - (bounds.x * 0.5) / zoom;
+    var right = pos.x + (bounds.x * 0.5) / zoom;
+    var top = pos.y + (bounds.y * 0.5) / zoom;
+    var bottom = pos.y - (bounds.y * 0.5) / zoom;
+    //account for grid line offset
+    var offsetX = left % interval;
+    var offsetY = bottom % interval;
 
-    for (var i = left; i < right; i++) {
+    //draw grid
+    var c = this.context
+        , p1 = null
+        , p2 = null
+    ;
+
+    c.save();
+    c.beginPath();
+
+    for (var i = left - interval; i < right + interval; i += interval) {
         //draw vertical
-        this.drawLine(i, bottom, i, top);
+        p1 = this.normalizeCanvasPosition(i - offsetX, bottom);
+        p2 = this.normalizeCanvasPosition(i - offsetX, top);
+        c.moveTo(p1.x, p1.y);
+        c.lineTo(p2.x, p2.y);
 
-        for (var j = bottom; j < top; j++) {
+        for (var j = bottom - interval; j < top + interval; j += interval) {
             //horiz
-            this.drawLine(left, j, right, j); 
+            p1 = this.normalizeCanvasPosition(left, j - offsetY);
+            p2 = this.normalizeCanvasPosition(right, j - offsetY);
+            c.moveTo(p1.x, p1.y);
+            c.lineTo(p2.x, p2.y);
         }
     }
+
+    //TODO: draw center crosshairs w/ coordinate text at
+    //boundries
+
+    c.stroke();
+    this.resetStyle();
 };
 
 Javelin.Layer2dCanvas.prototype.setCamera = function(camera) {

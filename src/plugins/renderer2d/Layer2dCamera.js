@@ -30,14 +30,15 @@ Javelin.Layer2dCamera = function(name) {
     };
 
     /**
-     * The rotation of the camera in degrees.
+     * The rotation of the camera in degrees.  This is not implemented yet, and
+     * is a placeholder for the future.
      * 
      * @type {float}
      */
     this.rotation = 0.0;
 
     /**
-     * The camera zoom.  Note that this cannot be a negative number.
+     * The camera zoom.  Note that this must be greater than 0.
      * 
      * @type {float}
      */
@@ -45,6 +46,15 @@ Javelin.Layer2dCamera = function(name) {
 
 
     this.layer = null;
+};
+
+/**
+ * Enforces setting the zoom to a positive number via `Math.abs()`
+ *
+ * @param {float} zoom      The new camera zoom
+ */
+Javelin.Layer2dCamera.prototype.setZoom = function(zoom) {
+    this.zoom = Math.abs(zoom);
 };
 
 Javelin.Layer2dCamera.prototype.setLayer = function(layer) {
