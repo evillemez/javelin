@@ -41,6 +41,7 @@ Javelin.Layer2dCanvas.prototype.drawLine = function(ax, ay, bx, by, style) {
     c.beginPath();
     c.moveTo(p1.x, p1.y);
     c.lineTo(p2.x, p2.y);
+    c.closePath();
 
     //TODO: handle styles properly
     c.stroke();
@@ -118,8 +119,24 @@ Javelin.Layer2dCanvas.prototype.getBoundries = function() {
     };
 };
 
-Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function() {
-    //TODO: draw debug grid
+//TODO: use raw canvas api here, don't use beginPath and stroke within loop - it's bad
+Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(color, interval) {
+    var bounds = this.getBoundries();
+
+    var left = this.camera.position.x - (bounds.x * 0.5) / this.camera.zoom;
+    var right = this.camera.position.x + (bounds.x * 0.5) / this.camera.zoom;
+    var top = this.camera.position.y + (bounds.y * 0.5) / this.camera.zoom;
+    var bottom = this.camera.position.y - (bounds.y * 0.5) / this.camera.zoom;
+
+    for (var i = left; i < right; i++) {
+        //draw vertical
+        this.drawLine(i, bottom, i, top);
+
+        for (var j = bottom; j < top; j++) {
+            //horiz
+            this.drawLine(left, j, right, j); 
+        }
+    }
 };
 
 Javelin.Layer2dCanvas.prototype.setCamera = function(camera) {

@@ -58,12 +58,3 @@ Javelin.Layer2dCamera.prototype.canSeePoint = function(x, y) {
 Javelin.Layer2dCamera.prototype.canSeeArea = function(ax, ay, bx, by) {
     return true;
 };
-
-Javelin.Layer2dCamera.prototype.getBoundries = function() {
-    var layerBoundries = this.getLayer().getBoundries();
-
-    return {
-        x: 1,
-        y: 1
-    };
-};

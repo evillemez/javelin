@@ -10,6 +10,7 @@ javelin.component('demo.ball', ['transform2d'], function(entity, game) {
 
     //add a callback for the 
     this.$on('renderer2d.draw', function(layer, camera) {
+
         //draw the ball on the layer, but only if it's actually
         //visible in the viewport
         layer.drawCircle(
@@ -57,8 +58,6 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
         if (input.getButton('zoomOut'))  { camera.zoom = Math.abs(camera.zoom - moveAmount * 0.25); }
     });
 
-    //include debug  grid, so we can visualize the
-    //coordinate system
     this.$on('renderer2d.draw', function(layer, camera) {
         layer.drawDebugCoordinates();
     });
