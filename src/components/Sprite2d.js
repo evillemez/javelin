@@ -51,11 +51,16 @@ Javelin.Components.Sprite2d = function(entity, game) {
     
     //actually draw the designated image on the canvas - the image could either be a regular image, or
     //an instance of Javelin.Asset.AtlasImage
-    this.$on('canvas2d.draw', function(context, camera) {
+    this.$on('renderer2d.draw', function(layer, context) {
         if (self.image) {
-            var pos = transform.position;
-            var rot = transform.getWorldRotation();
+            var pos = {
+                x: transform.getAbsoluteX(),
+                y: transform.getAbsoluteY()
+            };
+            var rot = transform.getAbsoluteRotation();
         
+//TODO: refactor beyond this point
+
             context.save();
 
             //TODO: take into account camera position and return if sprite is not visible, set visible to false
@@ -66,7 +71,7 @@ Javelin.Components.Sprite2d = function(entity, game) {
             );
             
             //convert degrees to radians and rotate the canvas
-            context.rotate(rot * Javelin.PI_OVER_180);
+            context.rotate(rot * Javelin.$PI_OVER_180);
 
             var scale = self.scale;
 

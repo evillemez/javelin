@@ -6,12 +6,21 @@
   {% for script in scripts %}
   <script src="{{baseurl}}/demos/{{meta.dir}}/{{script}}"></script>
   {% endfor %}
+
+  <style>
+    #viewport {
+      margin: 0px auto;
+      height: 360px;
+      width: 640px;
+      box-shadow: 0 0 2em black;
+    }
+  </style>
 </head>
 
 <body>
   <h1>Demo: {{meta.name}}</h1>
   <div id='viewport'>
-  <!-- game content here -->
+    <!-- game content will be injected here -->
   </div>
 
   <p>{{meta.description}}</p>

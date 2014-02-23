@@ -260,7 +260,12 @@ Javelin.Engine.prototype.step = function() {
 };
 
 Javelin.Engine.prototype.stats = function() {
-    console.log("Updated  " + this.gos.length + ' gos in ' + this.lastUpdateTimeTaken + 'ms, targeting ' + Math.floor(this.targetFps) + ' fps; DT: ' + this.deltaTime + ' seconds.');
+    console.log({
+        entities: this.gos.length,
+        lastFrameTime: this.lastUpdateTimeTaken + ' ms',
+        targetFPS: Math.floor(this.targetFps),
+        deltaTime: this.deltaTime + ' ms'
+    });
 };
 
 Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
