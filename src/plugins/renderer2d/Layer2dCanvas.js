@@ -1,6 +1,7 @@
 
 /**
- * This render layer renders to an HTML5 2d Canvas instance.
+ * This render layer renders to an HTML5 2d Canvas instance. It only supports a subset
+ * of the canvas functionality at the moment.
  */
 Javelin.Layer2dCanvas = function(renderTarget, camera, config) {
     this.$PI_OVER_180 = Math.PI / 180;
@@ -73,11 +74,11 @@ Javelin.Layer2dCanvas.prototype.drawShape = function(points, x, y, rotation, sty
 };
 
 Javelin.Layer2dCanvas.prototype.drawImage = function() {
-    //TODO
+    throw new Error("Not implemented.");
 };
 
 Javelin.Layer2dCanvas.prototype.drawAtlasImage = function() {
-    //TODO
+    throw new Error("Not implemented.");
 };
 
 Javelin.Layer2dCanvas.prototype.clear = function() {
