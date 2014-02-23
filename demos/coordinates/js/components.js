@@ -54,12 +54,11 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
         if (input.getButton('camDown'))  { camera.position.y -= moveAmount; }
         if (input.getButton('camRight')) { camera.position.x += moveAmount; }
         if (input.getButton('camLeft'))  { camera.position.x -= moveAmount; }
-        if (input.getButton('zoomIn'))   { camera.zoom += moveAmount * 0.25; }
-        if (input.getButton('zoomOut'))  { camera.zoom = Math.abs(camera.zoom - moveAmount * 0.25); }
+        if (input.getButton('zoomIn'))   { camera.zoom += moveAmount * 0.125; }
+        if (input.getButton('zoomOut'))  { camera.zoom = Math.abs(camera.zoom - moveAmount * 0.125); }
     });
 
     this.$on('renderer2d.draw', function(layer, camera) {
-        var interval = 2.0;
-        layer.drawDebugCoordinates(null, interval);
+        layer.drawDebugCoordinates(2.0);
     });
 });

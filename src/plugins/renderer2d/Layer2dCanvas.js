@@ -118,16 +118,21 @@ Javelin.Layer2dCanvas.prototype.getBoundries = function() {
     };
 };
 
-//TODO: use raw canvas api here, don't use beginPath and stroke within loop - it's bad
-Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(color, interval) {
+/**
+ * Show the canvas coordinate grid for debug purposes.
+ *
+ * @param  {float} interval     At what interval coordinates should be shown, default 1.0
+ * @param  {float} color        Color for the debug grid lines.
+ */
+Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color) {
     interval = interval || 1.0;
-    color = color || '888888';
+    color = color || '#888';
 
     var bounds = this.getBoundries();
     var pos = this.camera.position;
     var zoom = this.camera.zoom;
 
-    //figure out camera's visibility in game coordinates
+    //figure out camera's visibility boundries in game coordinates
     var left = pos.x - (bounds.x * 0.5) / zoom;
     var right = pos.x + (bounds.x * 0.5) / zoom;
     var top = pos.y + (bounds.y * 0.5) / zoom;
@@ -146,14 +151,14 @@ Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(color, interval)
     c.beginPath();
 
     for (var i = left - interval; i < right + interval; i += interval) {
-        //draw vertical
+        //draw vertical lines
         p1 = this.normalizeCanvasPosition(i - offsetX, bottom);
         p2 = this.normalizeCanvasPosition(i - offsetX, top);
         c.moveTo(p1.x, p1.y);
         c.lineTo(p2.x, p2.y);
 
         for (var j = bottom - interval; j < top + interval; j += interval) {
-            //horiz
+            //draw horizontal lines
             p1 = this.normalizeCanvasPosition(left, j - offsetY);
             p2 = this.normalizeCanvasPosition(right, j - offsetY);
             c.moveTo(p1.x, p1.y);
@@ -161,10 +166,32 @@ Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(color, interval)
         }
     }
 
-    //TODO: draw center crosshairs w/ coordinate text at
-    //boundries
-
+    c.setStrokeColor(color);
     c.stroke();
+    this.resetStyle();
+
+    //draw centered crosshairs
+    var midX = this.canvas.width * 0.5;
+    var midY = this.canvas.height * 0.5;
+
+    c.save();
+    c.beginPath();
+    c.moveTo(midX, 0);
+    c.lineTo(midX, this.canvas.height);
+    c.moveTo(0, midY);
+    c.lineTo(this.canvas.width, midY);
+    c.setStrokeColor('#0F0');
+    c.stroke();
+    this.resetStyle();
+
+    //write camera center coordinates
+    c.save();
+    c.setStrokeColor('#00F');
+    c.strokeText(
+        '('+pos.x.toFixed(2)+', '+pos.y.toFixed(2)+')',
+        midX + 3,
+        midY + 10
+    );
     this.resetStyle();
 };
 
