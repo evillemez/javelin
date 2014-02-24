@@ -22,6 +22,8 @@ Javelin.Layer2dCanvas = function(renderTarget, camera, config) {
     renderTarget.appendChild(canvas);
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
+
+    this.debugGridDrawn = false;
 };
 
 Javelin.Layer2dCanvas.prototype.setStyle = function(config) {
@@ -82,6 +84,7 @@ Javelin.Layer2dCanvas.prototype.drawAtlasImage = function() {
 };
 
 Javelin.Layer2dCanvas.prototype.clear = function() {
+    this.debugGridDrawn = false;
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 };
 
@@ -123,9 +126,13 @@ Javelin.Layer2dCanvas.prototype.getBoundries = function() {
  * Show the canvas coordinate grid for debug purposes.
  *
  * @param  {float} interval     At what interval coordinates should be shown, default 1.0
- * @param  {float} color        Color for the debug grid lines.
+ * @param  {string} color       Color for the debug grid lines.
  */
 Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color) {
+    if (this.debugGridDrawn) {
+        return;
+    }
+
     interval = interval || 1.0;
     color = color || '#888';
 
@@ -220,6 +227,7 @@ Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color)
     );
 
     this.resetStyle();
+    this.debugGridDrawn = true;
 };
 
 Javelin.Layer2dCanvas.prototype.setCamera = function(camera) {
