@@ -188,11 +188,37 @@ Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color)
     //write camera center coordinates
     c.save();
     c.setStrokeColor('#00F');
+    //center
     c.strokeText(
         '('+pos.x.toFixed(2)+', '+pos.y.toFixed(2)+')',
         midX + 3,
         midY + 10
     );
+    //left
+    c.strokeText(
+        '('+(pos.x + left).toFixed(2)+', '+pos.y.toFixed(2)+')',
+        0 + 3,
+        midY + 10
+    );
+    //right
+    c.strokeText(
+        '('+(pos.x + right).toFixed(2)+', '+pos.y.toFixed(2)+')',
+        this.canvas.width - 73,
+        midY + 10
+    );
+    //top
+    c.strokeText(
+        '('+pos.x.toFixed(2)+', '+(pos.y + top).toFixed(2)+')',
+        midX + 3,
+        0 + 10
+    );
+    //bottom
+    c.strokeText(
+        '('+pos.x.toFixed(2)+', '+(pos.y + bottom).toFixed(2)+')',
+        midX + 3,
+        this.canvas.height - 10
+    );
+
     this.resetStyle();
 };
 
