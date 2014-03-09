@@ -13,6 +13,7 @@ module.exports = function(grunt) {
         var root = path.resolve(__dirname, '..');
         var templatesDir = [root, 'util', 'docs', 'templates'].join(path.sep)
             , ops = this.options(this.data)
+            , version = grunt.config.get('pkg.version')
             , buildDir = [root, ops.dest].join(path.sep)
             , demosDir = [root, 'demos'].join(path.sep)
             , templates = []
@@ -41,6 +42,7 @@ module.exports = function(grunt) {
             template: [templatesDir, 'demos.index.swig.html'].join(path.sep),
             file: path.normalize([buildDir, 'index.html'].join(path.sep)),
             vars: {
+                version: version,
                 baseurl: ops.baseurl,
                 demos: demoMeta
             }
@@ -51,7 +53,7 @@ module.exports = function(grunt) {
 
             var   fileMeta = data.path + 'meta.json'
                 , fileReadme = data.path + 'README.md'
-                , templateVars = { baseurl: ops.baseurl }
+                , templateVars = { baseurl: ops.baseurl, version: version }
             ;
             
             if (!grunt.file.exists(fileMeta)) {

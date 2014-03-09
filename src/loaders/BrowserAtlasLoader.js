@@ -29,7 +29,7 @@ Javelin.Loaders.BrowserAtlasLoader = function(loader, relPath, absPath, done) {
     };
 
     //start by loading the json, will trigger series of callbacks
-    loader.loadAssetAsType(relPath, 'json', loadJsonCallback);
+    loader.loadAssetAsType(relPath, '.json', loadJsonCallback);
 };
 
 

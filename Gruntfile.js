@@ -128,8 +128,16 @@ module.exports = function(grunt) {
                     dest: 'build/docs/bower.json'
                 },
                 {
-                    src: 'build/javelin/**/*.js',
+                    cwd: 'build/javelin/',
+                    expand: true,
+                    src: '*',
                     dest: 'build/docs/javelin/'
+                },
+                {
+                    cwd: 'demos/shared/',
+                    expand: true,
+                    src: '**',
+                    dest: 'build/docs/demos/shared/'
                 }
             ]},
             ghp: {files: [
@@ -238,6 +246,7 @@ module.exports = function(grunt) {
 //        'javelin-docs-build-api:local',
 //        'javelin-docs-build-guides:local',
         'javelin-docs-build-demos:local',
+        'copy:build',
         'copy:docs'
     ]);
 

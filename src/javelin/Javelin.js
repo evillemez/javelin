@@ -9,6 +9,7 @@ var Javelin = Javelin || {
 //constants - prepended with $ because you can't start a variable with a number
 Javelin.$PI_OVER_180 = Math.PI / 180;
 Javelin.$180_OVER_PI = 180 / Math.PI;
+Javelin.$2xPI = 2 * Math.PI;
 
 //singleton registry instance
 Javelin.instance = null;

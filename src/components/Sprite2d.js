@@ -2,8 +2,8 @@
  * The `sprite` component will let you associate an image asset with a entity.  The `image` property can be
  * either an `Image` instance, or an instance of `Javelin.Asset.AtlasImage`.  Images can also specify a scale.
  *
- * @class Javelin.this.Sprite
- * @javelinComponent sprite
+ * @class Javelin.Sprite2d
+ * @javelinComponent sprite2d
  * @author Evan Villemez
  */
 Javelin.Components.Sprite2d = function(entity, game) {
@@ -33,6 +33,7 @@ Javelin.Components.Sprite2d = function(entity, game) {
         transform = entity.get('transform2d');
         
         //load image if specified
+        //TODO: change to "getAsset", fall back to asyncronous load
         if (self.imagePath) {
             entity.disable();
             if (self.atlasPath) {
@@ -51,7 +52,7 @@ Javelin.Components.Sprite2d = function(entity, game) {
     
     //actually draw the designated image on the canvas - the image could either be a regular image, or
     //an instance of Javelin.Asset.AtlasImage
-    this.$on('renderer2d.draw', function(layer, context) {
+    this.$on('renderer2d.draw', function(layer, camera) {
         if (self.image) {
             var pos = {
                 x: transform.getAbsoluteX(),
@@ -59,8 +60,13 @@ Javelin.Components.Sprite2d = function(entity, game) {
             };
             var rot = transform.getAbsoluteRotation();
         
-//TODO: refactor beyond this point
+            if (self.image instanceof Javelin.Asset.AtlasImage) {
+                //layer.drawAtlasImage();
+            } else {
+                //layer.drawimage();
+            }
 
+            /*
             context.save();
 
             //TODO: take into account camera position and return if sprite is not visible, set visible to false
@@ -133,6 +139,7 @@ Javelin.Components.Sprite2d = function(entity, game) {
             }
             
             context.restore();
+            */
         }
     });
     
