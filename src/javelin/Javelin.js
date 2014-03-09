@@ -3,7 +3,8 @@ var Javelin = Javelin || {
     Components: {},
     Plugins: {},
     Environments: {},
-    Loaders: {}
+    Loaders: {},
+    Assets: {}
 };
 
 //constants - prepended with $ because you can't start a variable with a number

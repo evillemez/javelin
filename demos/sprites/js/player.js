@@ -3,6 +3,10 @@ javelin.prefab('player', {
         'demo.controls': {
             speed: 5
         },
+        'sprite2d': {
+            imagePath: '/demos/shared/assets/robot/robowalk00.png'
+        }
+        /*
         'spriteAnimator2d': {
             animations: {
                 'walk': {
@@ -33,5 +37,6 @@ javelin.prefab('player', {
                 }
             }
         }
+        //*/
     }
 });

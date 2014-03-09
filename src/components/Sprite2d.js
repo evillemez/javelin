@@ -58,29 +58,36 @@ Javelin.Components.Sprite2d = function(entity, game) {
                 x: transform.getAbsoluteX(),
                 y: transform.getAbsoluteY()
             };
+            
+            //cull if not visible
+            if (!camera.canSeePoint(pos.x, pos.y)) {
+                return;
+            }
+
             var rot = transform.getAbsoluteRotation();
-        
-            if (self.image instanceof Javelin.Asset.AtlasImage) {
-                //layer.drawAtlasImage();
+
+            if (self.image instanceof Javelin.AtlasImage) {
+                layer.drawAtlasImage(
+                    self.image,
+                    self.imagePath,
+                    pos.x,
+                    pos.y,
+                    rot,
+                    self.scale.x,
+                    self.scale.y
+                );
             } else {
-                //layer.drawimage();
+                layer.drawImage(
+                    self.image,
+                    pos.x,
+                    pos.y,
+                    rot,
+                    self.scale.x,
+                    self.scale.y
+                );
             }
 
             /*
-            context.save();
-
-            //TODO: take into account camera position and return if sprite is not visible, set visible to false
-            //move canvas to draw the image in proper location
-            context.translate(
-                pos.x,
-                pos.y
-            );
-            
-            //convert degrees to radians and rotate the canvas
-            context.rotate(rot * Javelin.$PI_OVER_180);
-
-            var scale = self.scale;
-
             if (self.image instanceof Javelin.Asset.AtlasImage) {
                 var spr = self.image;
 
@@ -95,24 +102,6 @@ Javelin.Components.Sprite2d = function(entity, game) {
                     +spr.cy * scale.y,
                     spr.width * scale.x,
                     spr.height * scale.y
-                );
-            } else {
-                var cx, cy;
-                
-                //TODO: would be good to do this
-                //once when it loads - or when set
-                //in the sprite component
-                cx = self.image.height * 0.5;
-                cy = self.image.width * 0.5;
-                
-                var h = self.image.height * self.scale.y;
-                var w = self.image.width * self.scale.x;
-                context.drawImage(
-                    self.image,
-                    -cx * self.scale.x,
-                    -cy * self.scale.y,
-                    w,
-                    h
                 );
             }
             

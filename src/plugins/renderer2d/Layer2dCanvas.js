@@ -75,11 +75,32 @@ Javelin.Layer2dCanvas.prototype.drawShape = function(points, x, y, rotation, sty
     //in the array for that item
 };
 
-Javelin.Layer2dCanvas.prototype.drawImage = function() {
-    throw new Error("Not implemented.");
+Javelin.Layer2dCanvas.prototype.drawImage = function(image, x, y, rotation, scaleX, scaleY) {
+    var cam = this.camera;
+    var c = this.context;
+
+    scaleX = scaleX * cam.zoom;
+    scaleY = scaleY * cam.zoom;
+    var pos = this.normalizeCanvasPosition(x, y);
+    var cx = image.width * 0.5 * scaleX;
+    var cy = image.height * 0.5 * scaleY;
+    var width = image.width * scaleX;
+    var height = image.height * scaleY;
+
+    c.save();
+    c.translate(pos.x, pos.y);
+    c.rotate(rotation * this.$180_OVER_PI);
+    c.drawImage(
+        image,
+        -cx,
+        -cy,
+        width,
+        height
+    );
+    this.resetStyle();
 };
 
-Javelin.Layer2dCanvas.prototype.drawAtlasImage = function() {
+Javelin.Layer2dCanvas.prototype.drawAtlasImage = function(atlas, imagePath, x, y, rotation, scaleX, scaleY) {
     throw new Error("Not implemented.");
 };
 

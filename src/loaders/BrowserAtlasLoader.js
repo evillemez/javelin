@@ -12,7 +12,7 @@ Javelin.Loaders.BrowserAtlasLoader = function(loader, relPath, absPath, done) {
     imgPath = rp.substring(0, rp.lastIndexOf("/"));
 
     var createAtlas = function() {
-        var atlas = new TexturePackerAtlas(json, img);
+        var atlas = new Javelin.TexturePackerAtlas(json, img);
         loader.register(relPath, atlas);
         done(atlas);
     };
@@ -35,22 +35,22 @@ Javelin.Loaders.BrowserAtlasLoader = function(loader, relPath, absPath, done) {
 
 //TODO: these should maybe be moved elsewhere - perhaps a new /src/assets directory
 
-function TexturePackerAtlas(json, image) {
+Javelin.TexturePackerAtlas = function(json, image) {
     this.image = image;
     this.imageMeta = json.meta;
     this.images = {};
     
     var c = 0;
     for (var name in json.frames) {
-        var img = new AtlasImage(json.frames[name], this.image);
+        var img = new Javelin.AtlasImage(json.frames[name], this.image);
         this.images[name] = img;
         c++;
     }
     
     this.count = c;
-}
+};
 
-function AtlasImage(data, image) {
+Javelin.AtlasImage = function(data, image) {
     this.image = image;
     this.x = data.frame.x;
     this.y = data.frame.y;
@@ -64,4 +64,4 @@ function AtlasImage(data, image) {
         this.cx = -this.width * 0.5;
         this.cy = -this.height * 0.5;
     }
-}
+};
