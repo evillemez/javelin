@@ -22,6 +22,8 @@ Javelin.Layer2dCanvas = function(renderTarget, camera, config) {
     renderTarget.appendChild(canvas);
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
+
+    this.debugGridDrawn = false;
 };
 
 Javelin.Layer2dCanvas.prototype.setStyle = function(config) {
@@ -65,6 +67,11 @@ Javelin.Layer2dCanvas.prototype.drawCircle = function(x, y, radius, style) {
     this.resetStyle();
 };
 
+Javelin.Layer2dCanvas.prototype.drawRectangle = function(x, y, height, width, style) {
+    var c = this.context;
+    var pos = this.normalizeCanvasPosition(x, y);
+};
+
 Javelin.Layer2dCanvas.prototype.drawShape = function(points, x, y, rotation, style) {
     //draws a complex shape
     //points is array of points
@@ -73,15 +80,60 @@ Javelin.Layer2dCanvas.prototype.drawShape = function(points, x, y, rotation, sty
     //in the array for that item
 };
 
-Javelin.Layer2dCanvas.prototype.drawImage = function() {
-    throw new Error("Not implemented.");
+Javelin.Layer2dCanvas.prototype.drawImage = function(image, x, y, rotation, scaleX, scaleY) {
+    var cam = this.camera;
+    var c = this.context;
+
+    scaleX = scaleX * cam.zoom;
+    scaleY = scaleY * cam.zoom;
+    var pos = this.normalizeCanvasPosition(x, y);
+    var cx = image.width * 0.5 * scaleX;
+    var cy = image.height * 0.5 * scaleY;
+    var width = image.width * scaleX;
+    var height = image.height * scaleY;
+
+    c.save();
+    c.translate(pos.x, pos.y);
+    c.rotate(rotation * this.$PI_OVER_180);
+    c.drawImage(
+        image,
+        -cx,
+        -cy,
+        width,
+        height
+    );
+    this.resetStyle();
 };
 
-Javelin.Layer2dCanvas.prototype.drawAtlasImage = function() {
-    throw new Error("Not implemented.");
+Javelin.Layer2dCanvas.prototype.drawAtlasImage = function(atlasImage, x, y, rotation, scaleX, scaleY) {
+    var cam = this.camera;
+    var c = this.context;
+
+    scaleX = scaleX * cam.zoom;
+    scaleY = scaleY * cam.zoom;
+
+    var pos = this.normalizeCanvasPosition(x, y);
+
+    c.save();
+    c.translate(pos.x, pos.y);
+    c.rotate(rotation * this.$PI_OVER_180);
+    c.drawImage(
+        atlasImage.image,
+        atlasImage.x,
+        atlasImage.y,
+        atlasImage.width,
+        atlasImage.height,
+        atlasImage.cx * scaleX,
+        atlasImage.cy * scaleY,
+        atlasImage.width * scaleX,
+        atlasImage.height * scaleY
+    );
+
+    this.resetStyle();
 };
 
 Javelin.Layer2dCanvas.prototype.clear = function() {
+    this.debugGridDrawn = false;
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 };
 
@@ -99,8 +151,8 @@ Javelin.Layer2dCanvas.prototype.normalizeCanvasPosition = function(x, y) {
     //TODO: take into account camera rotation :(
 
     return {
-        x: (((x - this.camera.position.x) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.width * 0.5)),
-        y: (((-y + this.camera.position.y) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.height * 0.5))
+        x: ((x - this.camera.position.x) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.width * 0.5),
+        y: ((-y + this.camera.position.y) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.height * 0.5)
     };
 };
 
@@ -123,9 +175,13 @@ Javelin.Layer2dCanvas.prototype.getBoundries = function() {
  * Show the canvas coordinate grid for debug purposes.
  *
  * @param  {float} interval     At what interval coordinates should be shown, default 1.0
- * @param  {float} color        Color for the debug grid lines.
+ * @param  {string} color       Color for the debug grid lines.
  */
 Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color) {
+    if (this.debugGridDrawn) {
+        return;
+    }
+
     interval = interval || 1.0;
     color = color || '#888';
 
@@ -188,12 +244,39 @@ Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color)
     //write camera center coordinates
     c.save();
     c.setStrokeColor('#00F');
+    //center
     c.strokeText(
         '('+pos.x.toFixed(2)+', '+pos.y.toFixed(2)+')',
         midX + 3,
         midY + 10
     );
+    //left
+    c.strokeText(
+        '('+(pos.x + left).toFixed(2)+', '+pos.y.toFixed(2)+')',
+        0 + 3,
+        midY + 10
+    );
+    //right
+    c.strokeText(
+        '('+(pos.x + right).toFixed(2)+', '+pos.y.toFixed(2)+')',
+        this.canvas.width - 73,
+        midY + 10
+    );
+    //top
+    c.strokeText(
+        '('+pos.x.toFixed(2)+', '+(pos.y + top).toFixed(2)+')',
+        midX + 3,
+        0 + 10
+    );
+    //bottom
+    c.strokeText(
+        '('+pos.x.toFixed(2)+', '+(pos.y + bottom).toFixed(2)+')',
+        midX + 3,
+        this.canvas.height - 10
+    );
+
     this.resetStyle();
+    this.debugGridDrawn = true;
 };
 
 Javelin.Layer2dCanvas.prototype.setCamera = function(camera) {

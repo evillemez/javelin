@@ -1,0 +1,6 @@
+{
+    "name": "Sprites",
+    "dir": "sprites",
+    "description": "Moving and animating sprites.",
+    "scene": "default"
+}

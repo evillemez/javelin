@@ -183,13 +183,17 @@ Javelin.Registry.prototype.getLoaders = function(environment) {
     return this.loaders;
 };
 
-Javelin.Registry.prototype.createLoader = function(environment) {
-    return new Javelin.AssetLoader(environment, this.getLoaders(environment));
+Javelin.Registry.prototype.createLoader = function(environment, loaderConfig) {
+    loaderConfig = loaderConfig || {};
+    var basepath = loaderConfig.basepath || '';
+
+    return new Javelin.AssetLoader(basepath, this.getLoaders(environment));
 };
 
-Javelin.Registry.prototype.createEnvironment = function(environment, configuration) {
+Javelin.Registry.prototype.createEnvironment = function(environment, configuration, loader) {
     var def = this.getEnvironment(environment);
-    var env = new Javelin.Environment(environment, this.createLoader(environment));
+    loader = loader || new Javelin.AssetLoader();
+    var env = new Javelin.Environment(environment, loader);
     var config = configuration || def.defaults;
 
     def.handler.call(env, config);
@@ -199,9 +203,13 @@ Javelin.Registry.prototype.createEnvironment = function(environment, configurati
 
 Javelin.Registry.prototype.createGame = function(environment, config) {
     config = config || {};
-    var envConfig = (config.environments && config.environments[environment]) ? config.environments[environment] : null;
+    var envConfig = (config.environments && config.environments[environment]) ? config.environments[environment] : {};
+    var loaderConfig = (config.loader && config.loader[environment]) ? config.loader[environment] : {};
 
-    return new Javelin.Engine(this, this.createEnvironment(environment, envConfig), config);
+    var loader = this.createLoader(environment, loaderConfig);
+    var env = this.createEnvironment(environment, envConfig, loader);
+
+    return new Javelin.Engine(this, env, config);
 };
 
 Javelin.Registry.prototype.computeComponentRequirements = function() {

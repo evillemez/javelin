@@ -1,5 +1,6 @@
 Javelin.Environments.Browser = function(config) {
     var self = this;
+    this.config = config;
     var intervalId = null;
 
     //TODO: change to requestAnimationFrame

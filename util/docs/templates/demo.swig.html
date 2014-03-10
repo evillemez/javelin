@@ -1,8 +1,14 @@
 <!doctype html>
 <html>
 <head>
-  <script src="{{baseurl}}/javelin/build/javelin/javelin.js"></script>
-
+  <script>
+    window.javelinDemos = {
+      browserConfig: {
+        baseurl: '{{baseurl}}'
+      }
+    };
+  </script>
+  <script src="{{baseurl}}/javelin/javelin-{{version}}.js"></script>
   {% for script in scripts %}
   <script src="{{baseurl}}/demos/{{meta.dir}}/{{script}}"></script>
   {% endfor %}
@@ -33,7 +39,7 @@
 
 
   <script>
-    var game = javelin.createGame('browser', gameConfig);
+    var game = javelin.createGame('browser', window.gameConfig || {});
     game.loadScene('{{meta.scene}}');
   </script>
 </body>

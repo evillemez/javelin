@@ -36,15 +36,15 @@ Javelin.Components.Transform2d = function(entity, game) {
     
     //absolute world coordinates
     this.getAbsoluteX = function() {
-        return (parentTransform) ? parentTransform.getWorldX() + self.position.x : self.position.x;
+        return (parentTransform) ? parentTransform.getAbsoluteX() + self.position.x : self.position.x;
     };
     
     this.getAbsoluteY = function() {
-        return (parentTransform) ? parentTransform.getWorldY() + self.position.y : self.position.y;
+        return (parentTransform) ? parentTransform.getAbsoluteY() + self.position.y : self.position.y;
     };
     
     this.getAbsoluteRotation = function() {
-        return ((parentTransform) ? parentTransform.getWorldRotation() + self.rotation : self.rotation) % 360;
+        return ((parentTransform) ? parentTransform.getAbsoluteRotation() + self.rotation : self.rotation) % 360;
     };
 
     /**
@@ -79,9 +79,10 @@ Javelin.Components.Transform2d = function(entity, game) {
      */    
     this.translateForward = function(amount) {
         var radians = self.rotation * Javelin.$PI_OVER_180;
-        var x = Math.cos(radians) * amount;
-        var y = Math.sin(radians) * amount;
-        self.translate(x, y);
+        self.translate(
+            Math.sin(radians) * amount,
+            Math.cos(radians) * amount
+        );
     };
     
     /**
@@ -91,9 +92,10 @@ Javelin.Components.Transform2d = function(entity, game) {
      */    
     this.translateBackward = function(amount) {
         var radians = self.rotation * Javelin.$PI_OVER_180;
-        var x = -Math.cos(radians) * amount;
-        var y = -Math.sin(radians) * amount;
-        self.translate(x, y);
+        self.translate(
+            -Math.sin(radians) * amount,
+            -Math.cos(radians) * amount
+        );
     };
     
     this.translateRight = function(amount) {

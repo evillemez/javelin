@@ -2,8 +2,8 @@
  * The `sprite` component will let you associate an image asset with a entity.  The `image` property can be
  * either an `Image` instance, or an instance of `Javelin.Asset.AtlasImage`.  Images can also specify a scale.
  *
- * @class Javelin.this.Sprite
- * @javelinComponent sprite
+ * @class Javelin.Sprite2d
+ * @javelinComponent sprite2d
  * @author Evan Villemez
  */
 Javelin.Components.Sprite2d = function(entity, game) {
@@ -21,6 +21,10 @@ Javelin.Components.Sprite2d = function(entity, game) {
         x: 1.0,
         y: 1.0
     };
+
+    //modify the rotation of the image to make
+    //it easier to work with transforms
+    this.orientation = 0.0;
     
     var debug = false;
     var transform = null;
@@ -33,6 +37,7 @@ Javelin.Components.Sprite2d = function(entity, game) {
         transform = entity.get('transform2d');
         
         //load image if specified
+        //TODO: change to "getAsset", fall back to asyncronous load
         if (self.imagePath) {
             entity.disable();
             if (self.atlasPath) {
@@ -51,66 +56,43 @@ Javelin.Components.Sprite2d = function(entity, game) {
     
     //actually draw the designated image on the canvas - the image could either be a regular image, or
     //an instance of Javelin.Asset.AtlasImage
-    this.$on('renderer2d.draw', function(layer, context) {
+    this.$on('renderer2d.draw', function(layer, camera) {
         if (self.image) {
             var pos = {
                 x: transform.getAbsoluteX(),
                 y: transform.getAbsoluteY()
             };
-            var rot = transform.getAbsoluteRotation();
-        
-//TODO: refactor beyond this point
-
-            context.save();
-
-            //TODO: take into account camera position and return if sprite is not visible, set visible to false
-            //move canvas to draw the image in proper location
-            context.translate(
-                pos.x,
-                pos.y
-            );
             
-            //convert degrees to radians and rotate the canvas
-            context.rotate(rot * Javelin.$PI_OVER_180);
+            //cull if not visible
+            if (!camera.canSeePoint(pos.x, pos.y)) {
+                return;
+            }
 
-            var scale = self.scale;
+            var rot = transform.getAbsoluteRotation();
 
-            if (self.image instanceof Javelin.Asset.AtlasImage) {
-                var spr = self.image;
-
-                //draw the image fo' reals
-                context.drawImage(
-                    spr.image,
-                    spr.x,
-                    spr.y,
-                    spr.width,
-                    spr.height,
-                    +spr.cx * scale.x,
-                    +spr.cy * scale.y,
-                    spr.width * scale.x,
-                    spr.height * scale.y
+            if (self.image instanceof Javelin.AtlasImage) {
+                layer.drawAtlasImage(
+                    self.image,
+                    pos.x,
+                    pos.y,
+                    rot + self.orientation,
+                    self.scale.x,
+                    self.scale.y
                 );
             } else {
-                var cx, cy;
-                
-                //TODO: would be good to do this
-                //once when it loads - or when set
-                //in the sprite component
-                cx = self.image.height * 0.5;
-                cy = self.image.width * 0.5;
-                
-                var h = self.image.height * self.scale.y;
-                var w = self.image.width * self.scale.x;
-                context.drawImage(
+                layer.drawImage(
                     self.image,
-                    -cx * self.scale.x,
-                    -cy * self.scale.y,
-                    w,
-                    h
+                    pos.x,
+                    pos.y,
+                    rot + self.orientation,
+                    self.scale.x,
+                    self.scale.y
                 );
             }
+
             
             //draw debug center and bounding boxes
+            /*
             if (debug) {
                 context.strokeStyle = '#F00';
 
@@ -133,6 +115,7 @@ Javelin.Components.Sprite2d = function(entity, game) {
             }
             
             context.restore();
+            //*/
         }
     });
     
