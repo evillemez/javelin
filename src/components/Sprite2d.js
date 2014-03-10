@@ -21,6 +21,10 @@ Javelin.Components.Sprite2d = function(entity, game) {
         x: 1.0,
         y: 1.0
     };
+
+    //modify the rotation of the image to make
+    //it easier to work with transforms
+    this.orientation = 0.0;
     
     var debug = false;
     var transform = null;
@@ -69,10 +73,9 @@ Javelin.Components.Sprite2d = function(entity, game) {
             if (self.image instanceof Javelin.AtlasImage) {
                 layer.drawAtlasImage(
                     self.image,
-                    self.imagePath,
                     pos.x,
                     pos.y,
-                    rot,
+                    rot + self.orientation,
                     self.scale.x,
                     self.scale.y
                 );
@@ -81,31 +84,15 @@ Javelin.Components.Sprite2d = function(entity, game) {
                     self.image,
                     pos.x,
                     pos.y,
-                    rot,
+                    rot + self.orientation,
                     self.scale.x,
                     self.scale.y
                 );
             }
 
-            /*
-            if (self.image instanceof Javelin.Asset.AtlasImage) {
-                var spr = self.image;
-
-                //draw the image fo' reals
-                context.drawImage(
-                    spr.image,
-                    spr.x,
-                    spr.y,
-                    spr.width,
-                    spr.height,
-                    +spr.cx * scale.x,
-                    +spr.cy * scale.y,
-                    spr.width * scale.x,
-                    spr.height * scale.y
-                );
-            }
             
             //draw debug center and bounding boxes
+            /*
             if (debug) {
                 context.strokeStyle = '#F00';
 
@@ -128,7 +115,7 @@ Javelin.Components.Sprite2d = function(entity, game) {
             }
             
             context.restore();
-            */
+            //*/
         }
     });
     

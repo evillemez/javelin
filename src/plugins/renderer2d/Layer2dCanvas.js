@@ -67,6 +67,11 @@ Javelin.Layer2dCanvas.prototype.drawCircle = function(x, y, radius, style) {
     this.resetStyle();
 };
 
+Javelin.Layer2dCanvas.prototype.drawRectangle = function(x, y, height, width, style) {
+    var c = this.context;
+    var pos = this.normalizeCanvasPosition(x, y);
+};
+
 Javelin.Layer2dCanvas.prototype.drawShape = function(points, x, y, rotation, style) {
     //draws a complex shape
     //points is array of points
@@ -89,7 +94,7 @@ Javelin.Layer2dCanvas.prototype.drawImage = function(image, x, y, rotation, scal
 
     c.save();
     c.translate(pos.x, pos.y);
-    c.rotate(rotation * this.$180_OVER_PI);
+    c.rotate(rotation * this.$PI_OVER_180);
     c.drawImage(
         image,
         -cx,
@@ -100,8 +105,31 @@ Javelin.Layer2dCanvas.prototype.drawImage = function(image, x, y, rotation, scal
     this.resetStyle();
 };
 
-Javelin.Layer2dCanvas.prototype.drawAtlasImage = function(atlas, imagePath, x, y, rotation, scaleX, scaleY) {
-    throw new Error("Not implemented.");
+Javelin.Layer2dCanvas.prototype.drawAtlasImage = function(atlasImage, x, y, rotation, scaleX, scaleY) {
+    var cam = this.camera;
+    var c = this.context;
+
+    scaleX = scaleX * cam.zoom;
+    scaleY = scaleY * cam.zoom;
+
+    var pos = this.normalizeCanvasPosition(x, y);
+
+    c.save();
+    c.translate(pos.x, pos.y);
+    c.rotate(rotation * this.$PI_OVER_180);
+    c.drawImage(
+        atlasImage.image,
+        atlasImage.x,
+        atlasImage.y,
+        atlasImage.width,
+        atlasImage.height,
+        atlasImage.cx * scaleX,
+        atlasImage.cy * scaleY,
+        atlasImage.width * scaleX,
+        atlasImage.height * scaleY
+    );
+
+    this.resetStyle();
 };
 
 Javelin.Layer2dCanvas.prototype.clear = function() {
@@ -123,8 +151,8 @@ Javelin.Layer2dCanvas.prototype.normalizeCanvasPosition = function(x, y) {
     //TODO: take into account camera rotation :(
 
     return {
-        x: (((x - this.camera.position.x) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.width * 0.5)),
-        y: (((-y + this.camera.position.y) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.height * 0.5))
+        x: ((x - this.camera.position.x) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.width * 0.5),
+        y: ((-y + this.camera.position.y) * this.pixelsPerUnit * this.camera.zoom) + (this.canvas.height * 0.5)
     };
 };
 

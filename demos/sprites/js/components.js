@@ -6,11 +6,20 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
     this.speed = 5;
 
     //private component variables
-    var self = this
-        , transform = entity.get('transform2d')
-        , input = game.getPlugin('input')
-        , camera = game.getPlugin('renderer2d').getCamera('default')
-    ;
+    var self = this;
+    var transform, animator, input, camera;
+
+    //when created, get references to things this
+    //component will control
+    this.$on('engine.create', function() {
+        transform = entity.get('transform2d');
+        input = game.getPlugin('input');
+        camera = game.getPlugin('renderer2d').getCamera('default');
+        animator = entity.get('spriteAnimator2d');
+
+        //TODO: tmp hack to force asset load
+        animator.play('walk');
+    });
     
     //on every update, check for controls pressed
     //and move the circle and/or camera accordingly
@@ -18,10 +27,14 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
         var moveAmount = self.speed * deltaTime;
 
         //ball movement
-        if (input.getButton('up'))       { transform.position.y += moveAmount; }
-        if (input.getButton('down'))     { transform.position.y -= moveAmount; }
-        if (input.getButton('right'))    { transform.position.x += moveAmount; }
-        if (input.getButton('left'))     { transform.position.x -= moveAmount; }
+        var moving = false;
+        if (input.getButton('up'))       { transform.translateForward(moveAmount);  moving = true; }
+        if (input.getButton('down'))     { transform.translateBackward(moveAmount); moving = true; }
+        if (input.getButton('right'))    { transform.rotate(3);  moving = true; }
+        if (input.getButton('left'))     { transform.rotate(-3); moving = true; }
+
+        if (moving) { animator.start(); }
+        else { animator.stop(); }
 
         //camera movement
         if (input.getButton('camUp'))    { camera.position.y += moveAmount; }

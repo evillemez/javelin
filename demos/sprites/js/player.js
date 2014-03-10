@@ -4,9 +4,8 @@ javelin.prefab('player', {
             speed: 5
         },
         'sprite2d': {
-            imagePath: '/demos/shared/assets/robot/robowalk00.png'
-        }
-        /*
+            orientation: 90
+        },
         'spriteAnimator2d': {
             animations: {
                 'walk': {
@@ -37,6 +36,5 @@ javelin.prefab('player', {
                 }
             }
         }
-        //*/
     }
 });
