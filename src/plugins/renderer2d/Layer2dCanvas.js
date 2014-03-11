@@ -23,6 +23,7 @@ Javelin.Layer2dCanvas = function(renderTarget, camera, config) {
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
 
+    this.debug = false;
     this.debugGridDrawn = false;
 };
 
@@ -102,6 +103,24 @@ Javelin.Layer2dCanvas.prototype.drawImage = function(image, x, y, rotation, scal
         width,
         height
     );
+    
+    if (!this.debug) {
+        this.resetStyle();
+        return;
+    }
+    
+    //draw image debug
+    c.strokeStyle = '#F00';
+    c.beginPath();
+    c.arc(0, 0, 3 * this.camera.zoom, 0, this.$2xPI);
+    c.closePath();
+    c.rect(
+        -cx * scaleX,
+        -cy * scaleY,
+        width,
+        height
+    );
+    c.stroke();
     this.resetStyle();
 };
 
@@ -129,6 +148,23 @@ Javelin.Layer2dCanvas.prototype.drawAtlasImage = function(atlasImage, x, y, rota
         atlasImage.height * scaleY
     );
 
+    if (!this.debug) {
+        this.resetStyle();
+        return;
+    }
+
+    //draw sprite image debug (center and bounding box)
+    c.strokeStyle = '#F00';
+    c.beginPath();
+    c.arc(0, 0, 3 * this.camera.zoom, 0, this.$2xPI);
+    c.closePath();
+    c.rect(
+        atlasImage.cx * scaleX,
+        atlasImage.cy * scaleY,
+        atlasImage.width * scaleX,
+        atlasImage.height * scaleY
+    );
+    c.stroke();
     this.resetStyle();
 };
 
