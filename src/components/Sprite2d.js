@@ -1,6 +1,7 @@
 /**
- * The `sprite` component will let you associate an image asset with a entity.  The `image` property can be
- * either an `Image` instance, or an instance of `Javelin.Asset.AtlasImage`.  Images can also specify a scale.
+ * The `sprite2d` component will let you associate an image asset with a entity.  This
+ * allows easy drawing of images to 2d layers.  Other components use the `sprite2d`
+ * component to do more interesting things, like add animations.
  *
  * @class Javelin.Sprite2d
  * @javelinComponent sprite2d
@@ -9,43 +10,76 @@
 Javelin.Components.Sprite2d = function(entity, game) {
     var self = this;
 
+    /**
+     * Asset path to image.  When created, if the asset has not already
+     * loaded, it will be lazily loaded.
+     * 
+     * @type {string} Relative asset path.
+     */
     this.imagePath = null;
+
+    /**
+     * Asset path to sprite atlas.  When created, if the asset has not
+     * already loaded, it will be lazily loaded.
+     * 
+     * @type {string} Relative asset path.
+     */
     this.atlasPath = null;
     
-    //can be Image or Javelin.Asset.AtlasImage
+    /**
+     * The actual image instance that will be drawn.  This can
+     * be either an instance of [Image](), or an instance of
+     * `Javelin.AtlasImage`.
+     * 
+     * @type {object}
+     */
     this.image = null;
-    this.visible = true;
 
-    //how much to scale the image in x and y directions
+    /**
+     * How much to scale the images drawn by this component.
+     * 
+     * @type {Object} Object containing separate x/y scale values.
+     */
     this.scale = {
         x: 1.0,
         y: 1.0
     };
 
-    //modify the rotation of the image to make
-    //it easier to work with transforms
+    /**
+     * Change the orientation of images drawn by this sprite component.  For
+     * example, if an image was exported facing the "wrong" way, you can use
+     * this value to correct the rotation.
+     * 
+     * @type {float} Degrees to rotate the sprite.
+     */
     this.orientation = 0.0;
     
-    var debug = false;
     var transform = null;
     
+    /**
+     * On create, if assets are specified, but not loaded, they will
+     * be loaded, and the entity will be enabled after the assets have
+     * loaded.
+     */
     this.$on('engine.create', function() {
-        if (game && game.debug) {
-            debug = true;
-        }
-        
         transform = entity.get('transform2d');
+        var atlas = false;
         
-        //load image if specified
-        //TODO: change to "getAsset", fall back to asyncronous load
-        if (self.imagePath) {
-            entity.disable();
-            if (self.atlasPath) {
+        //get references to images, and load if not
+        //yet loaded
+        if (self.atlasPath) {
+            atlas = game.getAsset(self.atlasPath);
+            if (!atlas) {
+                entity.disable();
                 game.loadAsset(self.atlasPath, function(atlas) {
                     self.image = atlas.images[self.imagePath];
                     entity.enable();
                 });
-            } else {
+            }
+        } else if (self.imagePath) {
+            self.image = game.getAsset(self.imagePath);
+            if (!self.image) {
+                entity.disable();
                 game.loadAsset(self.imagePath, function(image) {
                     self.image = image;
                     entity.enable();
@@ -54,8 +88,13 @@ Javelin.Components.Sprite2d = function(entity, game) {
         }
     });
     
-    //actually draw the designated image on the canvas - the image could either be a regular image, or
-    //an instance of Javelin.Asset.AtlasImage
+    /**
+     * When the renderer is ready to draw, if this sprite has a reference
+     * to an image, it draws the image on the layer.
+     * 
+     * @param  {Javelin.Layer2dCanvas} layer  The layer to draw on.
+     * @param  {Javelin.Layer2dCamera} camera The camera assigned to the layer.
+     */
     this.$on('renderer2d.draw', function(layer, camera) {
         if (self.image) {
             var pos = {
@@ -63,7 +102,8 @@ Javelin.Components.Sprite2d = function(entity, game) {
                 y: transform.getAbsoluteY()
             };
             
-            //cull if not visible
+            //cull if not visible - temporary implementation,
+            //should at least check image bounds, not point
             if (!camera.canSeePoint(pos.x, pos.y)) {
                 return;
             }
@@ -89,34 +129,6 @@ Javelin.Components.Sprite2d = function(entity, game) {
                     self.scale.y
                 );
             }
-
-            
-            //draw debug center and bounding boxes
-            /*
-            if (debug) {
-                context.strokeStyle = '#F00';
-
-                //draw center of transform
-                context.beginPath();
-                context.arc(0, 0, 3, 0, 2 * Math.PI, true);
-                context.closePath();
-                context.stroke();
-    
-                //draw sprite image bounding box
-                if (self.image) {
-                    var img = self.image;
-                    var topLeftX = 0 - (img.width * 0.5) * scale.x;
-                    var topLeftY = 0 - (img.height * 0.5) * scale.y;
-                    var height = img.height * scale.x;
-                    var width = img.width * scale.y;
-            
-                    context.strokeRect(topLeftX, topLeftY, width, height);
-                }
-            }
-            
-            context.restore();
-            //*/
         }
-    });
-    
+    });    
 };

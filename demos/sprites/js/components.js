@@ -16,9 +16,6 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
         input = game.getPlugin('input');
         camera = game.getPlugin('renderer2d').getCamera('default');
         animator = entity.get('spriteAnimator2d');
-
-        //TODO: tmp hack to force asset load
-        animator.play('walk');
     });
     
     //on every update, check for controls pressed

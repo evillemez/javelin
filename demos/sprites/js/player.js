@@ -4,7 +4,9 @@ javelin.prefab('player', {
             speed: 5
         },
         'sprite2d': {
-            orientation: 90
+            atlasPath: '/demos/shared/assets/robot/robot.atlas.json',
+            imagePath: 'robowalk00.png',
+            orientation: 90     //original image was not facing "up"
         },
         'spriteAnimator2d': {
             animations: {

@@ -410,6 +410,10 @@ Javelin.Engine.prototype.loadAssets = function(arr, callback) {
     return this.loader.loadAssets(arr, callback);
 };
 
+Javelin.Engine.prototype.getAsset = function(path) {
+    return this.loader.getAsset(path);
+};
+
 /* Plugin Management */
 Javelin.Engine.prototype.loadPlugin = function(name, config) {
     if (this.plugins[name]) {
