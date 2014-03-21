@@ -13,6 +13,6 @@ This README will be about developing on Javelin, not how to use it in a game - t
 * use the grunt tasks to build the project, and perform other tasks:
     * `grunt build` - builds the main project into `build/javelin/`
     * `grunt javelin-docs` - builds a documentation site locally, and serves it from `127.0.0.1:8555`
-    * `grunt -h` - to list other available tasks
     * `grunt watch:javelin` - to rebuild everything in `build/javelin/` when code in `src/` changes
     * `grunt watch:docs` - to rebuild the local docs site when anything in `src/` or `demos/` changes
+    * `grunt -h` - to list other available tasks
