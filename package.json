@@ -4,17 +4,18 @@
   "description": "A component-based game engine for the modern web.",
   "private": true,
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.1.0",
-    "grunt-simple-mocha": "https://github.com/yaymukund/grunt-simple-mocha/tarball/master",
-    "grunt-contrib-watch": "~0.2.0",
-    "grunt-contrib-uglify": "~0.1.0",
-    "grunt-contrib-copy": "~0.5.0",
     "chai": "~1.5.0",
-    "dox": "~0.4.4",
     "chai-spies": "~0.5.1",
+    "dox": "~0.4.4",
+    "grunt": "~0.4.1",
     "grunt-concat-sourcemap": "~0.3.1",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-jshint": "~0.1.0",
+    "grunt-contrib-uglify": "~0.1.0",
+    "grunt-contrib-watch": "~0.2.0",
     "grunt-http-server": "*",
+    "grunt-simple-mocha": "https://github.com/yaymukund/grunt-simple-mocha/tarball/master",
+    "gulp": "^3.6.0",
     "swig": "~1.2.0"
   }
 }

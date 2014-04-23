@@ -1,0 +1,8 @@
+
+})((function(env){
+    if (typeof module !== 'undefined') {
+        return require('javelin').getInstance();
+    } else {
+    	return window.javelin;
+    }
+})());
