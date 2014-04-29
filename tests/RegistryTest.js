@@ -1,6 +1,6 @@
 'use strict';
 
-var Javelin = require('../build/javelin/javelin.js');
+var Javelin = require('../build/javelin/javelin.core.js');
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;

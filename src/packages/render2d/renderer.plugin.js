@@ -4,7 +4,7 @@
  *
  * TODO: document config, including layers and cameras
  */
-Javelin.Plugins.Renderer2d = function(config) {
+javelin.plugin('renderer2d', function(config) {
     
     var self = this;
     var renderTarget = null;
@@ -20,7 +20,7 @@ Javelin.Plugins.Renderer2d = function(config) {
      *
      * @param  {string} name            Name of camera to get.
      *
-     * @return {Javelin.Layer2dCamera}  The camera instance
+     * @return {Layer2dCamera}  The camera instance
      */
     this.getCamera = function (name) {
         if (!cameras[name]) {
@@ -37,7 +37,7 @@ Javelin.Plugins.Renderer2d = function(config) {
      *
      * @param  {string} name            Name of layer to get.
      *
-     * @return {Javelin.Canvas2dRenderer}  The layer instance
+     * @return {Canvas2dRenderer}  The layer instance
      */
     this.getLayer = function(name) {
         if (!layers[name]) {
@@ -91,7 +91,7 @@ Javelin.Plugins.Renderer2d = function(config) {
         
         //create cameras
         for (var cameraName in config.cameras) {
-            cameras[cameraName] = new Javelin.Layer2dCamera(cameraName, config.cameras[cameraName]);
+            cameras[cameraName] = new Layer2dCamera(cameraName, config.cameras[cameraName]);
         }
         
         //create and stack layer containers
@@ -179,6 +179,6 @@ Javelin.Plugins.Renderer2d = function(config) {
     var createLayerInstance = function(layerRenderTarget, camera, layerConfig) {
         //one day, this could return different types of
         //render layers
-        return new Javelin.Layer2dCanvas(layerRenderTarget, camera, layerConfig);
+        return new Layer2dCanvas(layerRenderTarget, camera, layerConfig);
     };
-};
+});

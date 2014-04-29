@@ -3,11 +3,10 @@
  * allows easy drawing of images to 2d layers.  Other components use the `sprite2d`
  * component to do more interesting things, like add animations.
  *
- * @class Javelin.Sprite2d
- * @javelinComponent sprite2d
- * @author Evan Villemez
+ * @package renderer2d
+ * @type component
  */
-Javelin.Components.Sprite2d = function(entity, game) {
+javelin.component('sprite2d', ['transform2d'], function(entity, game) {
     var self = this;
 
     /**
@@ -131,4 +130,4 @@ Javelin.Components.Sprite2d = function(entity, game) {
             }
         }
     });    
-};
+});

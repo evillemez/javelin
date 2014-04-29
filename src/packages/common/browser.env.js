@@ -1,4 +1,11 @@
-Javelin.Environments.Browser = function(config) {
+/**
+ * Takes care of managing the engine loop in a generic web browser
+ * environment.
+ *
+ * @package  common
+ * @type environment
+ */
+javelin.environment('browser', function(config) {
     var self = this;
     this.config = config;
     var intervalId = null;
@@ -19,4 +26,4 @@ Javelin.Environments.Browser = function(config) {
         setTimeout(callback, 1);
     };
 
-};
+});

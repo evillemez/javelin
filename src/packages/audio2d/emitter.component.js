@@ -1,4 +1,4 @@
-Javelin.Components.AudioEmitter2d = function(entity, game) {
+javelin.component('audioEmitter2d', ['transform2d'], function(entity, game) {
     var self = this;
     var audio = null,
         transform = null, 
@@ -69,4 +69,4 @@ Javelin.Components.AudioEmitter2d = function(entity, game) {
     this.$on('engine.destroy', function() {
         audio.clearActive(entity.id);
     });
-};
+});

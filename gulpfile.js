@@ -2,6 +2,8 @@ var gulp = require('gulp')
     , pkg = require('./package.json')
     , conf = require('./build-conf.js')
     , fs = require('fs')
+    , es = require('event-stream')
+    , path = require('path')
     , util = require('gulp-util')
     , concat = require('gulp-concat')
     , jshint = require('gulp-jshint')
@@ -9,10 +11,12 @@ var gulp = require('gulp')
     , server = require('gulp-livereload')
     , uglify = require('gulp-uglify')
     , debug = require('gulp-debug')
+    , sequence = require('run-sequence')
+    , glob = require('glob')
 ;
 
 gulp.on('err', function(e) {
-    console.log(e.err.stack);
+    util.log(e.err.stack);
 });
 
 gulp.task('lint', function() {
@@ -25,23 +29,40 @@ gulp.task('test', function() {
 });
 
 gulp.task('build:javelin', function() {
-    gulp.src(conf.paths.javelinCore)
-        .pipe(concat('javelin-'+pkg.version+'.core.js')).pipe(gulp.dest('build/javelin/'))
-        .pipe(concat('javelin.js')).pipe(gulp.dest('build/javelin/'));
+    var files = gulp.src(conf.paths.javelinCore);
+    return es.merge(
+        files.pipe(concat('javelin-'+pkg.version+'.core.js')).pipe(gulp.dest('build/javelin/dist/')),
+        files.pipe(concat('javelin.core.js')).pipe(gulp.dest('build/javelin/'))
+    );
 });
 
 gulp.task('build:fixtures', function() {
-    gulp.src(['util/build/fixtures.prefix','fixtures/**/*.js','util/build/fixtures.suffix'])
+    return gulp.src(['util/build/fixtures.prefix','fixtures/**/*.js','util/build/fixtures.suffix'])
         .pipe(concat('fixtures.js')).pipe(gulp.dest('build/'));
 });
 
-gulp.task('build:packages', function() {
-    util.log('package build not implemented...');
+gulp.task('build:packages', function(done) {
+    var dirs = glob.sync('src/packages/*/'), finished = 0;
+    var cb = function() { if (++finished === dirs.length) {done();}};
+    dirs.forEach(function(dir) {
+        var dirname = path.basename(dir);
+        var files = gulp.src(['util/build/package.prefix', 'src/packages/'+dirname+'/**/*.js','util/build/package.suffix']);
+        es.merge(
+            files.pipe(concat('javelin-'+pkg.version+'.'+dirname+'.js')).pipe(gulp.dest('build/javelin/dist/')),
+            files.pipe(concat('javelin.'+dirname+'.js')).pipe(gulp.dest('build/javelin/'))
+        ).on('end', cb);
+    });
 });
 
 gulp.task('minify', function() {
-    gulp.src('build/javelin/*.js').pipe(uglify()).pipe(gulp.dest('build/javelin/minified/'));
+    return gulp.src('build/javelin/dist/*.js').pipe(uglify()).pipe(gulp.dest('build/javelin/dist/minified/'));
 });
 
-gulp.task('build', ['build:fixtures','build:javelin','build:packages']);
-gulp.task('default', ['lint', 'build', 'test', 'minify']);
+gulp.task('build', function(done) {
+    sequence(
+        ['build:fixtures','build:javelin','build:packages'],
+        'minify',
+        done
+    );
+});
+gulp.task('default', function(done) { sequence('lint', 'build', 'test', done); });
