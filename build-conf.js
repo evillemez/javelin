@@ -1,7 +1,7 @@
 module.exports = {
-	paths: {
-		javelinCore: [
-			'util/build/javelin.prefix',
+    paths: {
+        javelinCore: [
+            'util/build/javelin.prefix',
             'src/javelin/Javelin.js',
             'src/javelin/Registry.js',
             'src/javelin/Engine.js',
@@ -12,6 +12,11 @@ module.exports = {
             'src/javelin/Component.js',
             'src/javelin/Entity.js',
             'util/build/javelin.suffix'
-		]
-	}
+        ]
+    },
+    docs: {
+        ghp: {},
+        local: {},
+        ghplocal: {}
+    }
 };

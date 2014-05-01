@@ -21,7 +21,7 @@ gulp.on('err', function(e) {
 
 gulp.task('lint', function() {
     gulp.src(['src/**/*.js', 'demos/**/*.js', 'fixtures/**/*.js', 'tests/**/*.js'])
-        .pipe(jshint()).pipe(jshint.reporter('default')).pipe(jshint.reporter('fail'));
+        .pipe(jshint('.jshintrc')).pipe(jshint.reporter('jshint-stylish'));
 });
 
 gulp.task('test', function() {
@@ -54,15 +54,29 @@ gulp.task('build:packages', function(done) {
     });
 });
 
+gulp.task('build', function(done) {
+    sequence(['build:fixtures','build:javelin','build:packages'], 'minify', done);
+});
+
+gulp.task('build:demos:ghp', function(done) { return javelinBuildDemos(gulp, conf.docs.ghp); });
+gulp.task('build:demos:local', function(done) { return javelinBuildDemos(gulp, conf.docs.local); });
+gulp.task('build:demos:ghplocal', function(done) { return javelinBuildDemos(gulp, conf.docs.ghplocal); });
+
 gulp.task('minify', function() {
     return gulp.src('build/javelin/dist/*.js').pipe(uglify()).pipe(gulp.dest('build/javelin/dist/minified/'));
 });
 
-gulp.task('build', function(done) {
-    sequence(
-        ['build:fixtures','build:javelin','build:packages'],
-        'minify',
-        done
-    );
-});
+
 gulp.task('default', function(done) { sequence('lint', 'build', 'test', done); });
+
+function javelinBuildApi(gulp, target) {}
+
+function javelinBuildGuides(gulp, target) {}
+
+function javelinBuildGHP(gulp, target) {
+
+}
+
+function javelinBuildDemos(gulp, config) {
+    return util.log('WEEEEEEE '+target);
+}
