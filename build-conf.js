@@ -1,3 +1,5 @@
+var pkg = require('./package.json');
+
 module.exports = {
     paths: {
         javelinCore: [
@@ -15,8 +17,20 @@ module.exports = {
         ]
     },
     docs: {
-        ghp: {},
-        local: {},
-        ghplocal: {}
+        ghp: {
+            demos: {
+                target: 'build/ghp/docs/'+pkg.version+'/demos/'
+            }
+        },
+        local: {
+            demos: {
+                target: 'build/docs/demos/'
+            }
+        },
+        ghplocal: {
+            demos: {
+                target: 'build/ghplocal/docs/'+pkg.version+'/demos/'
+            }
+        }
     }
 };

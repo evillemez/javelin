@@ -19,13 +19,15 @@
     "grunt-simple-mocha": "https://github.com/yaymukund/grunt-simple-mocha/tarball/master",
     "gulp": "^3.6.0",
     "gulp-concat": "~2.2",
-    "gulp-debug": "~0.3.0",
     "gulp-jshint": "~1.5.5",
     "gulp-livereload": "~1.3.1",
     "gulp-mocha": "~0.4.1",
+    "gulp-rename": "^1.2.0",
+    "gulp-swig": "^0.6.0",
     "gulp-uglify": "~0.2",
     "gulp-util": "*",
     "jshint-stylish": "^0.2.0",
+    "q": "^1.0.1",
     "run-sequence": "^0.3.6",
     "swig": "~1.2.0"
   }
