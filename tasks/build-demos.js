@@ -31,7 +31,7 @@ module.exports = function (gulp, config) {
             var demoTarget = config.target + data.dir;
             var deferred = Q.defer();
             promises.push(deferred.promise);
-            
+
             //TODO: parse README
             //TODO: resolve all scripts
             var swigOpts = {
@@ -55,6 +55,7 @@ module.exports = function (gulp, config) {
         //set up parsing main demo index
         var deferred = Q.defer();
         promises.push(deferred.promise);
+
         var swigOpts = {
             data: {
                 version: pkg.version,
@@ -67,7 +68,7 @@ module.exports = function (gulp, config) {
         //and copy shared assets
         es.merge(
             gulp.src('util/docs/templates/demos.index.swig.html').pipe(swig(swigOpts)).pipe(rename('index.html')).pipe(gulp.dest(config.target)),
-            gulp.src('demos/shared/*/').pipe(gulp.dest(config.target))
+            gulp.src('demos/shared/**/').pipe(gulp.dest(config.target))
         ).on('end', function() {
             deferred.resolve(true);
         });

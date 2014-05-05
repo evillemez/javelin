@@ -19,17 +19,20 @@ module.exports = {
     docs: {
         ghp: {
             demos: {
-                target: 'build/ghp/docs/'+pkg.version+'/demos/'
+                target: 'build/ghp/docs/'+pkg.version+'/demos/',
+                baseurl: '/javelin'
             }
         },
         local: {
             demos: {
-                target: 'build/docs/demos/'
+                target: 'build/docs/demos/',
+                baseurl: ''
             }
         },
         ghplocal: {
             demos: {
-                target: 'build/ghplocal/docs/'+pkg.version+'/demos/'
+                target: 'build/ghplocal/docs/'+pkg.version+'/demos/',
+                baseurl: ''
             }
         }
     }
