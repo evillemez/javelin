@@ -56,6 +56,17 @@ gulp.task('build:packages', function(done) {
     });
 });
 
+gulp.task('minify', function() {
+    return es.merge(
+        gulp.src('build/javelin/versioned/*.js').pipe(rename({extname: '.min.js'})).pipe(uglify()).pipe(gulp.dest('build/javelin/versioned/minified/')),
+        gulp.src('build/javelin/dist/*.js').pipe(rename({extname: '.min.js'})).pipe(uglify()).pipe(gulp.dest('build/javelin/dist/minified/'))
+    );
+});
+
+gulp.task('build', function(done) {
+    sequence(['build:fixtures','build:javelin','build:packages'], 'minify', done);
+});
+
 gulp.task('docs:demos:ghp', function() { return javelinBuildDemos(gulp, conf.docs.ghp.demos); });
 gulp.task('docs:demos:local', function() { return javelinBuildDemos(gulp, conf.docs.local.demos); });
 gulp.task('docs:demos:ghplocal', function() { return javelinBuildDemos(gulp, conf.docs.ghplocal.demos); });
@@ -85,18 +96,9 @@ gulp.task('docs:local', ['docs:demos:local'/*,'docs:api:local','docs:guides:loca
 // });
 
 gulp.task('server:docs', ['docs:local'], function() { connect.server({root: 'build/docs/'}); });
+gulp.task('docs', ['docs:local','server:docs']);
 
-// gulp.task('docs', ['docs:local','server:docs']);
-
-gulp.task('minify', function() {
-    return es.merge(
-        gulp.src('build/javelin/versioned/*.js').pipe(rename({extname: '.min.js'})).pipe(uglify()).pipe(gulp.dest('build/javelin/versioned/minified/')),
-        gulp.src('build/javelin/dist/*.js').pipe(rename({extname: '.min.js'})).pipe(uglify()).pipe(gulp.dest('build/javelin/dist/minified/'))
-    );
-});
-
-gulp.task('build', function(done) {
-    sequence(['build:fixtures','build:javelin','build:packages'], 'minify', done);
-});
+gulp.task('watch:javelin', function() { gulp.watch('src/**/*.js', ['default']); });
+gulp.task('watch:docs', function() { gulp.watch(['src/**/*.js','demos/**/*.*'], ['default','docs:local']); });
 
 gulp.task('default', function(done) { sequence('lint', 'build', 'test', done); });
