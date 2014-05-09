@@ -4,7 +4,7 @@
  * @package common
  * @type loader
  */
-javelin.loader(['json'], ['browser'], function(loader, relPath, absPath, done) {
+javelin.loader(['.json'], ['browser'], function(loader, relPath, absPath, done) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", absPath, true);
     xhr.onload = function() {

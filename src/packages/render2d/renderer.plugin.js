@@ -1,3 +1,5 @@
+/* global Layer2dCamera, Layer2dCanvas */
+
 /**
  * Renderer2d provides an API to components for drawing paths and images to HTML5 canvas.
  * It also handles multiple layers, with configurable render modes per layer.

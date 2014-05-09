@@ -63,7 +63,7 @@ function KeyboardInput(plugin, config) {
         kb.handleKeyDown(e);
     };
         
-};
+}
 
 KeyboardInput.prototype.registerListeners = function() {
     window.addEventListener('keyup', this.keyUpListener);

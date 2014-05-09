@@ -24,6 +24,8 @@ module.exports = {
             }
         },
         local: {
+            baseurl: '',
+            target: 'build/docs/',
             demos: {
                 target: 'build/docs/demos/',
                 baseurl: ''

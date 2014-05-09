@@ -4,10 +4,10 @@
     "description": "Experiment with the 2d coordinate system.",
     "scene": "default",
     "scripts": [
-    	"javelin.core.js",
-    	"javelin.common.js",
-    	"javelin.input.js",
-    	"javelin.transform2d.js",
-    	"javelin.render2d.js"
+        "javelin.core.js",
+        "javelin.common.js",
+        "javelin.input.js",
+        "javelin.transform2d.js",
+        "javelin.render2d.js"
     ]
 }

@@ -3,7 +3,7 @@
  * This render layer renders to an HTML5 2d Canvas instance. It only supports a subset
  * of the canvas functionality at the moment.
  */
-Layer2dCanvas = function(renderTarget, camera, config) {
+function Layer2dCanvas(renderTarget, camera, config) {
     this.$PI_OVER_180 = Math.PI / 180;
     this.$180_OVER_PI = 180 / Math.PI;
     this.$2xPI = 2 * Math.PI;
@@ -25,7 +25,7 @@ Layer2dCanvas = function(renderTarget, camera, config) {
 
     this.debug = false;
     this.debugGridDrawn = false;
-};
+}
 
 Layer2dCanvas.prototype.setStyle = function(config) {
     //set styles

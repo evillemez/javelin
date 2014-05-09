@@ -8,10 +8,11 @@ var gulp = require('gulp')
     , concat = require('gulp-concat')
     , jshint = require('gulp-jshint')
     , test = require('gulp-mocha')
-    , server = require('gulp-livereload')
     , uglify = require('gulp-uglify')
     , sequence = require('run-sequence')
     , rename = require('gulp-rename')
+    , connect = require('gulp-connect')
+    , swig = require('gulp-swig')
     , glob = require('glob')
     , javelinBuildDemos = require('./tasks/build-demos.js')
 ;
@@ -32,8 +33,8 @@ gulp.task('test', function() {
 gulp.task('build:javelin', function() {
     var files = gulp.src(conf.paths.javelinCore);
     return es.merge(
-        files.pipe(concat('javelin-'+pkg.version+'.core.js')).pipe(gulp.dest('build/javelin/dist/')),
-        files.pipe(concat('javelin.core.js')).pipe(gulp.dest('build/javelin/'))
+        files.pipe(concat('javelin-'+pkg.version+'.core.js')).pipe(gulp.dest('build/javelin/versioned/')),
+        files.pipe(concat('javelin.core.js')).pipe(gulp.dest('build/javelin/dist/'))
     );
 });
 
@@ -49,8 +50,8 @@ gulp.task('build:packages', function(done) {
         var dirname = path.basename(dir);
         var files = gulp.src(['util/build/package.prefix', 'src/packages/'+dirname+'/**/*.js','util/build/package.suffix']);
         es.merge(
-            files.pipe(concat('javelin-'+pkg.version+'.'+dirname+'.js')).pipe(gulp.dest('build/javelin/dist/')),
-            files.pipe(concat('javelin.'+dirname+'.js')).pipe(gulp.dest('build/javelin/'))
+            files.pipe(concat('javelin-'+pkg.version+'.'+dirname+'.js')).pipe(gulp.dest('build/javelin/versioned/')),
+            files.pipe(concat('javelin.'+dirname+'.js')).pipe(gulp.dest('build/javelin/dist/'))
         ).on('end', cb);
     });
 });
@@ -67,9 +68,15 @@ gulp.task('docs:demos:ghplocal', function() { return javelinBuildDemos(gulp, con
 // gulp.task('docs:guides:local', function() { return javelinBuildGuides(gulp, conf.docs.local.guides); });
 // gulp.task('docs:guides:ghplocal', function() { return javelinBuildGuides(gulp, conf.docs.ghplocal.guides); });
 
-// gulp.task('docs:local', ['docs:demos:local','docs:api:local','docs:guides:local'], function() {
-//     //build index, copy javelin
-// });
+//build local demos site
+gulp.task('docs:local', ['docs:demos:local'/*,'docs:api:local','docs:guides:local'*/], function() {
+    var opts = {data: {version: pkg.version, baseurl: conf.docs.local.baseurl}};
+    return es.merge(
+        gulp.src('util/docs/templates/index.swig.html').pipe(swig(opts)).pipe(rename('index.html')).pipe(gulp.dest(conf.docs.local.target)),
+        gulp.src('build/javelin/dist/**/*.js').pipe(gulp.dest(conf.docs.local.target+'javelin'))
+    );
+});
+
 // gulp.task('docs:ghp', ['docs:demos:ghp','docs:api:ghp','docs:guides:ghp'], function() {
 //     //build index
 // });
@@ -77,10 +84,15 @@ gulp.task('docs:demos:ghplocal', function() { return javelinBuildDemos(gulp, con
 //     //build index
 // });
 
+gulp.task('server:docs', ['docs:local'], function() { connect.server({root: 'build/docs/'}); });
+
 // gulp.task('docs', ['docs:local','server:docs']);
 
 gulp.task('minify', function() {
-    return gulp.src('build/javelin/dist/*.js').pipe(rename({extname: '.min.js'})).pipe(uglify()).pipe(gulp.dest('build/javelin/dist/minified/'));
+    return es.merge(
+        gulp.src('build/javelin/versioned/*.js').pipe(rename({extname: '.min.js'})).pipe(uglify()).pipe(gulp.dest('build/javelin/versioned/minified/')),
+        gulp.src('build/javelin/dist/*.js').pipe(rename({extname: '.min.js'})).pipe(uglify()).pipe(gulp.dest('build/javelin/dist/minified/'))
+    );
 });
 
 gulp.task('build', function(done) {

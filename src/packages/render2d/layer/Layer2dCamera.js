@@ -5,7 +5,7 @@
  * or from a layer instance.
  * 
  */
-Layer2dCamera = function(name) {
+function Layer2dCamera(name) {
 
     /**
      * Name of the camera instance.  This is the name you use when retrieving the camera
@@ -46,7 +46,7 @@ Layer2dCamera = function(name) {
 
 
     this.layer = null;
-};
+}
 
 /**
  * Enforces setting the zoom to a positive number via `Math.abs()`

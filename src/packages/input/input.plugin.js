@@ -1,3 +1,4 @@
+/* global KeyboardInput */
 
 /**
  * This callback can be executed by registering a listener for the

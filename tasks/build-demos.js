@@ -2,6 +2,7 @@ var   pkg = require('../package.json')
     , fs = require('fs')
     , path = require('path')
     , swig = require('gulp-swig')
+    , marked = require('swig-marked')
     , es = require('event-stream')
     , util = require('gulp-util')
     , rename = require('gulp-rename')
@@ -18,27 +19,38 @@ module.exports = function (gulp, config) {
 
         //build individual demos
         dirs.forEach(function(dir) {
-            var file = dir + 'meta.json';
+            var metaFile = dir + 'meta.json';
+            var readmeFile = dir + 'README.md';
+            var readme = false;
 
-            if (!fs.existsSync(file)) {
+            if (!fs.existsSync(metaFile)) {
                 return;
             }
 
+            if (fs.existsSync(readmeFile)) {
+                readme = fs.readFileSync(readmeFile, {encoding: 'utf8'});
+            }
+
             //TODO: make async
-            var data = JSON.parse(fs.readFileSync(file));
+            var data = JSON.parse(fs.readFileSync(metaFile));
             data.path = dir;
             demoMeta.push(data);
             var demoTarget = config.target + data.dir;
             var deferred = Q.defer();
             promises.push(deferred.promise);
 
-            //TODO: parse README
+            var demoScripts = glob.sync(dir + 'js/**/*.js').map(function(file) {
+                return path.relative(dir, file);
+            });
+
             //TODO: resolve all scripts
             var swigOpts = {
+                setup: function(swig) { marked.useTag(swig, 'markdown'); },
                 data: {
                     meta: data,
-                    readme: 'TODO - import readme',
-                    scripts: data.scripts
+                    readme: (readme === false) ? 'No README provided.' : readme,
+                    scripts: data.scripts,
+                    demoScripts: demoScripts
                 }
             };
 
@@ -68,7 +80,7 @@ module.exports = function (gulp, config) {
         //and copy shared assets
         es.merge(
             gulp.src('util/docs/templates/demos.index.swig.html').pipe(swig(swigOpts)).pipe(rename('index.html')).pipe(gulp.dest(config.target)),
-            gulp.src('demos/shared/**/').pipe(gulp.dest(config.target))
+            gulp.src('demos/shared/**/').pipe(gulp.dest(config.target + 'shared/'))
         ).on('end', function() {
             deferred.resolve(true);
         });
