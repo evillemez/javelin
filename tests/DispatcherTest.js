@@ -9,7 +9,7 @@ describe("Dispatcher", function() {
     var j;
     
     beforeEach(function() {
-        j = require('../build/javelin/javelin.js');
+        j = require('../build/javelin/dist/javelin.core.js');
     });
     
     it("should register listeners and dispatch events without errors", function() {

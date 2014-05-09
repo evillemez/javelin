@@ -1,6 +1,4 @@
-'use strict';
-
-Javelin.Loaders.BrowserImageLoader = function(loader, relPath, absPath, done) {
+javelin.loader(['.png','.jpg','.jpeg','.gif'], ['browser'], function(loader, relPath, absPath, done) {
     var img = new Image();
     img.onabort =
     img.onerror =
@@ -9,4 +7,4 @@ Javelin.Loaders.BrowserImageLoader = function(loader, relPath, absPath, done) {
         done(img);
     };
     img.src = absPath;
-};
+});

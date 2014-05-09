@@ -97,7 +97,7 @@ Javelin.AssetLoader.prototype.loadAsset = function(path, callback) {
  */
 Javelin.AssetLoader.prototype.loadAssetAsType = function(path, type, callback) {
     if(!this.loaders[type]) {
-        throw new Error("Unknown asset loader type.");
+        throw new Error("Unknown asset loader type ["+type+"].");
     }
     
     this.loaders[type](this, path, this.baseAssetPath + path, callback);

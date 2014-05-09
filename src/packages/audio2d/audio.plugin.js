@@ -1,9 +1,7 @@
 /*global webkitAudioContext: true */
 
-'use strict';
-
 //TODO: spatial audio w/ filters and what not is not implemented
-Javelin.Plugins.Audio2d = function(config, game) {
+javelin.plugin('audio2d', function(config, game) {
     var self = this;
 
     var loader = game.loader;
@@ -200,4 +198,4 @@ Javelin.Plugins.Audio2d = function(config, game) {
             //`audio.resolve` callbacks from components
         }
     };
-};
+});

@@ -4,7 +4,7 @@ var chai = require('chai')
     , spies = require('chai-spies')
     , assert = chai.assert
     , expect = chai.expect
-    , Javelin = require('../build/javelin/javelin.js')
+    , Javelin = require('../build/javelin/dist/javelin.core.js')
     , Fixtures = require('../build/fixtures.js')
 ;
 chai.use(spies);

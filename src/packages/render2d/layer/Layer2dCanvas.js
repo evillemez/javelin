@@ -3,7 +3,7 @@
  * This render layer renders to an HTML5 2d Canvas instance. It only supports a subset
  * of the canvas functionality at the moment.
  */
-Javelin.Layer2dCanvas = function(renderTarget, camera, config) {
+function Layer2dCanvas(renderTarget, camera, config) {
     this.$PI_OVER_180 = Math.PI / 180;
     this.$180_OVER_PI = 180 / Math.PI;
     this.$2xPI = 2 * Math.PI;
@@ -25,17 +25,17 @@ Javelin.Layer2dCanvas = function(renderTarget, camera, config) {
 
     this.debug = false;
     this.debugGridDrawn = false;
-};
+}
 
-Javelin.Layer2dCanvas.prototype.setStyle = function(config) {
+Layer2dCanvas.prototype.setStyle = function(config) {
     //set styles
 };
 
-Javelin.Layer2dCanvas.prototype.resetStyle = function() {
+Layer2dCanvas.prototype.resetStyle = function() {
     this.context.restore();
 };
 
-Javelin.Layer2dCanvas.prototype.drawLine = function(ax, ay, bx, by, style) {
+Layer2dCanvas.prototype.drawLine = function(ax, ay, bx, by, style) {
     var c = this.context;
     var p1 = this.normalizeCanvasPosition(ax, ay);
     var p2 = this.normalizeCanvasPosition(bx, by);
@@ -51,7 +51,7 @@ Javelin.Layer2dCanvas.prototype.drawLine = function(ax, ay, bx, by, style) {
     this.resetStyle();
 };
 
-Javelin.Layer2dCanvas.prototype.drawCircle = function(x, y, radius, style) {
+Layer2dCanvas.prototype.drawCircle = function(x, y, radius, style) {
     var c = this.context;
     var pos = this.normalizeCanvasPosition(x, y);
     if (style) { this.setStyle(style); }
@@ -68,12 +68,12 @@ Javelin.Layer2dCanvas.prototype.drawCircle = function(x, y, radius, style) {
     this.resetStyle();
 };
 
-Javelin.Layer2dCanvas.prototype.drawRectangle = function(x, y, height, width, style) {
+Layer2dCanvas.prototype.drawRectangle = function(x, y, height, width, style) {
     var c = this.context;
     var pos = this.normalizeCanvasPosition(x, y);
 };
 
-Javelin.Layer2dCanvas.prototype.drawShape = function(points, x, y, rotation, style) {
+Layer2dCanvas.prototype.drawShape = function(points, x, y, rotation, style) {
     //draws a complex shape
     //points is array of points
     //first point must be starting point
@@ -81,7 +81,7 @@ Javelin.Layer2dCanvas.prototype.drawShape = function(points, x, y, rotation, sty
     //in the array for that item
 };
 
-Javelin.Layer2dCanvas.prototype.drawImage = function(image, x, y, rotation, scaleX, scaleY) {
+Layer2dCanvas.prototype.drawImage = function(image, x, y, rotation, scaleX, scaleY) {
     var cam = this.camera;
     var c = this.context;
 
@@ -124,7 +124,7 @@ Javelin.Layer2dCanvas.prototype.drawImage = function(image, x, y, rotation, scal
     this.resetStyle();
 };
 
-Javelin.Layer2dCanvas.prototype.drawAtlasImage = function(atlasImage, x, y, rotation, scaleX, scaleY) {
+Layer2dCanvas.prototype.drawAtlasImage = function(atlasImage, x, y, rotation, scaleX, scaleY) {
     var cam = this.camera;
     var c = this.context;
 
@@ -168,7 +168,7 @@ Javelin.Layer2dCanvas.prototype.drawAtlasImage = function(atlasImage, x, y, rota
     this.resetStyle();
 };
 
-Javelin.Layer2dCanvas.prototype.clear = function() {
+Layer2dCanvas.prototype.clear = function() {
     this.debugGridDrawn = false;
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 };
@@ -182,7 +182,7 @@ Javelin.Layer2dCanvas.prototype.clear = function() {
  * @param  {float} y    Game y position
  * @return {object}     An object containing normalized x and y properties.
  */
-Javelin.Layer2dCanvas.prototype.normalizeCanvasPosition = function(x, y) {
+Layer2dCanvas.prototype.normalizeCanvasPosition = function(x, y) {
 
     //TODO: take into account camera rotation :(
 
@@ -200,7 +200,7 @@ Javelin.Layer2dCanvas.prototype.normalizeCanvasPosition = function(x, y) {
  * 
  * @return {object}     An object containing x and y properties.
  */
-Javelin.Layer2dCanvas.prototype.getBoundries = function() {
+Layer2dCanvas.prototype.getBoundries = function() {
     return {
         x: this.canvas.width / this.pixelsPerUnit,
         y: this.canvas.height / this.pixelsPerUnit
@@ -213,7 +213,7 @@ Javelin.Layer2dCanvas.prototype.getBoundries = function() {
  * @param  {float} interval     At what interval coordinates should be shown, default 1.0
  * @param  {string} color       Color for the debug grid lines.
  */
-Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color) {
+Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color) {
     if (this.debugGridDrawn) {
         return;
     }
@@ -315,11 +315,11 @@ Javelin.Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color)
     this.debugGridDrawn = true;
 };
 
-Javelin.Layer2dCanvas.prototype.setCamera = function(camera) {
+Layer2dCanvas.prototype.setCamera = function(camera) {
     this.camera = camera;
     camera.setLayer(this);
 };
 
-Javelin.Layer2dCanvas.prototype.getCamera = function() {
+Layer2dCanvas.prototype.getCamera = function() {
     return this.camera;
 };

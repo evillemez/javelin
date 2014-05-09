@@ -1,4 +1,3 @@
-'use strict';
 
 /**
  * This class represents a specific image in a sprite sheet exported from TexturePacker.  This is used internally
@@ -6,7 +5,7 @@
  * the "json(hash)" format
  */
 
-Javelin.Loaders.BrowserAtlasLoader = function(loader, relPath, absPath, done) {
+javelin.loader(['.atlas.json'], ['browser'], function(loader, relPath, absPath, done) {
     var json, img, imgPath;
     var rp = relPath;
     imgPath = rp.substring(0, rp.lastIndexOf("/"));
@@ -30,7 +29,7 @@ Javelin.Loaders.BrowserAtlasLoader = function(loader, relPath, absPath, done) {
 
     //start by loading the json, will trigger series of callbacks
     loader.loadAssetAsType(relPath, '.json', loadJsonCallback);
-};
+});
 
 
 //TODO: these should maybe be moved elsewhere - perhaps a new /src/assets directory

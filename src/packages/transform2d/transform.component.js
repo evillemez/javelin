@@ -5,10 +5,10 @@
  * 
  *  entity.get('transform2d').translateForward(50 * deltaTime);
  * 
- * @javelin-component transform2d
- * @author Evan Villemez
+ * @package transform2d
+ * @type component
  */
-Javelin.Components.Transform2d = function(entity, game) {
+javelin.component('transform2d', [], function(entity, game) {
     var self = this;
 
     //private reference to parent transform
@@ -125,4 +125,4 @@ Javelin.Components.Transform2d = function(entity, game) {
         //if there's a parent, cache its transform
         parentTransform = (entity.parent) ? entity.parent.getComponent('transform2d') : false;
     });
-};
+});

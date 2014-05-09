@@ -1,6 +1,10 @@
-'use strict';
-
-Javelin.Loaders.BrowserJsonLoader = function(loader, relPath, absPath, done) {
+/**
+ * Handles loading JSON assets in a browser environment.
+ *
+ * @package common
+ * @type loader
+ */
+javelin.loader(['.json'], ['browser'], function(loader, relPath, absPath, done) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", absPath, true);
     xhr.onload = function() {
@@ -9,4 +13,4 @@ Javelin.Loaders.BrowserJsonLoader = function(loader, relPath, absPath, done) {
         done(json);
     };
     xhr.send();
-};
+});

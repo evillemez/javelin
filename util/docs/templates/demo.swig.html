@@ -8,8 +8,10 @@
       }
     };
   </script>
-  <script src="{{baseurl}}/javelin/javelin-{{version}}.js"></script>
   {% for script in scripts %}
+  <script src="{{baseurl}}/javelin/{{script}}"></script>
+  {% endfor %}
+  {% for script in demoScripts %}
   <script src="{{baseurl}}/demos/{{meta.dir}}/{{script}}"></script>
   {% endfor %}
 
@@ -32,11 +34,8 @@
   <p>{{meta.description}}</p>
 
   <div id='readme'>
-    <pre>
-{{readme}}
-    </pre>
+      {% markdown %}{{readme}}{% endmarkdown %}
   </div>
-
 
   <script>
     var game = javelin.createGame('browser', window.gameConfig || {});

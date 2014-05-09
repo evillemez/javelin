@@ -5,7 +5,7 @@
  * or from a layer instance.
  * 
  */
-Javelin.Layer2dCamera = function(name) {
+function Layer2dCamera(name) {
 
     /**
      * Name of the camera instance.  This is the name you use when retrieving the camera
@@ -46,25 +46,25 @@ Javelin.Layer2dCamera = function(name) {
 
 
     this.layer = null;
-};
+}
 
 /**
  * Enforces setting the zoom to a positive number via `Math.abs()`
  *
  * @param {float} zoom      The new camera zoom
  */
-Javelin.Layer2dCamera.prototype.setZoom = function(zoom) {
+Layer2dCamera.prototype.setZoom = function(zoom) {
     this.zoom = Math.abs(zoom);
 };
 
-Javelin.Layer2dCamera.prototype.setLayer = function(layer) {
+Layer2dCamera.prototype.setLayer = function(layer) {
     this.layer = layer;
 };
 
-Javelin.Layer2dCamera.prototype.canSeePoint = function(x, y) {
+Layer2dCamera.prototype.canSeePoint = function(x, y) {
     return true;
 };
 
-Javelin.Layer2dCamera.prototype.canSeeArea = function(ax, ay, bx, by) {
+Layer2dCamera.prototype.canSeeArea = function(ax, ay, bx, by) {
     return true;
 };

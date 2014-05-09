@@ -3,7 +3,7 @@
 var chai = require('chai');
 chai.Assertion.includeStack = true;
 var assert = chai.assert;
-var Javelin = require('../build/javelin/javelin.js');
+var Javelin = require('../build/javelin/dist/javelin.core.js');
 
 describe("Component", function() {
 

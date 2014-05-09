@@ -1,4 +1,4 @@
-'use strict';
+/* global KeyboardInput */
 
 /**
  * This callback can be executed by registering a listener for the
@@ -14,10 +14,10 @@
  * and process the raw input values.  These handlers are loaded and unloaded automatically
  * based on the configuration passed to the this.
  * 
- * @class Javelin.Plugins.Input
- * @author Evan Villemez
+ * @package input
+ * @type plugin
  */
-Javelin.Plugins.Input = function (config, game) {
+javelin.plugin('input', function (config, game) {
     var self = this;
     this.config = config;
     this.handlers = {};
@@ -26,13 +26,14 @@ Javelin.Plugins.Input = function (config, game) {
     
     //process config and setup relevant listeners
     this.$onLoad = function() {
+        if ('undefined' === typeof window) {
+            return;
+        }
 
         //setup keyboard controls
         if (self.config.keyboard) {
-            var kb = self.handlers.keyboard = new Javelin.KeyboardInput(self, self.config.keyboard);
-            if ('undefined' !== typeof window) {
-                kb.registerListeners();
-            }
+            var kb = self.handlers.keyboard = new KeyboardInput(self, self.config.keyboard);
+            kb.registerListeners();
         }
         
         //TODO: setup mouse controls
@@ -191,7 +192,7 @@ Javelin.Plugins.Input = function (config, game) {
     this.setAxis = function(name, val) {
         self.input[name] = val;
     };
-};
+});
 
 /* 
 

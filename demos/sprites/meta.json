@@ -2,5 +2,12 @@
     "name": "Sprites & Animation",
     "dir": "sprites",
     "description": "Moving and animating sprites.",
-    "scene": "default"
+    "scene": "default",
+    "scripts": [
+    	"javelin.core.js",
+    	"javelin.common.js",
+    	"javelin.input.js",
+    	"javelin.transform2d.js",
+    	"javelin.render2d.js"
+    ]
 }
