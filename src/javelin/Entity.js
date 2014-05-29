@@ -20,13 +20,14 @@ Javelin.Entity = function (name, id) {
     this.allCallbackCache = {};                     //cached callbacks from all children
     this.tags = [];                                 //string tags for categorizing objects
     this.layer = 'default';                         //for assigning groups of objects to specific layers (may be removed)
+    this.reference = { entity: null };              //for other entities to store "weak" references
 };
 
 /* Lifecycle */
 
 Javelin.Entity.prototype.destroy = function() {
     this.broadcast('entity.destroy');
-
+  
     if (this.engine) {
         this.engine.destroy(this);
     }
@@ -34,7 +35,9 @@ Javelin.Entity.prototype.destroy = function() {
 
 Javelin.Entity.prototype.setId = function(id) {
     this.id = id;
-    
+
+    this.reference.entity = (id === -1) ? null : this;
+  
     for (var alias in this.components) {
         this.components[alias].$id = id;
     }
@@ -171,7 +174,7 @@ Javelin.Entity.prototype.getChildrenByTag = function(name, recursive) {
 };
 
 
-/* GO Hierarchy management */
+/* Entity Hierarchy management */
 
 Javelin.Entity.prototype.isRoot = function() {
     return (null === this.root);

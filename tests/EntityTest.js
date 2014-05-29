@@ -422,5 +422,17 @@ describe("Entity", function() {
         child.emit('foo', {foo: 5});
         assert.isTrue(parentCalled);
     });
+  
+    it("should maintain a weak self reference", function() {
+      var ent = new Javelin.Entity();
+      ent.setId(3);
+      var ref = ent.reference;
+      
+      assert.isTrue(ref.entity instanceof Javelin.Entity);
+      
+      ent.setId(-1);
+      
+      assert.isNull(ref.entity);
+    });
 
 });
