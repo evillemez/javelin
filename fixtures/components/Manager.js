@@ -14,7 +14,7 @@ Fixtures.ManagerComponent = function(entity, game) {
         }
     });
 
-    entity.on('engine.destroy', function() {
+    entity.on('entity.destroy', function() {
         for (var i in ents) {
             ents[i].destroy();
         }

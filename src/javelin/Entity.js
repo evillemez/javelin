@@ -252,7 +252,9 @@ Javelin.Entity.prototype.emit = function(name, data) {
     
     if (this.parent) {
         this.parent.emit(name, data);
-    }    
+    } else if (this.engine && this.isRoot()) {
+        this.engine.emit(name, data);
+    }
 };
 
 Javelin.Entity.prototype.broadcast = function(name, data) {

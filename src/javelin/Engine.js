@@ -464,11 +464,9 @@ Javelin.Engine.prototype.broadcast = function(event, data) {
     }
 
     //then broadcast to root game objects
-    for (var i in this.gos) {
+    for (var i =0; i < this.gos.length; i++) {
         if (this.gos[i].isRoot()) {
-            if (!this.gos[i].broadcast(event, data)) {
-                return false;
-            }
+            this.gos[i].broadcast(event, [data]);
         }
     }
     
