@@ -150,10 +150,7 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
             
             this.callPlugins('$onPrefabCreate', [go]);
 
-            var cbs = go.getCallbacks('engine.create', true) || [];
-            for (var j = 0; j < cbs.length; j++) {
-                cbs[j]();
-            }
+            go.broadcast('entity.create');
         }
     }
 };
@@ -167,10 +164,7 @@ Javelin.Engine.prototype.destroy = function(go, destroyingNested) {
         
         if (!destroyingNested) {
             //notify destroy callbacks
-            var cbs = go.getCallbacks('engine.destroy', true);
-            for (i = 0; i < cbs.length; i++) {
-                cbs[i]();
-            }
+            go.broadcast('entity.destroy');
             
             this.callPlugins('$onPrefabDestroy', [go]);
         }
@@ -271,16 +265,10 @@ Javelin.Engine.prototype.stats = function() {
 Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
     var l = this.gos.length;
     for (var i = 0; i < l; i++) {
-
-        //TODO: only process root level objects,
-        //the callbacks can be retrieved recursively
-        //for nested hierarchies, which will allow
-        //for efficient caching
-        if (this.gos[i].enabled) {
-            var cbs = this.gos[i].getCallbacks('engine.update', false);
-            for (var j = 0; j < cbs.length; j++) {
-                cbs[j](deltaTime);
-            }
+        var go = this.gos[i];
+        
+        if (go.enabled && go.isRoot()) {
+            go.broadcast('engine.update', [deltaTime]);
         }
     }
 };

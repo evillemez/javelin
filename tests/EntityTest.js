@@ -31,17 +31,6 @@ describe("Entity", function() {
         c2.$alias = 'bar';
         assert.isFalse(ent.hasComponent('foo'));
         assert.isFalse(ent.hasComponent('bar'));
-        ent.setComponents([c1, c2]);
-        assert.isTrue(ent.hasComponent('foo'));
-        assert.isTrue(ent.hasComponent('bar'));
-        assert.isTrue(ent.modified);
-    });
-    
-    it("should be modified if a component is added", function() {
-        var ent = new Javelin.Entity();
-        assert.isFalse(ent.modified);
-        ent.setComponent('foo', new Javelin.Component());
-        assert.isTrue(ent.modified);
     });
     
     it("should accept and remove child game objects", function() {
@@ -121,35 +110,6 @@ describe("Entity", function() {
         assert.strictEqual(3, c2.$id);
     });
     
-    it("should set and filter up modified", function() {
-        var parent = new Javelin.Entity();
-        var child = new Javelin.Entity();
-        assert.isFalse(parent.modified);
-        assert.isFalse(child.modified);
-        
-        parent.addChild(child);
-        assert.isTrue(parent.modified);
-        assert.isTrue(child.modified);
-        parent.modified = false;
-        child.modified = false;
-        assert.isFalse(parent.modified);
-        assert.isFalse(child.modified);
-        
-        //test bubble up
-        child.setModified();
-        assert.isTrue(parent.modified);
-        assert.isTrue(child.modified);
-        parent.modified = false;
-        child.modified = false;
-        
-        //adding a new child should modify the parent, but not existing children
-        var child2 = new Javelin.Entity();
-        parent.addChild(child2);
-        assert.isTrue(parent.modified);
-        assert.isTrue(child2.modified);
-        assert.isFalse(child.modified);
-    });
-    
     it("should set and cascade enabled", function() {
         var parent = new Javelin.Entity();
         var child1 = new Javelin.Entity();
@@ -173,63 +133,6 @@ describe("Entity", function() {
         assert.isFalse(parent.enabled);
         assert.isFalse(child1.enabled);
         assert.isFalse(child2.enabled);
-    });
-    
-    it("should assemble callback cache properly", function() {
-        var c1 = new Javelin.Component();
-        c1.$on('engine.update', function() {});
-        var c2 = new Javelin.Component();
-        c2.$on('engine.update', function() {});
-        
-        var parent = new Javelin.Entity();
-        var child1 = new Javelin.Entity();
-        var child2 = new Javelin.Entity();
-        
-        parent.setComponent('foo', c1);
-        parent.setComponent('bar', c2);
-        
-        //test parent alone
-        assert.isTrue(parent.modified);
-        assert.strictEqual(2, parent.getCallbacks('engine.update').length);
-        assert.strictEqual(2, parent.getCallbacks('engine.update', true).length);
-        assert.isFalse(parent.modified);
-        
-        //now setup children and do the same assertions
-        child1.setComponent('foo', c1);
-        child1.setComponent('bar', c2);
-        child2.setComponent('foo', c1);
-        child2.setComponent('bar', c2);
-        assert.strictEqual(2, child1.getCallbacks('engine.update').length);
-        assert.strictEqual(2, child2.getCallbacks('engine.update').length);
-        parent.addChild(child1);
-        parent.addChild(child2);
-        assert.isTrue(parent.modified);
-        assert.isTrue(child1.modified);
-        assert.isTrue(child2.modified);
-        
-        //did the callbacks come back from the children as well?
-        assert.strictEqual(2, parent.getCallbacks('engine.update').length);
-        assert.strictEqual(6, parent.getCallbacks('engine.update', true).length);
-        assert.isFalse(parent.modified);
-        assert.isFalse(child1.modified);
-        assert.isFalse(child2.modified);
-        
-        //test actual getCallback method
-        var cbs;
-        cbs = parent.getCallbacks('engine.update');
-        assert.strictEqual(2, cbs.length);
-        for (var i in cbs) {
-            assert.isFunction(cbs[i]);
-        }
-        cbs = parent.getCallbacks('engine.update', true);
-        assert.strictEqual(6, cbs.length);
-        for (i in cbs) {
-            assert.isFunction(cbs[i]);
-        }
-        cbs = parent.getCallbacks('fooooooo');
-        assert.strictEqual(0, cbs.length);
-        cbs = parent.getCallbacks('fooooooo', true);
-        assert.strictEqual(0, cbs.length);
     });
 
     it("should serialize to prefab structure", function () {
@@ -395,7 +298,7 @@ describe("Entity", function() {
             parentCalled = true;
         });
         
-        parent.broadcast('foo', {foo: 5});
+        parent.broadcast('foo', [{foo: 5}]);
         assert.isTrue(parentCalled);
     });
     
@@ -419,7 +322,7 @@ describe("Entity", function() {
             parentCalled = true;
         });
         
-        child.emit('foo', {foo: 5});
+        child.emit('foo', [{foo: 5}]);
         assert.isTrue(parentCalled);
     });
   

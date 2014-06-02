@@ -16,24 +16,24 @@
  *
  * Defining a component:
  *
- *  javelin.component('mygame.warrior', function(entity, game) {
+ *  javelin.component('mygame.character', ['javelin.sprite2d','javelin.rigidbody2d'], function(entity, game) {
  *      
  *      this.doSomething = function() {
  *          //some custom game logic
  *      };
  * 
- *  }, ['javelin.sprite2d','javelin.rigidbody2d']);
+ *  });
  *
  * Accessing and using other components:
  *
- *  javelin.component('mygame.', function(entity, game) {
- *      var warrior = entity.get('mygame.warrior');
+ *  javelin.component('mygame.warrior', ['mygame.character'], function(entity, game) {
+ *      var character = entity.get('mygame.character');
  *
  *      this.$on('engine.update', function(deltaTime) {
- *          warrior.doSomething();
+ *          character.doSomething();
  *      });
  * 
- *  },['mygame.warrior']);
+ *  });
  *
  * @group core 
  * 
@@ -43,24 +43,6 @@ Javelin.Component = function(name) {
     this.$name = name;
     this.$callbacks = {};
     this.$id = null;
-};
-
-/**
- * Register a callback for the engine.
- * 
- * One of the main jobs of a component is to register callbacks for the engine, or
- * the engine's plugins.
- * 
- * @param {string} name 
- * @param {function} callback  The format for the callbacks args depend on the callback.
- */
-Javelin.Component.prototype.$on = function(name, callback) {
-    callback.$id = this.$id;
-    this.$callbacks[name] = callback;
-};
-
-Javelin.Component.prototype.$getCallback = function(name) {
-    return this.$callbacks[name] || false;
 };
 
 Javelin.Component.prototype.$serialize = function() {

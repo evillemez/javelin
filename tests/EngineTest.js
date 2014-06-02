@@ -150,7 +150,7 @@ describe("Engine", function() {
         assert.isTrue(ent.children[1].hasComponent('foo'));
         assert.isTrue(ent.children[1].hasComponent('bar'));
     });
-
+  
     it("should instantiate entities during update", function() {
         var engine = createEngine();
 
@@ -400,7 +400,7 @@ describe("Engine", function() {
         });
 
         assert.isFalse(data.called);
-        ent.emit('foo.event', {called: true});
+        ent.emit('foo.event', [{called: true}]);
         assert.isTrue(data.called);
     });
     
@@ -414,7 +414,7 @@ describe("Engine", function() {
         });
 
         assert.isFalse(data.called);
-        engine.broadcast('foo.event', {called: true});
+        engine.broadcast('foo.event', [{called: true}]);
         assert.isTrue(data.called);
     });
 

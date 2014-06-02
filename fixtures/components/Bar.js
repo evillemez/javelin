@@ -5,15 +5,15 @@ Fixtures.BarComponent = function(entity, game) {
     this.destroyed = false;
     this.updated = false;
 
-    this.$on('engine.create', function() {
+    entity.on('entity.create', function() {
         self.created = true;
     });
 
-    this.$on('engine.destroy', function() {
+    entity.on('entity.destroy', function() {
         self.destroyed = true;
     });
 
-    this.$on('engine.update', function() {
+    entity.on('engine.update', function() {
         self.updated = true;
     });
 };
