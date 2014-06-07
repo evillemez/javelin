@@ -14,7 +14,7 @@ Some things to keep in mind about the coordinate system:
 
 ## Controls ##
 
-* &uarr;, &darr;, &larr;, &rarr; to control movement of the circle
+* \&uarr;, \&darr;, &larr;, &rarr; to control movement of the circle
 * `w,a,s,d` to control directional movement of the camera
 * `e` to zoom camera in
 * `q` to zoom camera out

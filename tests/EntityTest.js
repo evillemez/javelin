@@ -275,7 +275,10 @@ describe("Entity", function() {
         var parent = new Javelin.Entity();
         var child = new Javelin.Entity();
         var child2 = new Javelin.Entity();
+                
         parent.addChild(child);
+        parent.enable();
+        child2.enable();
         
         var parentCalled = false;
         var childCalled = false;
@@ -305,7 +308,9 @@ describe("Entity", function() {
     it("should emit events to parents", function() {
         var parent = new Javelin.Entity();
         var child = new Javelin.Entity();
+        
         parent.addChild(child);
+        parent.enable();
         
         var parentCalled = false;
         var childCalled = false;

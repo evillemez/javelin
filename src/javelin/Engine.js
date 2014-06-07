@@ -1,14 +1,15 @@
 Javelin.Engine = function(registry, environment, config) {
+    environment.setEngine(this);
+
     //this should persist
     this.registry = registry;
-    environment.setEngine(this);
     this.environment = environment;
     this.loader = environment.getLoader();
     this.config = config;
     this.debug = config.debug || false;
     this.targetFps = config.stepsPerSecond || 1000/30;
-    this.dispatcher = new Javelin.Dispatcher();
     this.initialized = false;
+    this.listeners = {};
     
     //everything else can be reset
     this.reset();
@@ -97,6 +98,8 @@ Javelin.Engine.prototype.instantiateEntity = function(def, isNestedCall) {
     if (def.children) {
         var l = def.children.length;
         for (var i = 0; i < l; i++) {
+            //TODO: should this be optimized?
+            //Should hierarchy events be fired during an instantiation?
             ent.addChild(this.instantiateEntity(def.children[i], true));
         }
     }
@@ -254,12 +257,12 @@ Javelin.Engine.prototype.step = function() {
 };
 
 Javelin.Engine.prototype.stats = function() {
-    console.log({
+    return {
         entities: this.gos.length,
-        lastFrameTime: this.lastUpdateTimeTaken + ' ms',
+        lastUpdateTime: this.lastUpdateTimeTaken + ' ms',
         targetFPS: Math.floor(this.targetFps),
         deltaTime: this.deltaTime + ' ms'
-    });
+    };
 };
 
 Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
@@ -307,8 +310,7 @@ Javelin.Engine.prototype.callPlugins = function(method, args) {
 //this should act as a manual trigger for garbage collection
 Javelin.Engine.prototype.flush = function() {
     //internal flushing?
-    //remove references, if I ever implement weak references
-    //finalize removal of destroyed entities, if I stop removing immediately
+    //remove references, if I ever implement entity/component pools - clean them
 
     //notify plugins of flush, they should remove any references in order to force
     //garbage collection
@@ -446,29 +448,41 @@ Javelin.Engine.prototype.getPlugin = function(alias) {
     return this.plugins[alias] || false;
 };
 
-//note that components should never use this - this is primarily a mechanism
-//for code that lives outside of the game, for example a standalone HTML/JS GUI
+/**
+ * Register a listener for the engine.  Note that entities, components
+ * and plugins should *never* use this to register listeners.  This is
+ * for use only by elements that exist outside the context of the engine
+ * and the currently executing scene.
+ */
 Javelin.Engine.prototype.on = function(event, callback) {
-    this.dispatcher.on(event, callback);
+    this.listeners[event] = this.listeners[event] || [];
+    this.listeners[event].push(callback);
 };
 
+/**
+ * Dispatches an event to listeners registered at the engine level.  Generally these
+ * are listeners that are registered outside the context of a scene - maybe by
+ * other elements on the page in which the game appears.
+ */
 Javelin.Engine.prototype.emit = function(event, data) {
-    //just dispatch own events
-    return this.dispatcher.dispatch(event, data);
+    var listeners = this.listeners[event] || [];
+    for (var i = 0; i < listeners.length; i++) {
+        listeners[i].apply(null, data);
+    }
 };
 
-Javelin.Engine.prototype.broadcast = function(event, data) {
-    //dispatch own events first
-    if(!this.dispatcher.dispatch(event, data)) {
-        return false;
-    }
+/**
+ * Broadcasts an event to entities in the scene.  Mechanisms outside the context
+ * of the game can use this to communicate with entities acting in the scene.
+ */
+Javelin.Engine.prototype.broadcast = function(event, args) {
+    //emit on self first
+    this.emit(event, args);
 
     //then broadcast to root game objects
-    for (var i =0; i < this.gos.length; i++) {
+    for (var i = 0; i < this.gos.length; i++) {
         if (this.gos[i].isRoot()) {
-            this.gos[i].broadcast(event, [data]);
+            this.gos[i].broadcast(event, args);
         }
     }
-    
-    return true;
 };

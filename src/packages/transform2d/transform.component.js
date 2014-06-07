@@ -12,16 +12,13 @@ javelin.component('transform2d', [], function(entity, game) {
     var self = this;
 
     //private reference to parent transform
-    var parentTransform;
+    var parentTransform = false;
     
     /**
      * An object containing the position x and y values.  It can be set directly:
      * 
      *  entity.get('transform2d').position = {x: 50, y: 50};
      *
-     * Note that if the entity also contains a `rigidbody2d` component, you should NOT
-     * set position and rotation information directly.
-     * 
      * @property {Object} X and Y coordinate position values
      */    
     this.position =  {
@@ -117,12 +114,12 @@ javelin.component('transform2d', [], function(entity, game) {
         self.rotation = self.rotation + degrees % 360;
     };
 
-    this.$on('entity.modified', function() {
-        parentTransform = (entity.parent) ? entity.parent.getComponent('transform2d') : false;
+    entity.on('entity.parent', function(oldParent, newParent) {
+        parentTransform = (newParent) ? entity.parent.get('transform2d') : false;
     });
     
-    this.$on('engine.create', function() {
+    entity.on('entity.create', function() {
         //if there's a parent, cache its transform
-        parentTransform = (entity.parent) ? entity.parent.getComponent('transform2d') : false;
+        parentTransform = (entity.parent) ? entity.parent.get('transform2d') : false;
     });
 });

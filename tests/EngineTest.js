@@ -389,8 +389,8 @@ describe("Engine", function() {
         assert.isTrue(foo.updated);
         assert.isTrue(foo.destroyed);
     });
-        
-    it("should dispatch events to root level entities", function() {
+    
+    it("should broadcast events to root level entities", function() {
         var engine = createEngineWithConfig();
         var ent = engine.instantiate('foo');
 
@@ -400,7 +400,7 @@ describe("Engine", function() {
         });
 
         assert.isFalse(data.called);
-        engine.broadcast('foo.event', {called: true});
+        engine.broadcast('foo.event', [{called: true}]);
         assert.isTrue(data.called);
     });
 

@@ -13,7 +13,7 @@ Javelin.Entity = function (name, id) {
     this.components = {};                           //component instances
     this.children = [];                             //child entity instances
     this.parent = null;                             //parent entity instance
-    this.root = null;                               //TODO: implement, if in a hierarchy, reference to root object in hierarcy
+    this.root = null;                               //if in a hierarchy, reference to root object in hierarcy
     this.tags = [];                                 //string tags for categorizing objects
     this.layer = 'default';                         //for assigning groups of objects to specific layers (may be removed)
     this.reference = { entity: null };              //for other entities to store "weak" references
@@ -23,8 +23,6 @@ Javelin.Entity = function (name, id) {
 /* Lifecycle */
 
 Javelin.Entity.prototype.destroy = function() {
-    this.broadcast('entity.destroy');
-  
     if (this.engine) {
         this.engine.destroy(this);
     }
@@ -248,6 +246,10 @@ Javelin.Entity.prototype.dispatch = function(name, data) {
 };
 
 Javelin.Entity.prototype.emit = function(name, data) {
+    if (!this.enabled) {
+        return;
+    }
+
     this.dispatch(name, data);
     
     if (this.parent) {
@@ -258,6 +260,10 @@ Javelin.Entity.prototype.emit = function(name, data) {
 };
 
 Javelin.Entity.prototype.broadcast = function(name, data) {
+    if (!this.enabled) {
+        return;
+    }
+    
     this.dispatch(name, data);
     
     if (this.children) {
