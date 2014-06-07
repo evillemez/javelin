@@ -43,7 +43,7 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
    * Load any unloaded assets when the entity is instantiated, and
    * add self to parent renderable, if there's a parent.
    */
-  this.$on('engine.create', function() {
+  entity.on('entity.create', function() {
 
     //load assets
     if (this.assets.length) {
@@ -65,15 +65,10 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
   /**
    * Remove self from renderable hierarchy.
    */
-  this.$on('engine.destroy', function() {
+  entity.on('entity.destroy', function() {
     if (parentRenderable) {
       parentRenderable.removeChild(renderable);
     }
   });
   
-  //... just some ideas...
-  entity.on('entity.parent', function(oldParent, newParent) {});
-  entity.on('entity.child.add', function(newChild) {});
-  entity.on('entity.child.remove', function(oldChild) {});
-   
 });

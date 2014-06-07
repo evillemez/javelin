@@ -13,7 +13,7 @@ javelin.component('pixi.sprite', ['renderable'], function(entity, engine) {
   var self = this;
   var renderable = entity.get('pixi.renderable');
 
-  this.$on('entity.create', function() {
+  entity.on('entity.create', function() {
     renderable.addAsset(self.imagePath);
     renderable.addAsset(self.atlasPath);
 

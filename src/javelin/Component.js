@@ -29,7 +29,7 @@
  *  javelin.component('mygame.warrior', ['mygame.character'], function(entity, game) {
  *      var character = entity.get('mygame.character');
  *
- *      this.$on('engine.update', function(deltaTime) {
+ *      entity.on('engine.update', function(deltaTime) {
  *          character.doSomething();
  *      });
  * 

@@ -60,13 +60,13 @@ javelin.component('audioEmitter2d', ['transform2d'], function(entity, game) {
     };
     
     //store reference to audio plugin and transform component
-    this.$on('engine.create', function() {
+    entity.on('entity.create', function() {
         audio = game.getPlugin('audio');
         transform = entity.get('transform2d');
     });
 
     //stop all sounds from this emitter
-    this.$on('engine.destroy', function() {
+    entity.on('entity.destroy', function() {
         audio.clearActive(entity.id);
     });
 });
