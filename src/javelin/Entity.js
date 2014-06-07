@@ -13,20 +13,16 @@ Javelin.Entity = function (name, id) {
     this.components = {};                           //component instances
     this.children = [];                             //child entity instances
     this.parent = null;                             //parent entity instance
-    this.dispatcher = new Javelin.Dispatcher();     //for emit/broadcast functionality
-    this.root = null;                               //TODO: implement, if in a hierarchy, reference to root object in hierarcy
-    this.modified = false;                          //whether or not the hierarchy or components have been modified
-    this.ownCallbackCache = {};                     //cached callbacks from own components
-    this.allCallbackCache = {};                     //cached callbacks from all children
+    this.root = null;                               //if in a hierarchy, reference to root object in hierarcy
     this.tags = [];                                 //string tags for categorizing objects
     this.layer = 'default';                         //for assigning groups of objects to specific layers (may be removed)
+    this.reference = { entity: null };              //for other entities to store "weak" references
+    this.listeners = {};                            //entity event listeners
 };
 
 /* Lifecycle */
 
 Javelin.Entity.prototype.destroy = function() {
-    this.broadcast('entity.destroy');
-
     if (this.engine) {
         this.engine.destroy(this);
     }
@@ -34,7 +30,9 @@ Javelin.Entity.prototype.destroy = function() {
 
 Javelin.Entity.prototype.setId = function(id) {
     this.id = id;
-    
+
+    this.reference.entity = (id === -1) ? null : this;
+  
     for (var alias in this.components) {
         this.components[alias].$id = id;
     }
@@ -42,32 +40,25 @@ Javelin.Entity.prototype.setId = function(id) {
 
 Javelin.Entity.prototype.enable = function() {
     this.enabled = true;
-    this.dispatcher.dispatch('entity.enable');
+    this.dispatch('entity.enable');
 
     if (this.children) {
-        for (var index in this.children) {
-            this.children[index].enable();
+        for (var i = 0; i < this.children.length; i++) {
+            this.children[i].enable();
         }
-    } else {
-        //set modified bubbles up, so we only need to call it
-        //if we don't have children
-        this.setModified();
     }
 };
 
 Javelin.Entity.prototype.disable = function() {
-    this.dispatcher.dispatch('entity.disable');
-    this.enabled = false;
+    this.dispatch('entity.disable');
     
     if (this.children) {
         for (var index in this.children) {
             this.children[index].disable();
         }
-    } else {
-        //set modified bubbles up, so we only need to call it
-        //if we don't have children
-        this.setModified();
     }
+
+    this.enabled = false;
 };
 
 /* Component management */
@@ -77,19 +68,6 @@ Javelin.Entity.prototype.setComponent = function(alias, component) {
     component.$alias = alias;
     component.$id = this.id;
     this.components[alias] = component;
-
-    this.setModified();
-};
-
-//micro optimization to set multiple components without having to call setModified() every time
-Javelin.Entity.prototype.setComponents = function(arr) {
-    for (var i in arr) {
-        var comp = arr[i];
-        comp.$id = this.id;
-        this.components[comp.$alias] = comp;
-    }
-
-    this.setModified();
 };
 
 Javelin.Entity.prototype.get = function(name) {
@@ -171,7 +149,7 @@ Javelin.Entity.prototype.getChildrenByTag = function(name, recursive) {
 };
 
 
-/* GO Hierarchy management */
+/* Entity Hierarchy management */
 
 Javelin.Entity.prototype.isRoot = function() {
     return (null === this.root);
@@ -189,17 +167,22 @@ Javelin.Entity.prototype.setRoot = function(go) {
 };
 
 Javelin.Entity.prototype.addChild = function(child) {
-    //don't allow an object to be a child of more
-    //that one parent
+    //notify old parent of child removal, if necessary
+    var oldParent = null;
     if (child.parent) {
+        oldParent = child.parent;
         child.parent.removeChild(child);
     }
     
-    this.setModified();
-    child.setModified();
-    child.parent = this;
+    //set new child parent, add as child
+    child.parent = this;    
     child.setRoot(this.getRoot());
     this.children.push(child);
+    
+    //notify entities of hierarchy change
+    child.dispatch('entity.parent', [oldParent, this]);
+    this.dispatch('entity.child.add', [child]);
+
 };
 
 Javelin.Entity.prototype.setParent = function(parent) {
@@ -207,10 +190,9 @@ Javelin.Entity.prototype.setParent = function(parent) {
 };
 
 Javelin.Entity.prototype.removeChild = function(child) {
-    child.setModified();
-    this.setModified();
     child.parent = null;
     this.children.splice(this.children.indexOf(child), 1);
+    this.dispatch('entity.child.remove', [child]);
 };
 
 Javelin.Entity.prototype.leaveParent = function() {
@@ -236,92 +218,58 @@ Javelin.Entity.prototype.hasParent = function() {
 
 /* Messaging */
 
+/**
+ * Register a callback for the engine.
+ * 
+ * One of the main jobs of a component is to register callbacks for the engine, or
+ * the engine's plugins.
+ * 
+ * @param {string} name 
+ * @param {function} callback  The format for the callbacks args depend on the event.
+ */
 Javelin.Entity.prototype.on = function(name, listener) {
-    this.dispatcher.on(name, listener);
+    this.listeners[name] = this.listeners[name] || [];
+    this.listeners[name].push(listener);
 };
 
 
+Javelin.Entity.prototype.dispatch = function(name, data) {
+    var listeners = this.listeners[name];
+
+    if (!listeners) {
+        return;
+    }    
+    
+    for (var i = 0; i < listeners.length; i++) {
+        listeners[i].apply(null, data);
+    }
+};
+
 Javelin.Entity.prototype.emit = function(name, data) {
-    if (this.dispatcher.dispatch(name, data)) {
-        if (this.parent) {
-            this.parent.emit(name, data);
-        }
-        if (this.isRoot() && this.engine) {
-            this.engine.emit(name, data);
-        }
+    if (!this.enabled) {
+        return;
+    }
+
+    this.dispatch(name, data);
+    
+    if (this.parent) {
+        this.parent.emit(name, data);
+    } else if (this.engine && this.isRoot()) {
+        this.engine.emit(name, data);
     }
 };
 
 Javelin.Entity.prototype.broadcast = function(name, data) {
-    if (this.dispatcher.dispatch(name, data)) {
-        if (this.children) {
-            for (var i = 0; i < this.children.length; i++) {
-                if (!this.children[i].broadcast(name, data)) {
-                    return false;
-                }
-            }
-        }
-        
-        return true;
+    if (!this.enabled) {
+        return;
     }
     
-    return false;
-};
-
-Javelin.Entity.prototype.getCallbacks = function(eventName, recursive) {
-    if (this.modified) {
-        this.rebuildCallbackCache();
-        this.modified = false;
-    }
+    this.dispatch(name, data);
     
-    return (recursive) ? this.allCallbackCache[eventName] || [] : this.ownCallbackCache[eventName] || [];
-};
-
-Javelin.Entity.prototype.rebuildCallbackCache = function() {
-    var key, i, ownCallbacks = {};
-    for (var comp in this.components) {
-        for (key in this.components[comp].$callbacks) {
-            ownCallbacks[key] = ownCallbacks[key] || [];
-            ownCallbacks[key].push(this.components[comp].$callbacks[key]);
+    if (this.children) {
+        for (var i = 0; i < this.children.length; i++) {
+            this.children[i].broadcast(name, data);
         }
-    }
-    
-    this.ownCallbackCache = ownCallbacks;
-    
-    //clone own callbacks into new object
-    var allCallbacks = {};
-    for (key in ownCallbacks) {
-        allCallbacks[key] = allCallbacks[key] || [];
-        for (i in ownCallbacks[key]) {
-            allCallbacks[key].push(ownCallbacks[key][i]);
-        }
-    }
-    
-    //now add all callbacks from children
-    for (i in this.children) {
-        var child = this.children[i];
-        
-        if (child.modified) {
-            child.rebuildCallbackCache();
-            child.modified = false;
-        }
-        
-        for (var eventName in child.allCallbackCache) {
-            allCallbacks[eventName] = allCallbacks[eventName] || [];
-            
-            for (i in child.allCallbackCache[eventName]) {
-                allCallbacks[eventName].push(child.allCallbackCache[eventName][i]);
-            }
-        }
-    }
-    
-    this.allCallbackCache = allCallbacks;
-};
-
-Javelin.Entity.prototype.setModified = function() {
-    this.modified = true;
-    if (this.parent) {
-        this.parent.setModified();
     }
 };
 

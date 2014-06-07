@@ -15,38 +15,7 @@ describe("Component", function() {
         var c = createComponent('foo');
         assert.strictEqual(c.$name, 'foo');
     });
-    
-    it("should return false if requested callback does not exist", function() {
-        var c = createComponent();
-        assert.isFalse(c.$getCallback("engine.update"));
-    });
-    
-    it("should return registered callback function if exists", function() {
-        var c = createComponent();
-
-        c.$on('engine.update', function() {
-            return "foo";
-        });
-
-        var cb = c.$getCallback("engine.update");
-        assert.strictEqual("foo", cb());
-    });
-    
-    it("should overwrite previously registered callback", function() {
-        var c = createComponent();
-
-        c.$on('engine.update', function() {
-            return "foo";
-        });
-
-        c.$on('engine.update', function() {
-            return "bar";
-        });
         
-        var cb = c.$getCallback("engine.update");
-        assert.strictEqual("bar", cb());
-    });
-    
     it("should serialize only non-function properties added to object", function() {
         var c = createComponent();
         c.foo = "bar";
@@ -80,7 +49,7 @@ describe("Component", function() {
         assert.deepEqual(data, c.$serialize());
     });
     
-    it("should be scriptable from handler function and not conflict with multiple instances", function() {
+    it("should be scriptable not conflict with multiple entity instances", function() {
         
         //an example component construction function
         var FooComponentHandler = function(entity, game) {
@@ -93,21 +62,18 @@ describe("Component", function() {
             this.y = 5.0;
 
             //callbacks
-            this.$on("engine.update", function() {
+            this.doStuff = function() {
                 return [foo, self.x];
-            });
+            };
         };
         
         //create and "setup" components
         var c1 = createComponent('foo');
-        FooComponentHandler.call(c1);
+        FooComponentHandler.call(c1, new Javelin.Entity());
         c1.$unserialize({x: 1});
         var c2 = createComponent('foo');
-        FooComponentHandler.call(c2);
+        FooComponentHandler.call(c2, new Javelin.Entity());
         c2.$unserialize({x: 10});
-
-        var cb1 = c1.$getCallback("engine.update");
-        var cb2 = c2.$getCallback("engine.update");
         
         //generally the two instances should be equal, but their
         //callbacks should return different values
@@ -115,7 +81,7 @@ describe("Component", function() {
         assert.strictEqual(5.0, c2.y);
         assert.isUndefined(c1.foo);
         assert.isUndefined(c2.foo);
-        assert.deepEqual(cb1(), ["hello", 1]);
-        assert.deepEqual(cb2(), ["hello", 10]);
+        assert.deepEqual(c1.doStuff(), ["hello", 1]);
+        assert.deepEqual(c2.doStuff(), ["hello", 10]);
     });
 });

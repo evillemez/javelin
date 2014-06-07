@@ -81,7 +81,7 @@ javelin.component('spriteAnimator2d', ['sprite2d'], function(entity, game) {
     
     //if this.animations is defined, automatically load
     //and define the animations
-    this.$on('engine.create', function() {
+    entity.on('entity.create', function() {
         if (self.animations) {
             var numLoaded = 0;
             var numTotal = 0;
@@ -119,7 +119,7 @@ javelin.component('spriteAnimator2d', ['sprite2d'], function(entity, game) {
     });
     
     //each frame, figure out which image to draw
-    this.$on('engine.update', function(deltaTime) {
+    entity.on('engine.update', function(deltaTime) {
         if (sprite.visible && animating) {
             var current = currentAnimation || self.defaultAnimation;
             var anim = animations[current];

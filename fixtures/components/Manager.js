@@ -4,7 +4,7 @@ Fixtures.ManagerComponent = function(entity, game) {
     var ents = [];
     var mode = 'create';
 
-    this.$on('engine.update', function(deltaTime) {
+    entity.on('engine.update', function(deltaTime) {
         if (ents.length < max && 'create' === mode) {
             ents.push(game.instantiate('foo'));
         }
@@ -14,7 +14,7 @@ Fixtures.ManagerComponent = function(entity, game) {
         }
     });
 
-    this.$on('engine.destroy', function() {
+    entity.on('entity.destroy', function() {
         for (var i in ents) {
             ents[i].destroy();
         }

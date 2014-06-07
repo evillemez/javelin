@@ -17,7 +17,7 @@
  * @package input
  * @type plugin
  */
-javelin.plugin('input', function (config, game) {
+javelin.plugin('input', function (config, engine) {
     var self = this;
     this.config = config;
     this.handlers = {};
@@ -58,33 +58,14 @@ javelin.plugin('input', function (config, game) {
             self.handlers[i].processInputEvents(currTime, lastTime, deltaTime);
         }
         
-        //call any registered `input.resolve` callbacks
-        for (i in self.callbacks) {
-            if (self.callbacks[i]) {
-                for (j in self.callbacks[i]) {
-                    self.callbacks[i][j](self);
-                }
-            }
-        }
+        //call any registered `input.resolve` callbacks by components
+        self.$engine.broadcast('input.resolve', [self]);
     };
     
     this.$onPostUpdate = function(deltaTime) {
         //TODO: clear anything?
     };
     
-    this.$onEntityCreate = function(gameObject) {
-        var cbs = gameObject.getCallbacks('input.resolve');
-        if (cbs.length) {
-            self.callbacks[gameObject.id] = cbs;
-        }
-    };
-    
-    this.$onEntityDestroy = function(gameObject) {
-        if (self.callbacks[gameObject.id]) {
-            self.callbacks[gameObject.id] = null;
-        }
-    };
-
     //generic GET by name - will internally decide which input to call, so you need
     //to already know what type of value will be returned
     this.getInput = function (name) {

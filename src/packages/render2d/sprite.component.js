@@ -60,7 +60,7 @@ javelin.component('sprite2d', ['transform2d'], function(entity, game) {
      * be loaded, and the entity will be enabled after the assets have
      * loaded.
      */
-    this.$on('engine.create', function() {
+    entity.on('entity.create', function() {
         transform = entity.get('transform2d');
         var atlas = false;
         
@@ -94,7 +94,7 @@ javelin.component('sprite2d', ['transform2d'], function(entity, game) {
      * @param  {Javelin.Layer2dCanvas} layer  The layer to draw on.
      * @param  {Javelin.Layer2dCamera} camera The camera assigned to the layer.
      */
-    this.$on('renderer2d.draw', function(layer, camera) {
+    entity.on('renderer2d.draw', function(layer, camera) {
         if (self.image) {
             var pos = {
                 x: transform.getAbsoluteX(),

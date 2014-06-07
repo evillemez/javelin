@@ -165,13 +165,9 @@ javelin.plugin('renderer2d', function(config) {
         var li = entities.length;
         for (i = 0; i < li; i++) {
             if (entities[i].enabled && entities[i].isRoot()) {
-                var cbs = entities[i].getCallbacks('renderer2d.draw', true);
                 var layer = self.getLayer(entities[i].layer);
                 var camera = layer.getCamera();
-                var lj = cbs.length;
-                for (j = 0; j < lj; j++) {
-                    cbs[j](layer, camera);
-                }
+                this.$engine.broadcast('renderer2d.draw', [layer, camera]);
             }
         }
         

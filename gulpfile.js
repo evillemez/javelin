@@ -98,7 +98,7 @@ gulp.task('docs:local', ['docs:demos:local'/*,'docs:api:local','docs:guides:loca
 gulp.task('server:docs', ['docs:local'], function() { connect.server({root: 'build/docs/'}); });
 gulp.task('docs', ['docs:local','server:docs']);
 
-gulp.task('watch:javelin', function() { gulp.watch('src/**/*.js', ['default']); });
+gulp.task('watch:javelin', function() { gulp.watch(['src/**/*.js','fixtures/**/*.js','tests/**/*.js'], ['default']); });
 gulp.task('watch:docs', function() { gulp.watch(['src/**/*.js','demos/**/*.*'], ['default','docs:local']); });
 
 gulp.task('default', function(done) { sequence('lint', 'build', 'test', done); });

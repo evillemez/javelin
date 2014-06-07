@@ -9,7 +9,7 @@ javelin.component('demo.ball', ['transform2d'], function(entity, game) {
     var transform = entity.get('transform2d');
 
     //add a callback for the 
-    this.$on('renderer2d.draw', function(layer, camera) {
+    entity.on('renderer2d.draw', function(layer, camera) {
 
         //draw the ball on the layer, but only if it's actually
         //visible in the viewport
@@ -40,7 +40,7 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
     
     //on every update, check for controls pressed
     //and move the circle and/or camera accordingly
-    this.$on('engine.update', function(deltaTime) {
+    entity.on('engine.update', function(deltaTime) {
         var moveAmount = self.speed * deltaTime;
 
         //ball movement
@@ -58,7 +58,7 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
         if (input.getButton('zoomOut'))  { camera.zoom = Math.abs(camera.zoom - moveAmount * 0.125); }
     });
 
-    this.$on('renderer2d.draw', function(layer, camera) {
+    entity.on('renderer2d.draw', function(layer, camera) {
         layer.drawDebugCoordinates(2.0);
     });
 });
