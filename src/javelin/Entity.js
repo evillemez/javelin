@@ -1,7 +1,7 @@
 /**
  * Entities are processed by the engine.  Entities contain components that implement custom
  * game logic.
- * 
+ *
  * @param {string} name
  * @param {int} id
  */
@@ -32,7 +32,7 @@ Javelin.Entity.prototype.setId = function(id) {
     this.id = id;
 
     this.reference.entity = (id === -1) ? null : this;
-  
+
     for (var alias in this.components) {
         this.components[alias].$id = id;
     }
@@ -51,7 +51,7 @@ Javelin.Entity.prototype.enable = function() {
 
 Javelin.Entity.prototype.disable = function() {
     this.dispatch('entity.disable');
-    
+
     if (this.children) {
         for (var index in this.children) {
             this.children[index].disable();
@@ -64,7 +64,7 @@ Javelin.Entity.prototype.disable = function() {
 /* Component management */
 
 //explicitly set a component instance
-Javelin.Entity.prototype.setComponent = function(alias, component) {    
+Javelin.Entity.prototype.setComponent = function(alias, component) {
     component.$alias = alias;
     component.$id = this.id;
     this.components[alias] = component;
@@ -78,16 +78,16 @@ Javelin.Entity.prototype.hasComponent = function(name) {
     if (this.components[name]) {
         return true;
     }
-    
+
     return false;
 };
 
 Javelin.Entity.prototype.getComponentsInChildren = function(name) {
     var components = [];
-    
+
     for (var i = 0; i < this.children.length; i++) {
         var c = this.children[i];
-        
+
         //check nested children recursively
         if (c.children) {
             var comps = c.getComponentsInChildren(name);
@@ -95,14 +95,14 @@ Javelin.Entity.prototype.getComponentsInChildren = function(name) {
                 components.push(comps[j]);
             }
         }
-        
+
         //get component of child
         var component = c.get(name);
         if (component) {
             components.push(component);
         }
     }
-        
+
     return components;
 };
 
@@ -134,7 +134,7 @@ Javelin.Entity.prototype.getChildrenByTag = function(name, recursive) {
         if (this.children[i].hasTag(name)) {
             children.push(this.children[i]);
         }
-        
+
         if (recursive) {
             var nested = this.children[i].getChildrenByTag(name, true);
             if (nested) {
@@ -144,7 +144,7 @@ Javelin.Entity.prototype.getChildrenByTag = function(name, recursive) {
             }
         }
     }
-    
+
     return children;
 };
 
@@ -173,15 +173,18 @@ Javelin.Entity.prototype.addChild = function(child) {
         oldParent = child.parent;
         child.parent.removeChild(child);
     }
-    
+
     //set new child parent, add as child
-    child.parent = this;    
+    child.parent = this;
     child.setRoot(this.getRoot());
     this.children.push(child);
-    
-    //notify entities of hierarchy change
-    child.dispatch('entity.parent', [oldParent, this]);
-    this.dispatch('entity.child.add', [child]);
+
+    //notify entities of hierarchy change, but only
+    //when enabled
+    if (this.enabled) {
+        child.dispatch('entity.parent', [oldParent, this]);
+        this.dispatch('entity.child.add', [child]);
+    }
 
 };
 
@@ -192,7 +195,11 @@ Javelin.Entity.prototype.setParent = function(parent) {
 Javelin.Entity.prototype.removeChild = function(child) {
     child.parent = null;
     this.children.splice(this.children.indexOf(child), 1);
-    this.dispatch('entity.child.remove', [child]);
+
+    //notify entity of hierarchy change only when enabled
+    if (this.enabled) {
+        this.dispatch('entity.child.remove', [child]);
+    }
 };
 
 Javelin.Entity.prototype.leaveParent = function() {
@@ -220,11 +227,11 @@ Javelin.Entity.prototype.hasParent = function() {
 
 /**
  * Register a callback for the engine.
- * 
+ *
  * One of the main jobs of a component is to register callbacks for the engine, or
  * the engine's plugins.
- * 
- * @param {string} name 
+ *
+ * @param {string} name
  * @param {function} callback  The format for the callbacks args depend on the event.
  */
 Javelin.Entity.prototype.on = function(name, listener) {
@@ -238,8 +245,8 @@ Javelin.Entity.prototype.dispatch = function(name, data) {
 
     if (!listeners) {
         return;
-    }    
-    
+    }
+
     for (var i = 0; i < listeners.length; i++) {
         listeners[i].apply(null, data);
     }
@@ -251,7 +258,7 @@ Javelin.Entity.prototype.emit = function(name, data) {
     }
 
     this.dispatch(name, data);
-    
+
     if (this.parent) {
         this.parent.emit(name, data);
     } else if (this.engine && this.isRoot()) {
@@ -263,9 +270,9 @@ Javelin.Entity.prototype.broadcast = function(name, data) {
     if (!this.enabled) {
         return;
     }
-    
+
     this.dispatch(name, data);
-    
+
     if (this.children) {
         for (var i = 0; i < this.children.length; i++) {
             this.children[i].broadcast(name, data);
@@ -282,17 +289,17 @@ Javelin.Entity.prototype.serialize = function() {
         tags: this.tags,
         components: {}
     };
-    
+
     for (var alias in this.components) {
         serialized.components[alias] = this.components[alias].$serialize();
     }
-    
+
     if (this.children.length > 0) {
         serialized.children = [];
         for (var index in this.children) {
             serialized.children.push(this.children[index].serialize());
         }
     }
-    
+
     return serialized;
 };

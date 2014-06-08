@@ -7,7 +7,7 @@
  * TODO: document config, including layers and cameras
  */
 javelin.plugin('renderer2d', function(config) {
-    
+
     var self = this;
     var renderTarget = null;
     var cameras = {};
@@ -51,7 +51,7 @@ javelin.plugin('renderer2d', function(config) {
 
     /**
      * Load creates layer and camera instances based on given config.  If config
-     * does not specify anything, there is always a 'default' layer, and a 
+     * does not specify anything, there is always a 'default' layer, and a
      * 'default' camera.
      */
     this.$onLoad = function() {
@@ -61,17 +61,17 @@ javelin.plugin('renderer2d', function(config) {
             console.log("No browser environment detected - deactivating the renderer2d plugin.");
             return;
         }
-            
+
         targetFps = config.framesPerSecond || engine.stepsPerSecond;
         lastTimeRendered = 0.0;
 
         var target = document.getElementById(config.renderTargetId);
         renderTarget = target;
-        
+
         if (!target) {
             throw new Error("No render target defined!");
         }
-        
+
         //enforce default layer
         config.layers = config.layers || {};
         if (!config.layers['default']) {
@@ -90,12 +90,12 @@ javelin.plugin('renderer2d', function(config) {
         if (!config.cameras['default']) {
             config.cameras['default'] = {};
         }
-        
+
         //create cameras
         for (var cameraName in config.cameras) {
             cameras[cameraName] = new Layer2dCamera(cameraName, config.cameras[cameraName]);
         }
-        
+
         //create and stack layer containers
         var targetStyle = window.getComputedStyle(renderTarget);
         var targetHeight = targetStyle.height;
@@ -126,7 +126,7 @@ javelin.plugin('renderer2d', function(config) {
             layers[layerName] = layerInstance;
         }
     };
-    
+
     /**
      * Unload will remove any created layerRenderTargets.
      */
@@ -140,7 +140,7 @@ javelin.plugin('renderer2d', function(config) {
         layers = {};
         cameras = {};
     };
-    
+
     /**
      * PostUpdate will call all available `renderer2d.draw` callbacks registered
      * by entity components, passing along the relevant layer instance and camera.
@@ -160,19 +160,18 @@ javelin.plugin('renderer2d', function(config) {
             }
         }
 
-        //execute `renderer2d.draw` callbacks on all root game objects (by layer)
-        var entities = engine.gos;
-        var li = entities.length;
-        for (i = 0; i < li; i++) {
-            if (entities[i].enabled && entities[i].isRoot()) {
-                var layer = self.getLayer(entities[i].layer);
-                var camera = layer.getCamera();
-                this.$engine.broadcast('renderer2d.draw', [layer, camera]);
-            }
-        }
-        
+        //invoke render callbacks
+        engine.callRootEntities(renderEntity);
+
         lastTimeRendered = engine.time;
     };
+
+    //execute `renderer2d.draw` callbacks on all root game objects (by layer)
+    function renderEntity(entity) {
+        var layer = self.getLayer(entity.layer);
+        var camera = layer.getCamera();
+        entity.broadcast('renderer2d.draw', [layer, camera]);
+    }
 
     var createLayerInstance = function(layerRenderTarget, camera, layerConfig) {
         //one day, this could return different types of

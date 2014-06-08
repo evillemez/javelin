@@ -1,11 +1,13 @@
+/*global PIXI: true */
+
 javelin.component('pixi.polygon', ['renderable'], function(entity, engine) {
 
-  this.points = [];
-  this.fillStyle = '';
-  this.lineStyle = '';
+    this.points = [];
+    this.fillStyle = '';
+    this.lineStyle = '';
 
-  var self = this;
-  var renderable = entity.get('renderable');
+    var self = this;
+    var renderable = entity.get('renderable');
 
 
 

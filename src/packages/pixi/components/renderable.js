@@ -1,9 +1,11 @@
+/*global PIXI: true */
+
 /**
  * A base component for any renderable object.  Provides some basic asset loading
  * shortcuts and the base API required by the plugin to manage renderable objects.
  *
  * This component also takes care of managing the PIXI parent/child relationships
- * for renderable objects.  Thus, any renderable should assume it is wrapping an 
+ * for renderable objects.  Thus, any renderable should assume it is wrapping an
  * instance of a `PIXI.DisplayObjectContainer`.
  *
  * @type component
@@ -11,64 +13,145 @@
  */
 javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
 
-  //publicly configurable
-  this.layer = 'default';
-  this.assetPaths = [];
-  this.assets = [];
+    /**
+     * @var {String} The name of the layer this entity should be assigned to.  "default" unless
+     * otherwise specified
+     */
+    this.layer = 'default';
 
-  //private references
-  var self = this;
-  var renderable = null;
-  var parentRenderable = null;
+    /**
+     * How the entity should be culled.  By default, if the top-level renderable is not visible
+     * on the layer, then all children will be hidden as well.
+     *
+     * @var {string} "container" or "self"
+     */
+    this.cullMode = 'container';
 
-  /**
-   * Set a pixi renderable.  This would be any object that gets added to a pixi "stage".
-   */
-  this.setRenderable = function(obj) {
-    renderable = obj;
-  };
+    this.assetPaths = [];
+    this.assets = [];
 
-  /**
-   * Get the pixi renderable object.
-   */
-  this.getRenderable = function() {
-    return renderable;
-  };
+    //private references
+    var self = this
+        , myDisplayObject = null
+        , parentRenderable = null
+        , parentDisplayObject = null
+        , plugin = null
+    ;
 
-  this.createDisplayObjectContainer = function() {
-    //TODO: get stuff in hierarchy and `addChild`, and come up with better name
-  };
+    /**
+     * Set a pixi display object.  This would be any object that gets added to a pixi "stage". Any
+     * other component that defines a PIXI DisplayObject should use this method during the
+     * `entity.create` phase to set the display object.
+     */
+    this.setDisplayObject = function(obj) {
+        myDisplayObject = obj;
+    };
 
-  /**
-   * Load any unloaded assets when the entity is instantiated, and
-   * add self to parent renderable, if there's a parent.
-   */
-  entity.on('entity.create', function() {
+    /**
+     * Get the pixi display object.  This will recursively check all
+     * children for display objects and add them as child display objects.
+     */
+    this.getDisplayObject = function(rebuild) {
+        rebuild = rebuild || false;
 
-    //load assets
-    if (this.assets.length) {
-      this.disable();
+        //if already have it, return it
+        if (!rebuild && myDisplayObject) {
+            return myDisplayObject;
+        }
 
-      engine.loadAssets(this.assets, function(loaded) {
-        self.assets = loaded;
-        this.enable();
-      });
-    }
-    
-    //add to parent renderable
-    if (self.parent) {
-      parentRenderable = self.parent.get('pixi.renderable').getRenderable();
-      parentRenderable.addChild(self.getRenderable());
-    }
-  });
-  
-  /**
-   * Remove self from renderable hierarchy.
-   */
-  entity.on('entity.destroy', function() {
-    if (parentRenderable) {
-      parentRenderable.removeChild(renderable);
-    }
-  });
-  
+        //check children for any renderables
+        var l = entity.children.length;
+        if (l) {
+            for (var i = 0; i < l; i++) {
+                var childRenderable = entity.children[i].get('pixi.renderable');
+                if (childRenderable) {
+                    myDisplayObject.addChild(childRenderable.getDisplayObject());
+                }
+            }
+        }
+
+        return myDisplayObject;
+    };
+
+    this.getLayer = function() {
+        return (parentRenderable) ? parentRenderable.getLayer() : self.layer;
+    };
+
+    entity.on('pixi.position', function() {
+        //TODO: normalize render position efficiently
+    });
+
+    entity.on('pixi.cull', function() {});
+
+    entity.on('pixi.draw', function() {
+        //TODO: anything necessary to do here?
+    });
+
+    /**
+     * Loads any unloaded assets when the entity is instantiated.
+     */
+    entity.on('entity.create', function() {
+
+        //load assets
+        if (self.assets.length) {
+            self.disable();
+
+            engine.loadAssets(this.assets, function(loaded) {
+                self.assets = loaded;
+                self.enable();
+            });
+        }
+
+        //cache refence to parent components and displayObjects
+        if (self.parent) {
+            parentRenderable = self.parent.get('pixi.renderable');
+            if (parentRenderable) {
+                parentDisplayObject = parentRenderable.getDisplayObject();
+            }
+        }
+
+        //cache reference to assigned layer
+        plugin = game.getPlugin('pixi');
+        layer = plugin.getLayer(self.getLayer());
+    });
+
+    entity.on('entity.destroy', function() {
+        if (parentRenderable) {
+            parentRenderable.removeChild(renderable);
+        }
+    });
+
+    entity.on('entity.enable', function() {
+        if (myDisplayObject) {
+            myDisplayObject.visible = true;
+        }
+    });
+
+    entity.on('entity.disable', function() {
+        if (myDisplayObject) {
+            myDisplayObject.visible = false;
+        }
+    });
+
+    entity.on('entity.parent', function(oldParent, newParent) {
+        if (oldParent) {
+            var oldParentRenderable = oldParent.get('pixi.renderable');
+            if (oldParentRenderable) {
+                oldParentRenderable.removeChild(myDisplayObject);
+            }
+        }
+
+        if (newParent) {
+            var newParentRenderable = newParent.get('pixi.renderable');
+            if (newParentRenderable) {
+                newParentRenderable.addChild(myDisplayObject);
+            }
+        } else {
+            //NOTE: this may be a bad idea - I'm not sure yet, will need to test extensively
+            console.log('renderable adding to stage due to hierarchy change');
+            layer.stage.addChild(myDisplayObject);
+        }
+
+
+    });
 });

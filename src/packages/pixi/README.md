@@ -9,13 +9,12 @@ The plugin also adds a layer on top of the typical pixi.js *stage*, to allow usi
 as rendering all objects relative to a "camera".  This makes it easier to develop resolution independent games, and
 keeps a unified coordinate system consistent accross other plugins, for example: physics.
 
-
 ## Renderables ##
-
 
 Pixi:
 
 * Sprite
+* SpriteBatch
 * MovieClip
 * Graphics
 * DisplayObjectContainer
@@ -25,3 +24,6 @@ Javelin:
 
 * Sprite
 * Polygon
+* Container
+* SpriteAnimator (MovieClip)
+* ParticleSystem (SpriteBatch)

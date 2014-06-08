@@ -19,8 +19,8 @@ Javelin.Registry.prototype.component = function(name, requirements, handler) {
 
     if (!Javelin.isFunction(handler)) {
         throw new Error("Components must be functions in " + name + ".");
-    }    
-    
+    }
+
     var definition = {
         name: name,
         handler: handler,
@@ -57,7 +57,7 @@ Javelin.Registry.prototype.scene = function(name, obj) {
 };
 
 Javelin.Registry.prototype.plugin = function(name, handler, defaults) {
-    
+
     if (!name || !Javelin.isString(name)) {
         throw new Error("Engine plugins must specify a string name.");
     }
@@ -65,7 +65,7 @@ Javelin.Registry.prototype.plugin = function(name, handler, defaults) {
     if (!Javelin.isFunction(handler)) {
         throw new Error("Engine plugins must be a function.");
     }
-    
+
     var definition = {
         name: name,
         handler: handler,
@@ -176,7 +176,7 @@ Javelin.Registry.prototype.getLoaders = function(environment) {
         if (!this.environments[environment] && !this.loaders[environment]) {
             throw new Error("Asset loaders requested for unknown environment ["+environment+"].");
         }
-        
+
         return this.loaders[environment] || {};
     }
 
@@ -232,7 +232,7 @@ Javelin.Registry.prototype.computeComponentRequirements = function() {
 
         return reqs;
     };
-    
+
     //assign computed requirements for every registered component
     for (var name in this.components) {
         var def = this.components[name];
@@ -245,6 +245,7 @@ Javelin.Registry.prototype.computeComponentRequirements = function() {
 //in-memory objects, so no extra logic is required during
 //actual instantiation
 //TODO: consider unpacking into a separate object
+//TODO: also, compute component requirements on a per-entity basis
 Javelin.Registry.prototype.unpackPrefabs = function() {
     var self = this;
 
@@ -266,7 +267,7 @@ Javelin.Registry.prototype.unpackPrefabs = function() {
             prefab.children = unpackedChildren;
         }
     };
-    
+
     for (var name in this.prefabs) {
         unpackPrefab(this.getPrefab(name));
     }

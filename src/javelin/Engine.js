@@ -10,7 +10,7 @@ Javelin.Engine = function(registry, environment, config) {
     this.targetFps = config.stepsPerSecond || 1000/30;
     this.initialized = false;
     this.listeners = {};
-    
+
     //everything else can be reset
     this.reset();
 };
@@ -46,7 +46,7 @@ Javelin.Engine.prototype.reset = function() {
     if (this.config.loader) {
         this.loader = new Javelin.AssetLoader(this.config.loader.assetUrl || '');
     }
-    
+
 };
 
 /* Managing Game Objects */
@@ -62,13 +62,33 @@ Javelin.Engine.prototype.getEntityById = function(id) {
     return false;
 };
 
+Javelin.Engine.prototype.callEntities = function(callback) {
+    var ents = this.gos, l = ents.length;
+    for(var i = 0; i < l; i++) {
+        var ent = ents[i];
+        if (ent.enabled) {
+            callback(ent);
+        }
+    }
+};
+
+Javelin.Engine.prototype.callRootEntities = function(callback) {
+    var ents = this.gos, l = ents.length;
+    for(var i = 0; i < l; i++) {
+        var ent = ents[i];
+        if (ent.enabled && ent.isRoot()) {
+            callback(ent);
+        }
+    }
+};
+
 Javelin.Engine.prototype.instantiate = function(prefab) {
     return this.instantiateEntity(this.registry.getPrefab(prefab));
 };
 
 Javelin.Engine.prototype.instantiateEntity = function(def, isNestedCall) {
     var ent;
-    
+
     //instantiate game object
     if (def.fromPrefab) {
         //it's not really nested, but we say it is to avoid this call
@@ -85,7 +105,7 @@ Javelin.Engine.prototype.instantiateEntity = function(def, isNestedCall) {
     if (ent.id === -1) {
         ent.setId(++this.lastGoId);
     }
-    
+
     //add required components w/ values
     if (def.components) {
         for (var key in def.components) {
@@ -93,7 +113,7 @@ Javelin.Engine.prototype.instantiateEntity = function(def, isNestedCall) {
             c.$unserialize(def.components[key]);
         }
     }
-    
+
     //instantiate children
     if (def.children) {
         var l = def.children.length;
@@ -103,11 +123,11 @@ Javelin.Engine.prototype.instantiateEntity = function(def, isNestedCall) {
             ent.addChild(this.instantiateEntity(def.children[i], true));
         }
     }
-    
+
     if (!isNestedCall) {
         this.__addGameObject(ent);
     }
-    
+
     return ent;
 };
 
@@ -115,7 +135,7 @@ Javelin.Engine.prototype.addComponentToEntity = function(ent, name) {
     if (ent.hasComponent(name)) {
         return ent.get(name);
     }
-        
+
     //add any required components first
     var def = this.registry.getComponent(name);
     var reqs = def.computedRequirements;
@@ -124,13 +144,13 @@ Javelin.Engine.prototype.addComponentToEntity = function(ent, name) {
     for (var i = 0; i < l; i++) {
         this.addComponentToEntity(ent, reqs[i]);
     }
-    
+
     var comp = new Javelin.Component(name);
     comp.$id = ent.id;
     def.handler.call(comp, ent, this);
 
     ent.setComponent(name, comp);
-    
+
     return comp;
 };
 
@@ -141,7 +161,7 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
         this.gos.push(go);
 
         this.callPlugins('$onEntityCreate', [go]);
-        
+
         if (go.children.length) {
             for (var i in go.children) {
                 this.__addGameObject(go.children[i]);
@@ -150,10 +170,10 @@ Javelin.Engine.prototype.__addGameObject = function(go) {
 
         if (go.isRoot()) {
             go.enable();
-            
-            this.callPlugins('$onPrefabCreate', [go]);
 
             go.broadcast('entity.create');
+
+            this.callPlugins('$onPrefabCreate', [go]);
         }
     }
 };
@@ -164,14 +184,15 @@ Javelin.Engine.prototype.destroy = function(go, destroyingNested) {
         this.destroyedGos.push(go);
     } else {
         var i;
-        
+
         if (!destroyingNested) {
+
+            this.callPlugins('$onPrefabDestroy', [go]);
+
             //notify destroy callbacks
             go.broadcast('entity.destroy');
-            
-            this.callPlugins('$onPrefabDestroy', [go]);
         }
-        
+
         //destroy children first
         if(go.children) {
             //copy into separate array so we can abandon now
@@ -189,8 +210,8 @@ Javelin.Engine.prototype.destroy = function(go, destroyingNested) {
 
         //notify plugins
         this.callPlugins('$onEntityDestroy', [go]);
-        
-        //make sure this object is detached from any parents, 
+
+        //make sure this object is detached from any parents,
         //because we abandoned and deleted children already,
         //this should only be the case if this go is a child of
         //another object that is NOT being deleted
@@ -201,7 +222,7 @@ Javelin.Engine.prototype.destroy = function(go, destroyingNested) {
         //remove references
         go.setId(-1);
         go.engine = null;
-        
+
         //remove from engine
         var index = this.gos.indexOf(go);
         this.gos.splice(index, 1);
@@ -232,12 +253,12 @@ Javelin.Engine.prototype.step = function() {
     this.prevStepTime = this.time;
     this.time = new Date().getTime();
     this.deltaTime = (this.time - this.prevStepTime) * 0.001;
-    
+
     //some plugins process before GO udpates
     this.callPlugins('$onPreUpdate', [this.deltaTime]);
-    
+
     this.updateGameObjects(this.deltaTime);
-    
+
     //some process after
     this.callPlugins('$onPostUpdate', [this.deltaTime]);
     this.updating = false;
@@ -247,13 +268,13 @@ Javelin.Engine.prototype.step = function() {
     this.cleanupStep();
 
     this.lastUpdateTimeTaken = new Date().getTime() - this.time;
-    
+
     if(this.lastUpdateTimeTaken > this.targetFps) {
         this.isRunningSlowly = true;
     } else {
         this.isRunningSlowly = false;
     }
-    
+
 };
 
 Javelin.Engine.prototype.stats = function() {
@@ -269,7 +290,7 @@ Javelin.Engine.prototype.updateGameObjects = function(deltaTime) {
     var l = this.gos.length;
     for (var i = 0; i < l; i++) {
         var go = this.gos[i];
-        
+
         if (go.enabled && go.isRoot()) {
             go.broadcast('engine.update', [deltaTime]);
         }
@@ -286,13 +307,13 @@ Javelin.Engine.prototype.cleanupStep = function() {
             this.__addGameObject(this.createdGos[i]);
         }
     }
-    
+
     if (ld) {
         for (i = 0; i < ld; i++) {
             this.destroy(this.destroyedGos[i]);
         }
     }
-    
+
     this.createdGos = [];
     this.destroyedGos = [];
 };
@@ -331,25 +352,25 @@ Javelin.Engine.prototype.loadScene = function(name, callback) {
             engine.unloadScene();
             engine.loadScene(name, callback);
         });
-        
+
         return;
     }
-    
+
     this.reset();
-    
+
     if(!this.initialized) {
         this.initialize();
     }
-    
+
     var scene = this.registry.getScene(name);
-    
+
     if(!scene) {
         throw new Error("Tried loading unregistered scene: " + name);
     }
 
     this.sceneDefinition = scene;
     this.currentScene = name;
-    
+
     //load plugins defined in scene - otherwise, check main config
     var alias;
     if (scene.plugins) {
@@ -377,7 +398,7 @@ Javelin.Engine.prototype.loadScene = function(name, callback) {
     }
 
     this.callPlugins('$onSceneLoaded');
-    
+
     if (callback) {
         callback();
     } else {
@@ -409,12 +430,12 @@ Javelin.Engine.prototype.loadPlugin = function(name, config) {
     if (this.plugins[name]) {
         return;
     }
-    
+
     var def = this.registry.getPlugin(name);
     if (!def) {
         throw new Error("An unknown plugin [" + name + "] was requested.");
     }
-    
+
     if (Javelin.isEmpty(config)) {
         if (this.config && this.config.plugins && this.config.plugins[name]) {
             config = this.config.plugins[name];
@@ -422,9 +443,9 @@ Javelin.Engine.prototype.loadPlugin = function(name, config) {
             config = def.defaults || {};
         }
     }
-    
+
     var plugin = new Javelin.Plugin(name, this);
-    
+
     def.handler.call(plugin, config);
     this.plugins[plugin.$name] = plugin;
     plugin.$onLoad();
