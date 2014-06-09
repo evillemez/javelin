@@ -198,6 +198,7 @@ Javelin.Entity.prototype.removeChild = function(child) {
 
     //notify entity of hierarchy change only when enabled
     if (this.enabled) {
+        //child.dispatch('entity.parent', [this, null]); really do this here?
         this.dispatch('entity.child.remove', [child]);
     }
 };

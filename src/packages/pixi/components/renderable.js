@@ -77,11 +77,10 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         return (parentRenderable) ? parentRenderable.getLayer() : self.layer;
     };
 
-    entity.on('pixi.position', function() {
-        //TODO: normalize render position efficiently
+    entity.on('pixi.transform', function() {
+        //TODO: normalize render position efficiently - only if root renderable, then call children
+        //directly with a quicker update - cull objects while normalizing positions
     });
-
-    entity.on('pixi.cull', function() {});
 
     entity.on('pixi.draw', function() {
         //TODO: anything necessary to do here?
