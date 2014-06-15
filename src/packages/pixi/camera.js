@@ -5,7 +5,7 @@
  * or from a layer instance.
  *
  */
-function Camera(name) {
+function Camera(name, config) {
 
     /**
      * Name of the camera instance.  This is the name you use when retrieving the camera

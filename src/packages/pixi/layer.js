@@ -11,7 +11,7 @@ function Layer(renderTarget, camera, config) {
     var targetHeight = targetStyle.height;
     var targetWidth = targetStyle.width;
 
-    //instantiate the pixi renderer - autodetect if not specified directly
+    //instantiate the pixi renderer - autodetect if not specified directly in config
     if (config.type === 'webgl') {
         this.renderer = new PIXI.WebGLRenderer(targetWidth, targetHeight, null, true, config.antialias || true);
     } else if (config.type === 'canvas') {

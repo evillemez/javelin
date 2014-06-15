@@ -23,9 +23,22 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
      * How the entity should be culled.  By default, if the top-level renderable is not visible
      * on the layer, then all children will be hidden as well.
      *
+     * If set to "self", each individual child will be checked independently for culling. Only
+     * use this if you have to.
+     *
      * @var {string} "container" or "self"
      */
     this.cullMode = 'container';
+
+    /**
+     * Boundaries for culling - some types of renderables can set this automaticall, for example sprites. However,
+     * you may need to set this manually for certain types of renderables, such as PIXI.Graphics, which can contain
+     * arbitrary dimensions.
+     */
+    this.cullBoundry = {
+        x: 0,
+        y: 0
+    };
 
     this.assetPaths = [];
     this.assets = [];
@@ -133,6 +146,11 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
     });
 
     entity.on('entity.parent', function(oldParent, newParent) {
+        parentRenderable = null;
+        parentDisplayObject = null;
+
+        //START HERE - set references properly
+
         if (oldParent) {
             var oldParentRenderable = oldParent.get('pixi.renderable');
             if (oldParentRenderable) {

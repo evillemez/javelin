@@ -82,8 +82,6 @@ javelin.plugin('pixi', function(config) {
             layerRenderTarget.style.height = targetHeight;
             layerRenderTarget.style.width = targetWidth;
             layerRenderTarget.style.zIndex = zIndex;
-            // layerRenderTarget.style.top = top;
-            // layerRenderTarget.style.left = left;
             layerRenderTarget.id = 'javelin-layer-' + layerName;
             layerRenderTargets[layerName] = layerRenderTarget;
             target.appendChild(layerRenderTarget);
