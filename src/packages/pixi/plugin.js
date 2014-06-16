@@ -70,7 +70,7 @@ javelin.plugin('pixi', function(config) {
         }
 
         //create layer instances and render targets
-        renderTarget = document.selectElementById(config.renderTargetId);
+        renderTarget = document.getElementById(config.renderTargetId);
         var targetStyle = window.getComputedStyle(renderTarget);
         var targetHeight = targetStyle.height;
         var targetWidth = targetStyle.width;
@@ -122,7 +122,10 @@ javelin.plugin('pixi', function(config) {
         //procedurally draw something
         engine.broadcast('pixi.draw');
 
-        //TODO: render each layer
+        //render each layer
+        for (var name in this.layers) {
+            this.layers[name].render();
+        }
     };
 
     /**

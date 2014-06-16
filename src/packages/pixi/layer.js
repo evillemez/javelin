@@ -26,6 +26,10 @@ function Layer(renderTarget, camera, config) {
     this.stage = new PIXI.Stage(config.backgroundColor || 0xFFFFFF);
 }
 
+Layer.prototype.render = function() {
+    this.renderer.render(this.stage);
+};
+
 /**
  * This takes an x and y in game coordinate space, and converts it into canvas coordinates,
  * while taking into account the cameras position and zoom.  It also takes care of inverting

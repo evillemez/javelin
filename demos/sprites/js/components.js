@@ -14,10 +14,10 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
     entity.on('entity.create', function() {
         transform = entity.get('transform2d');
         input = game.getPlugin('input');
-        camera = game.getPlugin('renderer2d').getCamera('default');
+        camera = game.getPlugin('pixi').getCamera('default');
         animator = entity.get('spriteAnimator2d');
     });
-    
+
     //on every update, check for controls pressed
     //and move the circle and/or camera accordingly
     entity.on('engine.update', function(deltaTime) {
@@ -43,7 +43,7 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
     });
 
     entity.on('renderer2d.draw', function(layer, camera) {
-        layer.debug = true;
-        layer.drawDebugCoordinates(2.0);
+//        layer.debug = true;
+//        layer.drawDebugCoordinates(2.0);
     });
 });

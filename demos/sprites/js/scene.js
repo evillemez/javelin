@@ -14,7 +14,7 @@ javelin.scene('default', {
         ]
     },
     plugins: {
-        'renderer2d': {
+        'pixi': {
             renderTargetId: 'viewport',
         },
         'input': {
