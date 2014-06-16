@@ -10,10 +10,11 @@
  */
 javelin.plugin('pixi', function(config) {
 
+    //internal references
     var self = this;
     var engine = this.$engine;
     var renderTarget = null;
-
+    var layerRenderTargets = {};
     var layers = {};
     var cameras = {};
 
@@ -69,6 +70,7 @@ javelin.plugin('pixi', function(config) {
         }
 
         //create layer instances and render targets
+        renderTarget = document.selectElementById(config.renderTargetId);
         var targetStyle = window.getComputedStyle(renderTarget);
         var targetHeight = targetStyle.height;
         var targetWidth = targetStyle.width;
@@ -84,10 +86,10 @@ javelin.plugin('pixi', function(config) {
             layerRenderTarget.style.zIndex = zIndex;
             layerRenderTarget.id = 'javelin-layer-' + layerName;
             layerRenderTargets[layerName] = layerRenderTarget;
-            target.appendChild(layerRenderTarget);
+            renderTarget.appendChild(layerRenderTarget);
 
             //instantiate layer with render target
-            var layerInstance = createLayerInstance(
+            var layerInstance = new Layer(
                 layerRenderTarget,
                 self.getCamera(layerConfig.camera || 'default'),
                 layerConfig.config
@@ -129,7 +131,7 @@ javelin.plugin('pixi', function(config) {
     this.$onPrefabCreate = function(prefab) {
         var renderable = prefab.get('pixi.renderable');
 
-        if (!renderable) return;
+        if (!renderable) { return; }
 
         var pixiDisplayObject = renderable.getDisplayObject(true);
 
@@ -142,7 +144,7 @@ javelin.plugin('pixi', function(config) {
      */
     this.$onPrefabDestroy = function(prefab) {
         var renderable = prefab.get('pixi.renderable');
-        if (!renderable) return;
+        if (!renderable) { return; }
 
         var pixiDisplayObject = renderable.getDisplayObject(true);
 
@@ -161,6 +163,6 @@ javelin.plugin('pixi', function(config) {
         for (var name in layers) {
             layers[name].renderer.resize(targetWidth, targetHeight);
         }
-    };
+    }
 
 });

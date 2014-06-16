@@ -46,6 +46,8 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
     //private references
     var self = this
         , myDisplayObject = null
+        , myTransform = null
+        , layer = null
         , parentRenderable = null
         , parentDisplayObject = null
         , plugin = null
@@ -86,13 +88,65 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         return myDisplayObject;
     };
 
+    /**
+     * Renderables can only be visisble on the layer of their parent - so if you add a renderable as a child of a
+     * renderable on a different layer, that is the same as changing the layer of the child.
+     */
     this.getLayer = function() {
         return (parentRenderable) ? parentRenderable.getLayer() : self.layer;
     };
 
+    this.hide = function() { entity.broadcast('pixi.hide'); };
+    this.show = function() { entity.broadcast('pixi.show'); };
+    entity.on('pixi.hide', function() { myDisplayObject.visible = false; });
+    entity.on('pixi.show', function() { myDisplayObject.visible = true; });
+
+    /**
+     * This method also updates the display object position by normalizing the display coordinates from
+     * the game coordinates.
+     */
+    this.cull = function() {
+        var camera = layer.getCamera();
+
+        //normalize game to canvas coordinates
+        var myPos = layer.normalizeCanvasPosition(myTransform.position.x, myTransform.position.y);
+        myDisplayObject.position = myPos;
+        myDisplayObject.rotation = myTransform.rotation;
+
+        //return early if camera can't see this position and we should be culling all children
+        var visible = camera.canSeePoint(myPos.x, myPos.y);    //TODO: change to test AABB visibility
+        if (!visible && self.cullMode === 'container') {
+            self.hide();
+            return;
+        }
+
+        //show self or not
+        if (!visible) {
+            myDisplayObject.visible = false;
+        } else {
+            myDisplayObject.visible = true;
+        }
+
+        //cull renderable on each child
+        //TODO: consider caching references to child renderable components
+        var children = entity.children;
+        var l = children.length;
+        if (l) {
+            for (var i = 0; i < l; i++) {
+                var renderable = children[i].get('pixi.renderable');
+                if (renderable) {
+                    renderable.cull();
+                }
+            }
+        }
+    };
+
     entity.on('pixi.transform', function() {
-        //TODO: normalize render position efficiently - only if root renderable, then call children
-        //directly with a quicker update - cull objects while normalizing positions
+        if (parentDisplayObject) {
+            return;
+        }
+
+        self.cull();
     });
 
     entity.on('pixi.draw', function() {
@@ -123,13 +177,13 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         }
 
         //cache reference to assigned layer
-        plugin = game.getPlugin('pixi');
+        plugin = engine.getPlugin('pixi');
         layer = plugin.getLayer(self.getLayer());
     });
 
     entity.on('entity.destroy', function() {
         if (parentRenderable) {
-            parentRenderable.removeChild(renderable);
+            parentRenderable.removeChild(myDisplayObject);
         }
     });
 
@@ -148,8 +202,7 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
     entity.on('entity.parent', function(oldParent, newParent) {
         parentRenderable = null;
         parentDisplayObject = null;
-
-        //START HERE - set references properly
+        layer = plugin.getLayer(self.getLayer());
 
         if (oldParent) {
             var oldParentRenderable = oldParent.get('pixi.renderable');
@@ -161,6 +214,7 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         if (newParent) {
             var newParentRenderable = newParent.get('pixi.renderable');
             if (newParentRenderable) {
+                parentDisplayObject = parentRenderable.getDisplayObject();
                 newParentRenderable.addChild(myDisplayObject);
             }
         } else {
@@ -168,7 +222,6 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
             console.log('renderable adding to stage due to hierarchy change');
             layer.stage.addChild(myDisplayObject);
         }
-
 
     });
 });

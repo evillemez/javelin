@@ -1,3 +1,5 @@
+/*global PIXI: true */
+
 javelin.loader(['.png','.jpg','.jpeg','.gif'], ['browser'], function(loader, relPath, absPath, done) {
     var img = new Image();
     img.onabort =
