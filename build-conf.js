@@ -14,6 +14,9 @@ module.exports = {
             'src/javelin/Component.js',
             'src/javelin/Entity.js',
             'util/build/javelin.suffix'
+        ],
+        vendorScripts: [
+          'node_modules/pixi.js/bin/pixi.js'
         ]
     },
     docs: {

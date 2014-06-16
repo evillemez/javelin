@@ -1,4 +1,5 @@
 var   pkg = require('../package.json')
+    , settings = require('../build-conf.js')
     , fs = require('fs')
     , path = require('path')
     , swig = require('gulp-swig')
@@ -80,7 +81,8 @@ module.exports = function (gulp, config) {
         //and copy shared assets
         es.merge(
             gulp.src('util/docs/templates/demos.index.swig.html').pipe(swig(swigOpts)).pipe(rename('index.html')).pipe(gulp.dest(config.target)),
-            gulp.src('demos/shared/**/').pipe(gulp.dest(config.target + 'shared/'))
+            gulp.src('demos/shared/**/').pipe(gulp.dest(config.target + 'shared/')),
+            gulp.src(settings.vendorScripts).pipe(gulp.dest(config.target+'vendor/'))
         ).on('end', function() {
             deferred.resolve(true);
         });

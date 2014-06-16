@@ -9,7 +9,7 @@
     };
   </script>
   {% for script in scripts %}
-  <script src="{{baseurl}}/javelin/{{script}}"></script>
+  <script src="{{baseurl}}{{script}}"></script>
   {% endfor %}
   {% for script in demoScripts %}
   <script src="{{baseurl}}/demos/{{meta.dir}}/{{script}}"></script>

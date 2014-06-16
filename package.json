@@ -19,9 +19,9 @@
     "gulp-uglify": "~0.2",
     "gulp-util": "*",
     "jshint-stylish": "^0.2.0",
+    "pixi.js": "^1.5.3",
     "q": "^1.0.1",
     "run-sequence": "^0.3.6",
-    "swig-marked": "0.0.1",
-    "pixi.js": "~1.5.2"
+    "swig-marked": "0.0.1"
   }
 }

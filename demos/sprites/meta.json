@@ -4,10 +4,11 @@
     "description": "Moving and animating sprites.",
     "scene": "default",
     "scripts": [
-        "javelin.core.js",
-        "javelin.common.js",
-        "javelin.input.js",
-        "javelin.transform2d.js",
-        "javelin.pixi.js"
+        "/vendor/pixi.js", 
+        "/javelin/javelin.core.js",
+        "/javelin/javelin.common.js",
+        "/javelin/javelin.input.js",
+        "/javelin/javelin.transform2d.js",
+        "/javelin/javelin.pixi.js"
     ]
 }

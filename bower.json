@@ -1,0 +1,26 @@
+{
+  "name": "javelin",
+  "version": "0.0.0",
+  "homepage": "https://github.com/evillemez/javelin",
+  "authors": [
+    "Evan Villemez <evillemez@gmail.com>"
+  ],
+  "description": "A flexible game engine in javascript.",
+  "main": "build/dist/javelin.js",
+  "keywords": [
+    "game",
+    "engine"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "pixi.js": "~1.5.3"
+  }
+}
