@@ -10,7 +10,7 @@ function Layer(renderTarget, camera, config) {
     var targetStyle = window.getComputedStyle(renderTarget);
     var targetHeight = targetStyle.height;
     var targetWidth = targetStyle.width;
-
+  
     //instantiate the pixi renderer - autodetect if not specified directly in config
     if (config.type === 'webgl') {
         this.renderer = new PIXI.WebGLRenderer(targetWidth, targetHeight, null, true, config.antialias || true);
@@ -22,7 +22,7 @@ function Layer(renderTarget, camera, config) {
 
     //add renderer view to target element
     this.view = this.renderer.view;
-    this.renderTarget.addChild(this.renderer.view);
+    this.renderTarget.appendChild(this.renderer.view);
     this.stage = new PIXI.Stage(config.backgroundColor || 0xFFFFFF);
 }
 

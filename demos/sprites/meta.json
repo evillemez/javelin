@@ -4,7 +4,7 @@
     "description": "Moving and animating sprites.",
     "scene": "default",
     "scripts": [
-        "/vendor/pixi.js", 
+        "/vendor/pixi.dev.js", 
         "/javelin/javelin.core.js",
         "/javelin/javelin.common.js",
         "/javelin/javelin.input.js",

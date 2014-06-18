@@ -23,15 +23,15 @@ javelin.plugin('pixi', function(config) {
     };
 
     this.getCamera = function(name) {
-        if (cameras[name]) {
+        if (!cameras[name]) {
             throw new Error('Unknown render camera '+ name +' requested.');
         }
 
-        return layers[name];
+        return cameras[name];
     };
 
     this.getLayer = function(name) {
-        if (layers[name]) {
+        if (!layers[name]) {
             throw new Error('Unknown render layer '+ name +' requested.');
         }
 
@@ -92,7 +92,7 @@ javelin.plugin('pixi', function(config) {
             var layerInstance = new Layer(
                 layerRenderTarget,
                 self.getCamera(layerConfig.camera || 'default'),
-                layerConfig.config
+                layerConfig
             );
 
             layers[layerName] = layerInstance;

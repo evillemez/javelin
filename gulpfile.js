@@ -67,9 +67,9 @@ gulp.task('build', function(done) {
     sequence(['build:fixtures','build:javelin','build:packages'], 'minify', done);
 });
 
-gulp.task('docs:demos:ghp', function() { return javelinBuildDemos(gulp, conf.docs.ghp.demos); });
-gulp.task('docs:demos:local', function() { return javelinBuildDemos(gulp, conf.docs.local.demos); });
-gulp.task('docs:demos:ghplocal', function() { return javelinBuildDemos(gulp, conf.docs.ghplocal.demos); });
+gulp.task('docs:demos:ghp', function() { return javelinBuildDemos(gulp, 'ghp'); });
+gulp.task('docs:demos:local', function() { return javelinBuildDemos(gulp, 'local'); });
+gulp.task('docs:demos:ghplocal', function() { return javelinBuildDemos(gulp, 'ghplocal'); });
 
 // gulp.task('docs:api:ghp', function() { return javelinBuildApi(gulp, conf.docs.ghp.api); });
 // gulp.task('docs:api:local', function() { return javelinBuildApi(gulp, conf.docs.local.api); });
@@ -84,7 +84,8 @@ gulp.task('docs:local', ['docs:demos:local'/*,'docs:api:local','docs:guides:loca
     var opts = {data: {version: pkg.version, baseurl: conf.docs.local.baseurl}};
     return es.merge(
         gulp.src('util/docs/templates/index.swig.html').pipe(swig(opts)).pipe(rename('index.html')).pipe(gulp.dest(conf.docs.local.target)),
-        gulp.src('build/javelin/dist/**/*.js').pipe(gulp.dest(conf.docs.local.target+'javelin'))
+        gulp.src('build/javelin/dist/**/*.js').pipe(gulp.dest(conf.docs.local.target+'javelin')),
+        gulp.src(conf.paths.vendorScripts).pipe(gulp.dest(conf.docs.local.target+'vendor'))
     );
 });
 

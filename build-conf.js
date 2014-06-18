@@ -16,7 +16,7 @@ module.exports = {
             'util/build/javelin.suffix'
         ],
         vendorScripts: [
-          'node_modules/pixi.js/bin/pixi.js'
+          'node_modules/pixi.js/bin/pixi.dev.js'
         ]
     },
     docs: {

@@ -159,10 +159,12 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
     entity.on('entity.create', function() {
 
         //load assets
-        if (self.assets.length) {
+        if (!self.assets.length) {
             self.disable();
-
-            engine.loadAssets(this.assets, function(loaded) {
+          
+            console.log('loading');
+          
+            engine.loadAssets(self.assetPaths, function(loaded) {
                 self.assets = loaded;
                 self.enable();
             });

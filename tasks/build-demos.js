@@ -1,5 +1,5 @@
 var   pkg = require('../package.json')
-    , settings = require('../build-conf.js')
+    , conf = require('../build-conf.js')
     , fs = require('fs')
     , path = require('path')
     , swig = require('gulp-swig')
@@ -12,7 +12,8 @@ var   pkg = require('../package.json')
     , Q = require('q')
 ;
 
-module.exports = function (gulp, config) {
+module.exports = function (gulp, type) {
+    var config = conf.docs[type].demos;
     var demoMeta = [], promises = [];
 
     //parse each demo
@@ -81,8 +82,7 @@ module.exports = function (gulp, config) {
         //and copy shared assets
         es.merge(
             gulp.src('util/docs/templates/demos.index.swig.html').pipe(swig(swigOpts)).pipe(rename('index.html')).pipe(gulp.dest(config.target)),
-            gulp.src('demos/shared/**/').pipe(gulp.dest(config.target + 'shared/')),
-            gulp.src(settings.vendorScripts).pipe(gulp.dest(config.target+'vendor/'))
+            gulp.src('demos/shared/**/').pipe(gulp.dest(config.target + 'shared/'))
         ).on('end', function() {
             deferred.resolve(true);
         });
