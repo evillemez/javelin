@@ -46,7 +46,7 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
     //private references
     var self = this
         , myDisplayObject = null
-        , myTransform = null
+        , myTransform = entity.get('transform2d')
         , layer = null
         , parentRenderable = null
         , parentDisplayObject = null
@@ -158,18 +158,6 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
      */
     entity.on('entity.create', function() {
 
-        //load assets
-        if (!self.assets.length) {
-            self.disable();
-          
-            console.log('loading');
-          
-            engine.loadAssets(self.assetPaths, function(loaded) {
-                self.assets = loaded;
-                self.enable();
-            });
-        }
-
         //cache refence to parent components and displayObjects
         if (self.parent) {
             parentRenderable = self.parent.get('pixi.renderable');
@@ -181,6 +169,11 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         //cache reference to assigned layer
         plugin = engine.getPlugin('pixi');
         layer = plugin.getLayer(self.getLayer());
+    });
+
+    //DEBUG
+    entity.on('engine.update', function(deltaTime) {
+        console.log(myDisplayObject.visible);
     });
 
     entity.on('entity.destroy', function() {

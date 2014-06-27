@@ -6,7 +6,7 @@
  * @apidoc packages.pixi.component.sprite.html
  * @type component
  */
-javelin.component('pixi.sprite', ['pixi.renderable'], function(entity, engine) {
+javelin.component('pixi.sprite', ['pixi.renderable', 'common.loader'], function(entity, engine) {
 
     //publicly configurable properties
     this.imagePath = null;
@@ -14,33 +14,38 @@ javelin.component('pixi.sprite', ['pixi.renderable'], function(entity, engine) {
 
     var self = this;
     var renderable = entity.get('pixi.renderable');
+    var loader = entity.get('common.loader');
 
-    if (this.imagePath) {
-        renderable.assetPaths.push(this.imagePath);
-    }
-    if (this.atlasPath) {
-        renderable.assetPaths.push(this.atlasPath);
-    }
+    //define sprite
+    var baseTexture = new PIXI.BaseTexture();
+    var sprite = new PIXI.Sprite(new PIXI.Texture(baseTexture));
 
-//    renderable.onLoad(function(assets) {
-//      
+//    entity.on('assets.load', function(loader) {
+//        //register assets to load
+//        if (self.atlasPath) {
+//            loader.requireAsset(self.atlasPath);
+//        } else if (self.imagePath) {
+//            loader.requireAsset(self.imagePath);
+//        }
 //    });
-  
+//
+//    //set sprite texture and show it once loaded
+//    entity.on('assets.loaded', function() {
+//        if (self.atlasPath) {
+//            //TODO: create texture from atlas
+//        } else if (self.imagePath) {
+//            console.log('setting sprite');
+//            baseTexture.source = engine.getAsset(self.imagePath);
+//            baseTexture.hasLoaded = true;
+//        }
+//
+//        sprite.visible = true;
+//    });
+
+    //hide sprite until assets have loaded
     entity.on('entity.create', function() {
-        var sprite = null;
-
-        //create sprite
-        if (self.atlasPath) {
-            //TODO: create image from texture packer atlas
-        } else if (self.imagePath) {
-          if (!renderable.assets[self.imagePath]) {
-            
-          }
-          
-          sprite = new PIXI.Sprite(new PIXI.Texture(renderable.assets[self.imagePath]));
-        }
-
+        var sprite = new PIXI.Sprite(new PIXI.Texture.fromImage(self.imagePath));
+        //sprite.visible = false;
         renderable.setDisplayObject(sprite);
     });
-
-}); 
+});

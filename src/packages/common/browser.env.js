@@ -13,11 +13,13 @@ javelin.environment('browser', function(config) {
     //TODO: change to requestAnimationFrame
     this.run = function(stepsPerSecond) {
         intervalId = setInterval(function() {
-            try {
-                self.engine.step();
-            } catch (e) {
-                console.log(e);
-            }
+            self.engine.step();
+//            try {
+//                self.engine.step();
+//            } catch (e) {
+//                throw e;
+//                //console.log(e);
+//            }
         }, stepsPerSecond);
     };
 

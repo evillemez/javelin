@@ -10,15 +10,23 @@ function Layer(renderTarget, camera, config) {
     var targetStyle = window.getComputedStyle(renderTarget);
     var targetHeight = targetStyle.height;
     var targetWidth = targetStyle.width;
-  
+
     //instantiate the pixi renderer - autodetect if not specified directly in config
     if (config.type === 'webgl') {
+        console.log('webgl');
         this.renderer = new PIXI.WebGLRenderer(targetWidth, targetHeight, null, true, config.antialias || true);
     } else if (config.type === 'canvas') {
+        console.log('canvas');
         this.renderer = new PIXI.CanvasRenderer(targetWidth, targetHeight, null, true, config.antialias || true);
     } else {
+        console.log('auto');
         this.renderer = PIXI.autoDetectRenderer(targetWidth, targetHeight, null, true, config.antialias || true);
     }
+
+    //HACKS ///////////////////
+    this.renderer.view.style.height = targetHeight;
+    this.renderer.view.style.width = targetWidth;
+    ///////////////////////////
 
     //add renderer view to target element
     this.view = this.renderer.view;

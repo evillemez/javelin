@@ -15,7 +15,7 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
         transform = entity.get('transform2d');
         input = game.getPlugin('input');
         camera = game.getPlugin('pixi').getCamera('default');
-        animator = entity.get('spriteAnimator2d');
+        //animator = entity.get('spriteAnimator2d');
     });
 
     //on every update, check for controls pressed
@@ -30,8 +30,8 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
         if (input.getButton('right'))    { transform.rotate(3);  moving = true; }
         if (input.getButton('left'))     { transform.rotate(-3); moving = true; }
 
-        if (moving) { animator.start(); }
-        else { animator.stop(); }
+//        if (moving) { animator.start(); }
+//        else { animator.stop(); }
 
         //camera movement
         if (input.getButton('camUp'))    { camera.position.y += moveAmount; }
