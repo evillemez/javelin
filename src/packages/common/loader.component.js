@@ -1,12 +1,16 @@
 /**
- * This component provides a more accessible api for loading required assets.
+  * This component provides a more accessible api for loading required assets.
  */
 javelin.component('common.loader', [], function(entity, game) {
     var requiredAssets = [];
     var assetInstances = {};
     var self = this;
 
-    this.loading = false;
+    var loading = false;
+
+    this.isLoading = function() {
+      return loading;
+    };
 
     this.requireAsset = function(path) {
         requiredAssets.push(path);
@@ -25,9 +29,9 @@ javelin.component('common.loader', [], function(entity, game) {
             return;
         }
 
-        self.loading = true;
+        loading = true;
         game.loadAssets(requiredAssets, function(assets) {
-            self.loading = false;
+            loading = false;
             assetInstances = assets;
             entity.dispatch('assets.loaded');
         });
