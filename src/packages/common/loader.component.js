@@ -1,7 +1,7 @@
 /**
   * This component provides a more accessible api for loading required assets.
  */
-javelin.component('common.loader', [], function(entity, game) {
+javelin.component('common.loader', [], function(entity, engine) {
     var requiredAssets = [];
     var assetInstances = {};
     var self = this;
@@ -30,10 +30,15 @@ javelin.component('common.loader', [], function(entity, game) {
         }
 
         loading = true;
-        game.loadAssets(requiredAssets, function(assets) {
+        engine.loadAssets(requiredAssets, function(assets) {
             loading = false;
-            assetInstances = assets;
-            entity.dispatch('assets.loaded');
+            
+            //build map of loaded assets
+            for(var i = 0; i < requiredAssets.length; i++) {
+                assetInstances[requiredAssets[i]] = assets[i];
+            }
+                        
+            entity.dispatch('assets.loaded', [assetInstances]);
         });
     });
 });

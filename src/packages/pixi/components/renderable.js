@@ -67,7 +67,7 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
      * children for display objects and add them as child display objects.
      */
     this.getDisplayObject = function(rebuild) {
-        rebuild = rebuild || false;
+        rebuild = !!rebuild;
 
         //if already have it, return it
         if (!rebuild && myDisplayObject) {
@@ -109,9 +109,12 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         var camera = layer.getCamera();
 
         //normalize game to canvas coordinates
-        var myPos = layer.normalizeCanvasPosition(myTransform.position.x, myTransform.position.y);
+        console.log("GAME POS: ", myTransform.position);
+        var myPos = layer.computeCanvasPosition(myTransform.position.x, myTransform.position.y);
         myDisplayObject.position = myPos;
         myDisplayObject.rotation = myTransform.rotation;
+        
+        console.log("CANVAS POS: ", myPos);
 
         //return early if camera can't see this position and we should be culling all children
         var visible = camera.canSeePoint(myPos.x, myPos.y);    //TODO: change to test AABB visibility

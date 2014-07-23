@@ -4,12 +4,12 @@
  * A Layer encapsulates a PIXI stage, camera and DOM element used to render to.
  */
 function Layer(renderTarget, camera, config) {
-    this.camera = camera;
+    this.setCamera(camera);
     this.renderTarget = renderTarget;
-
-    var targetStyle = window.getComputedStyle(renderTarget);
-    var targetHeight = targetStyle.height;
-    var targetWidth = targetStyle.width;
+    this.pixelsPerUnit = config.pixelsPerUnit || 20;
+    
+    var targetHeight = renderTarget.clientHeight;
+    var targetWidth = renderTarget.clientWidth;
 
     //instantiate the pixi renderer - autodetect if not specified directly in config
     if (config.type === 'webgl') {
@@ -22,11 +22,6 @@ function Layer(renderTarget, camera, config) {
         console.log('auto');
         this.renderer = PIXI.autoDetectRenderer(targetWidth, targetHeight, null, true, config.antialias || true);
     }
-
-    //HACKS ///////////////////
-    this.renderer.view.style.height = targetHeight;
-    this.renderer.view.style.width = targetWidth;
-    ///////////////////////////
 
     //add renderer view to target element
     this.view = this.renderer.view;
@@ -47,9 +42,7 @@ Layer.prototype.render = function() {
  * @param  {float} y    Game y position
  * @return {object}     An object containing normalized x and y properties.
  */
-Layer.prototype.normalizeCanvasPosition = function(x, y) {
-
-    //TODO: take into account camera rotation :(
+Layer.prototype.computeCanvasPosition = function(x, y) {
 
     return {
         x: ((x - this.camera.position.x) * this.pixelsPerUnit * this.camera.zoom) + (this.view.width * 0.5),

@@ -137,7 +137,7 @@ javelin.plugin('pixi', function(config) {
         if (!renderable) { return; }
 
         var pixiDisplayObject = renderable.getDisplayObject(true);
-
+        
         //add to stage for the layer
         self.getLayer(renderable.layer).stage.addChild(pixiDisplayObject);
     };
@@ -148,7 +148,8 @@ javelin.plugin('pixi', function(config) {
     this.$onPrefabDestroy = function(prefab) {
         var renderable = prefab.get('pixi.renderable');
         if (!renderable) { return; }
-
+        
+        //QUESTION: rebuild on destroy?  Probably better to trust cached version...
         var pixiDisplayObject = renderable.getDisplayObject(true);
 
         self.getLayer(renderable.layer).stage.removeChild(pixiDisplayObject);
