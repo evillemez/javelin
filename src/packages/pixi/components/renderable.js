@@ -109,20 +109,17 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         var camera = layer.getCamera();
 
         //normalize game to canvas coordinates
-        console.log("GAME POS: ", myTransform.position);
         var myPos = layer.computeCanvasPosition(myTransform.position.x, myTransform.position.y);
         myDisplayObject.position = myPos;
         myDisplayObject.rotation = myTransform.rotation;
         
-        console.log("CANVAS POS: ", myPos);
-
         //return early if camera can't see this position and we should be culling all children
         var visible = camera.canSeePoint(myPos.x, myPos.y);    //TODO: change to test AABB visibility
         if (!visible && self.cullMode === 'container') {
             self.hide();
             return;
         }
-
+        
         //show self or not
         if (!visible) {
             myDisplayObject.visible = false;
@@ -143,12 +140,13 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
             }
         }
     };
-
+    
+    //update positions of pixi objects, starting from root object down
     entity.on('pixi.transform', function() {
         if (parentDisplayObject) {
             return;
         }
-
+        
         self.cull();
     });
 
@@ -160,6 +158,9 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
      * Loads any unloaded assets when the entity is instantiated.
      */
     entity.on('entity.create', function() {
+        //cache reference to assigned layer
+        plugin = engine.getPlugin('pixi');
+        layer = plugin.getLayer(self.getLayer());
 
         //cache refence to parent components and displayObjects
         if (self.parent) {
@@ -169,14 +170,6 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
             }
         }
 
-        //cache reference to assigned layer
-        plugin = engine.getPlugin('pixi');
-        layer = plugin.getLayer(self.getLayer());
-    });
-
-    //DEBUG
-    entity.on('engine.update', function(deltaTime) {
-        console.log(myDisplayObject.visible);
     });
 
     entity.on('entity.destroy', function() {

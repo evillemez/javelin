@@ -43,7 +43,9 @@ Layer.prototype.render = function() {
  * @return {object}     An object containing normalized x and y properties.
  */
 Layer.prototype.computeCanvasPosition = function(x, y) {
-
+    
+    //TODO: consider camera rotation :/
+    
     return {
         x: ((x - this.camera.position.x) * this.pixelsPerUnit * this.camera.zoom) + (this.view.width * 0.5),
         y: ((-y + this.camera.position.y) * this.pixelsPerUnit * this.camera.zoom) + (this.view.height * 0.5)

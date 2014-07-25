@@ -123,8 +123,8 @@ javelin.plugin('pixi', function(config) {
         engine.broadcast('pixi.draw');
 
         //render each layer
-        for (var name in this.layers) {
-            this.layers[name].render();
+        for (var name in layers) {
+            layers[name].render();
         }
     };
 
