@@ -48,6 +48,7 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         , myDisplayObject = null
         , myTransform = entity.get('transform2d')
         , layer = null
+        , camera = null
         , parentRenderable = null
         , parentDisplayObject = null
         , plugin = null
@@ -106,12 +107,13 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
      * the game coordinates.
      */
     this.cull = function() {
-        var camera = layer.getCamera();
 
         //normalize game to canvas coordinates
         var myPos = layer.computeCanvasPosition(myTransform.position.x, myTransform.position.y);
         myDisplayObject.position = myPos;
         myDisplayObject.rotation = myTransform.rotation;
+        myDisplayObject.scale.x = camera.zoom;
+        myDisplayObject.scale.y = camera.zoom;
         
         //return early if camera can't see this position and we should be culling all children
         var visible = camera.canSeePoint(myPos.x, myPos.y);    //TODO: change to test AABB visibility
@@ -161,7 +163,8 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         //cache reference to assigned layer
         plugin = engine.getPlugin('pixi');
         layer = plugin.getLayer(self.getLayer());
-
+        camera = layer.getCamera();
+        
         //cache refence to parent components and displayObjects
         if (self.parent) {
             parentRenderable = self.parent.get('pixi.renderable');

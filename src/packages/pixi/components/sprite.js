@@ -15,9 +15,8 @@ javelin.component('pixi.sprite', ['pixi.renderable', 'common.loader'], function(
     var self = this;
     var renderable = entity.get('pixi.renderable');
 
-    //define sprite
-    var baseTexture = new PIXI.BaseTexture();
-    var sprite = new PIXI.Sprite(new PIXI.Texture(baseTexture));
+    //define sprite - unfortunately need to provide empty objects
+    var sprite = new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture()));
     sprite.visible = false;
 
     //register assets to load
@@ -34,18 +33,15 @@ javelin.component('pixi.sprite', ['pixi.renderable', 'common.loader'], function(
         if (self.atlasPath) {
             //TODO: create texture from atlas
         } else if (self.imagePath) {
-            baseTexture.source = assets[self.imagePath];
-            baseTexture.hasLoaded = true;
+            // baseTexture.source = assets[self.imagePath];
+            // baseTexture.hasLoaded = true;
+            sprite.setTexture(new PIXI.Texture(assets[self.imagePath]));
         }
     
         sprite.visible = true;
     });
 
     entity.on('entity.create', function() {
-        
-        //HACK - don't want pixi to have to load stuff...
-        var sprite = new PIXI.Sprite(new PIXI.Texture.fromImage(self.imagePath));
-
         renderable.setDisplayObject(sprite);
     });
 });

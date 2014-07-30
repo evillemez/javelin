@@ -27,6 +27,10 @@ function Layer(renderTarget, camera, config) {
     this.view = this.renderer.view;
     this.renderTarget.appendChild(this.renderer.view);
     this.stage = new PIXI.Stage(config.backgroundColor || 0xFFFFFF);
+    
+    if (config.debug || false) {
+        //TODO: add debug grid graphic to stage
+    }
 }
 
 Layer.prototype.render = function() {
