@@ -23,7 +23,7 @@ javelin.component('common.loader', [], function(entity, engine) {
     };
 
     entity.on('entity.create', function() {
-        entity.dispatch('assets.load', [self]);
+        entity.dispatch('assets.require', [self]);
 
         if (!requiredAssets.length) {
             return;

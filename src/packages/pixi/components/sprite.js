@@ -14,7 +14,6 @@ javelin.component('pixi.sprite', ['pixi.renderable', 'common.loader'], function(
 
     var self = this;
     var renderable = entity.get('pixi.renderable');
-    var loader = entity.get('common.loader');
 
     //define sprite
     var baseTexture = new PIXI.BaseTexture();
@@ -22,7 +21,7 @@ javelin.component('pixi.sprite', ['pixi.renderable', 'common.loader'], function(
     sprite.visible = false;
 
     //register assets to load
-    entity.on('assets.load', function(loader) {
+    entity.on('assets.require', function(loader) {
         if (self.atlasPath) {
             loader.requireAsset(self.atlasPath);
         } else if (self.imagePath) {
