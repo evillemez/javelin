@@ -14,7 +14,7 @@ javelin.component('demo.controls', ['transform2d'], function(entity, game) {
     entity.on('entity.create', function() {
         transform = entity.get('transform2d');
         input = game.getPlugin('input');
-        camera = game.getPlugin('pixi').getCamera('default');
+        camera = game.getPlugin('pixi').getCamera('main');
         //animator = entity.get('spriteAnimator2d');
     });
 

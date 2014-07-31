@@ -16,6 +16,13 @@ javelin.scene('default', {
     plugins: {
         'pixi': {
             renderTargetId: 'viewport',
+            layers: {
+                main: {
+                    camera: 'main',
+                    pixelsPerUnit: 20,
+                    debug: true
+                }
+            }
         },
         'input': {
             keyboard: {

@@ -48,10 +48,10 @@ javelin.plugin('pixi', function(config) {
             console.log('Disabling the PIXI plugin - no window or PIXI library detected.');
         }
 
-        //enforce default camera
+        //enforce main camera
         config.cameras = config.cameras || {};
-        if (!config.cameras['default']) {
-            config.cameras['default'] = {};
+        if (!config.cameras['main']) {
+            config.cameras['main'] = {};
         }
 
         //create cameras
@@ -59,13 +59,13 @@ javelin.plugin('pixi', function(config) {
             cameras[cameraName] = new Camera(cameraName, config.cameras[cameraName]);
         }
 
-        //enforce a default layer
+        //enforce a main layer
         config.layers = config.layers || {};
-        if (!config.layers['default']) {
-            config.layers['default'] = {
-                camera: 'default',
-                clearOnUpdate: true,
-                pixelsPerUnit: 20
+        if (!config.layers['main']) {
+            config.layers['main'] = {
+                camera: 'main',
+                pixelsPerUnit: 20,
+                debug: false
             };
         }
 
@@ -91,7 +91,7 @@ javelin.plugin('pixi', function(config) {
             //instantiate layer with render target
             var layerInstance = new Layer(
                 layerRenderTarget,
-                self.getCamera(layerConfig.camera || 'default'),
+                self.getCamera(layerConfig.camera || 'main'),
                 layerConfig
             );
 
@@ -100,6 +100,9 @@ javelin.plugin('pixi', function(config) {
 
         //register resize listener
         window.addEventListener('resize', onWindowResize);
+        
+        //kinda hacky... but, a way to centralize access to one instance of an empty texture
+        this.emptyTexture = new PIXI.Texture(PIXI.BaseTexture());
     };
 
     this.$onUnload = function() {

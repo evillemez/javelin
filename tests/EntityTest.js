@@ -156,13 +156,11 @@ describe("Entity", function() {
         
         var expected = {
             name: 'parent',
-            layer: 'default',
             tags: [],
             components: {},
             children: [
                 {
                     name: 'child1',
-                    layer: 'default',
                     tags: [],
                     components: {
                         'bar': {
@@ -172,7 +170,6 @@ describe("Entity", function() {
                 },
                 {
                     name: 'child2',
-                    layer: 'default',
                     tags: [],
                     components: {
                         'baz': {

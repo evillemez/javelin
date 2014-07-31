@@ -14,10 +14,10 @@
 javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
 
     /**
-     * @var {String} The name of the layer this entity should be assigned to.  "default" unless
+     * @var {String} The name of the layer this entity should be assigned to.  "main" unless
      * otherwise specified
      */
-    this.layer = 'default';
+    this.layer = 'main';
 
     /**
      * How the entity should be culled.  By default, if the top-level renderable is not visible

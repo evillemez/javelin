@@ -13,10 +13,12 @@ javelin.component('pixi.sprite', ['pixi.renderable', 'common.loader'], function(
     this.atlasPath = null;
 
     var self = this;
+    var plugin = engine.getPlugin('pixi');
     var renderable = entity.get('pixi.renderable');
 
-    //define sprite - unfortunately need to provide empty objects
-    var sprite = new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture()));
+    //define sprite - unfortunately need to provide an empty texture until
+    //we can be sure that the underlying resource has loaded
+    var sprite = new PIXI.Sprite(plugin.emptyTexture);
     sprite.visible = false;
 
     //register assets to load

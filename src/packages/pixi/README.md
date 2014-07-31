@@ -22,6 +22,7 @@ Pixi:
 
 Javelin:
 
+* Renderable
 * Sprite
 * Polygon
 * Container

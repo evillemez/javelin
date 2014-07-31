@@ -96,7 +96,6 @@ Javelin.Engine.prototype.instantiateEntity = function(def, isNestedCall) {
         ent = this.instantiateEntity(this.registry.getPrefab(def.fromPrefab), true);
     } else {
         ent = new Javelin.Entity();
-        ent.layer = def.layer || 'default';
         ent.name = def.name || 'Anonymous';
         ent.tags = def.tags || [];
         ent.engine = this;

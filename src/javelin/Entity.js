@@ -15,7 +15,6 @@ Javelin.Entity = function (name, id) {
     this.parent = null;                             //parent entity instance
     this.root = null;                               //if in a hierarchy, reference to root object in hierarcy
     this.tags = [];                                 //string tags for categorizing objects
-    this.layer = 'default';                         //for assigning groups of objects to specific layers (may be removed)
     this.reference = { entity: null };              //for other entities to store "weak" references
     this.listeners = {};                            //entity event listeners
 };
@@ -286,7 +285,6 @@ Javelin.Entity.prototype.broadcast = function(name, data) {
 Javelin.Entity.prototype.serialize = function() {
     var serialized = {
         name: this.name,
-        layer: this.layer,
         tags: this.tags,
         components: {}
     };
