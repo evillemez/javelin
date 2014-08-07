@@ -17,6 +17,8 @@ javelin.plugin('pixi', function(config) {
     var layerRenderTargets = {};
     var layers = {};
     var cameras = {};
+    var targetFps = config.framesPerSecond || engine.stepsPerSecond;
+    var lastTimeRendered = 0.0;
 
     this.createCamera = function(name, config) {
         cameras[name] = new Camera(config);
@@ -115,7 +117,15 @@ javelin.plugin('pixi', function(config) {
         window.removeEventListener('resize', onWindowResize);
     };
 
+    /**
+     * Render each layer in the scene.
+     */
     this.$onPostUpdate = function(deltaTime) {
+        if (engine.isRunningSlowly || engine.time - lastTimeRendered <= targetFps) {
+            console.log("skipping frame");
+            return;
+        }
+        
         //have renderable instances update their position/rotation by normalizing
         //transform position to canvas position - in the process, cull objects
         //by toggling visibility
@@ -129,6 +139,8 @@ javelin.plugin('pixi', function(config) {
         for (var name in layers) {
             layers[name].render();
         }
+
+        lastTimeRendered = engine.time;
     };
 
     /**
