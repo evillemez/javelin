@@ -13,13 +13,10 @@ function Layer(renderTarget, camera, config) {
 
     //instantiate the pixi renderer - autodetect if not specified directly in config
     if (config.type === 'webgl') {
-        console.log('webgl');
         this.renderer = new PIXI.WebGLRenderer(targetWidth, targetHeight, null, true, config.antialias || true);
     } else if (config.type === 'canvas') {
-        console.log('canvas');
         this.renderer = new PIXI.CanvasRenderer(targetWidth, targetHeight, null, true, config.antialias || true);
     } else {
-        console.log('auto');
         this.renderer = PIXI.autoDetectRenderer(targetWidth, targetHeight, null, true, config.antialias || true);
     }
 
@@ -30,7 +27,8 @@ function Layer(renderTarget, camera, config) {
     this.debugGraphics = null;
     
     if (config.debug || false) {
-        this.stage.addChild(new DebugGrid(this, camera))
+        this.debugGraphics = new LayerDebugCoordinates(this, camera);
+        this.stage.addChild(this.debugGraphics);
     }
 }
 
@@ -54,6 +52,7 @@ Layer.prototype.render = function() {
 Layer.prototype.computeCanvasPosition = function(x, y) {
     
     //TODO: consider camera rotation :/
+    //http://www.willamette.edu/~gorr/classes/GeneralGraphics/Transforms/transforms2d.htm
     
     return {
         x: ((x - this.camera.position.x) * this.pixelsPerUnit * this.camera.zoom) + (this.view.width * 0.5),

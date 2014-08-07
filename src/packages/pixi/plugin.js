@@ -102,7 +102,7 @@ javelin.plugin('pixi', function(config) {
         window.addEventListener('resize', onWindowResize);
         
         //kinda hacky... but, a way to centralize access to one instance of an empty texture
-        this.emptyTexture = new PIXI.Texture(PIXI.BaseTexture());
+        this.emptyTexture = new PIXI.Texture(new PIXI.BaseTexture());
     };
 
     this.$onUnload = function() {
