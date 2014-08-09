@@ -39,5 +39,13 @@ LayerDebugCoordinates.prototype.drawCoordinates = function () {
 };
 
 LayerDebugCoordinates.prototype.drawCamera = function () {
+    var height = this.layer.renderer.view.height;
+    var width = this.layer.renderer.view.width;
+
+    this.lineStyle(3, 0xFFAAAA, 1);
+    this.moveTo(0, height * 0.5);
+    this.lineTo(width, height * 0.5);
     
+    this.moveTo(width * 0.5, 0);
+    this.lineTo(width * 0.5, height);
 };
