@@ -86,7 +86,7 @@ gulp.task('docs:local', ['docs:demos:local'/*,'docs:api:local','docs:guides:loca
         gulp.src('util/docs/templates/index.swig.html').pipe(swig(opts)).pipe(rename('index.html')).pipe(gulp.dest(conf.docs.local.target)),
         gulp.src('build/javelin/dist/**/*.js').pipe(gulp.dest(conf.docs.local.target+'javelin')),
         gulp.src(conf.paths.vendorScripts).pipe(gulp.dest(conf.docs.local.target+'vendor'))
-    );
+    ).pipe(connect.reload());
 });
 
 // gulp.task('docs:ghp', ['docs:demos:ghp','docs:api:ghp','docs:guides:ghp'], function() {
@@ -96,7 +96,7 @@ gulp.task('docs:local', ['docs:demos:local'/*,'docs:api:local','docs:guides:loca
 //     //build index
 // });
 
-gulp.task('server:docs', ['docs:local'], function() { connect.server({root: 'build/docs/'}); });
+gulp.task('server:docs', ['docs:local'], function() { connect.server({root: 'build/docs/', livereload: true}); });
 gulp.task('docs', ['docs:local','server:docs']);
 
 gulp.task('docsrebuild', function(done) { sequence('build', 'docs:local', done); });

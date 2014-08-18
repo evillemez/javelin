@@ -3,10 +3,12 @@ javelin.prefab('player', {
         'demo.controls': {
             speed: 5
         },
+        'pixi.renderable': {
+            orientation: 90 //original image was not facing "up"
+        },
         'pixi.sprite': {
             //atlasPath: '/demos/shared/assets/robot/robot.atlas.json',
-            imagePath: '/demos/shared/assets/robot/robowalk00.png',
-            orientation: 90     //original image was not facing "up"
+            imagePath: '/demos/shared/assets/robot/robowalk00.png'
         }
 //        'spriteAnimator2d': {
 //            animations: {

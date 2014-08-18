@@ -42,6 +42,11 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
 
     this.assetPaths = [];
     this.assets = [];
+    
+    /**
+     * Rotation modifer, in degrees.
+     */
+    this.orientation = 0;
 
     //private references
     var self = this
@@ -111,7 +116,7 @@ javelin.component('pixi.renderable', ['transform2d'], function(entity, engine) {
         //normalize game to canvas coordinates
         var myPos = layer.computeCanvasPosition(myTransform.position.x, myTransform.position.y);
         myDisplayObject.position = myPos;
-        myDisplayObject.rotation = myTransform.rotation;
+        myDisplayObject.rotation = ((myTransform.rotation + self.orientation) % 360) * Javelin.$PI_OVER_180;
         myDisplayObject.scale.x = camera.zoom;
         myDisplayObject.scale.y = camera.zoom;
         

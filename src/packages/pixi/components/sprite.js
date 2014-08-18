@@ -11,6 +11,7 @@ javelin.component('pixi.sprite', ['pixi.renderable', 'common.loader'], function(
     //publicly configurable properties
     this.imagePath = null;
     this.atlasPath = null;
+    this.anchor = {x: 0.5, y: 0.5}
 
     var self = this;
     var plugin = engine.getPlugin('pixi');
@@ -20,6 +21,7 @@ javelin.component('pixi.sprite', ['pixi.renderable', 'common.loader'], function(
     //we can be sure that the underlying resource has loaded
     var sprite = new PIXI.Sprite(plugin.emptyTexture);
     sprite.visible = false;
+    sprite.anchor = this.anchor;
 
     //register assets to load
     entity.on('assets.require', function(loader) {
