@@ -64,7 +64,7 @@ Layer2dCanvas.prototype.drawCircle = function(x, y, radius, style) {
 
     //TODO: handle styles properly
     c.stroke();
-    
+
     this.resetStyle();
 };
 
@@ -103,12 +103,12 @@ Layer2dCanvas.prototype.drawImage = function(image, x, y, rotation, scaleX, scal
         width,
         height
     );
-    
+
     if (!this.debug) {
         this.resetStyle();
         return;
     }
-    
+
     //draw image debug
     c.strokeStyle = '#F00';
     c.beginPath();
@@ -177,7 +177,7 @@ Layer2dCanvas.prototype.clear = function() {
  * This takes an x and y in game coordinate space, and converts it into canvas coordinates,
  * while taking into account the cameras position and zoom.  It also takes care of inverting
  * the y axis.
- * 
+ *
  * @param  {float} x    Game x position
  * @param  {float} y    Game y position
  * @return {object}     An object containing normalized x and y properties.
@@ -197,7 +197,7 @@ Layer2dCanvas.prototype.normalizeCanvasPosition = function(x, y) {
  * relative to the camera - it's a direct translation from canvas space to game space.
  *
  * To determine the game coordinate boundaries visible by the camera, call `camera.getBoundries()`.
- * 
+ *
  * @return {object}     An object containing x and y properties.
  */
 Layer2dCanvas.prototype.getBoundries = function() {
@@ -259,7 +259,7 @@ Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color) {
         }
     }
 
-    c.setStrokeColor(color);
+    c.strokeStyle = color;
     c.stroke();
     this.resetStyle();
 
@@ -273,13 +273,13 @@ Layer2dCanvas.prototype.drawDebugCoordinates = function(interval, color) {
     c.lineTo(midX, this.canvas.height);
     c.moveTo(0, midY);
     c.lineTo(this.canvas.width, midY);
-    c.setStrokeColor('#0F0');
+    c.strokeStyle = '#0F0';
     c.stroke();
     this.resetStyle();
 
     //write camera center coordinates
     c.save();
-    c.setStrokeColor('#00F');
+    c.strokeStyle = '#00F';
     //center
     c.strokeText(
         '('+pos.x.toFixed(2)+', '+pos.y.toFixed(2)+')',

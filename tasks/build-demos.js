@@ -6,7 +6,7 @@ var   pkg = require('../package.json')
     , es = require('event-stream')
     , util = require('gulp-util')
     , rename = require('gulp-rename')
-    , debug = require('gulp-debug')
+//    , debug = require('gulp-debug')
     , glob = require('glob')
     , Q = require('q')
 ;
@@ -63,7 +63,7 @@ module.exports = function (gulp, config) {
                 deferred.resolve(true);
             });
         });
-        
+
         //set up parsing main demo index
         var deferred = Q.defer();
         promises.push(deferred.promise);
